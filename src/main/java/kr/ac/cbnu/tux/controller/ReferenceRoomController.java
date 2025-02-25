@@ -8,7 +8,6 @@ import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.service.AttachmentService;
 import kr.ac.cbnu.tux.service.LikeService;
 import kr.ac.cbnu.tux.service.ReferenceRoomService;
-import kr.ac.cbnu.tux.service.UserService;
 import kr.ac.cbnu.tux.utility.FileHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -31,6 +30,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @Controller
 public class ReferenceRoomController {
@@ -169,13 +169,14 @@ public class ReferenceRoomController {
     @GetMapping("/api/referenceroom/list/category")
     @ResponseBody
     public Page<ReferenceRoomListDTO> listByCategory(
-            @RequestParam(name = "query", defaultValue = "") String query, ReferenceRoomPostType type, Pageable pageable) {
+            @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable) {
         try {
             Page<ReferenceRoom> found;
             if (StringUtils.hasText(query)) {
-                found = referenceRoomService.searchListByCategory(query, pageable, type);
+                found = referenceRoomService.searchListByCategories(query, pageable, types);
             } else {
-                found = referenceRoomService.listByCategory(pageable, type);
+                found = referenceRoomService.listByCategories(pageable, types);
             }
             return new PageImpl<>(
                     found.getContent().stream().map(data -> ReferenceRoomListDTO.build(data)).toList(),

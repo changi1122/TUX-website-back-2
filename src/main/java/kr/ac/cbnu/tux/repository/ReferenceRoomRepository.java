@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Repository
 @Transactional(readOnly = true)
 public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Long> {
@@ -28,8 +30,16 @@ public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Lo
     Page<ReferenceRoom> findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(ReferenceRoomPostType type, Pageable pageable);
 
     @EntityGraph("ReferenceRoom.fetchUser")
+    Page<ReferenceRoom> findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(List<ReferenceRoomPostType> types, Pageable pageable);
+
+    @EntityGraph("ReferenceRoom.fetchUser")
     Page<ReferenceRoom> findByIsDeletedFalseAndCategoryAndTitleContainingIgnoreCaseOrIsDeletedFalseAndCategoryAndLectureContainingIgnoreCaseOrIsDeletedFalseAndCategoryAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
             ReferenceRoomPostType type, String title, ReferenceRoomPostType type1, String lecture, ReferenceRoomPostType type2, String professor, Pageable pageable
+    );
+
+    @EntityGraph("ReferenceRoom.fetchUser")
+    Page<ReferenceRoom> findByIsDeletedFalseAndCategoryInAndTitleContainingIgnoreCaseOrIsDeletedFalseAndCategoryInAndLectureContainingIgnoreCaseOrIsDeletedFalseAndCategoryInAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
+            List<ReferenceRoomPostType> types, String title, List<ReferenceRoomPostType> types1, String lecture, List<ReferenceRoomPostType> types2, String professor, Pageable pageable
     );
 
     Long countByIsDeletedFalse();

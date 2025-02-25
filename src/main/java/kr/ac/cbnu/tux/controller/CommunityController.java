@@ -1,7 +1,5 @@
 package kr.ac.cbnu.tux.controller;
 
-import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import kr.ac.cbnu.tux.domain.*;
 import kr.ac.cbnu.tux.dto.CommunityDTO;
 import kr.ac.cbnu.tux.dto.CommunityListDTO;
@@ -34,6 +32,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 @Controller
@@ -171,13 +170,15 @@ public class CommunityController {
     @GetMapping("/api/community/list/category")
     @ResponseBody
     public Page<CommunityListDTO> listByCategory(
-            @RequestParam(name = "query", defaultValue = "") String query, CommunityPostType type, Pageable pageable) {
+            @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam("type") List<CommunityPostType> types, Pageable pageable) {
+
         try {
             Page<Community> found;
             if (StringUtils.hasText(query)) {
-                found = communityService.searchListByCategory(query, pageable, type);
+                found = communityService.searchListByCategories(query, pageable, types);
             } else {
-                found = communityService.listByCategory(pageable, type);
+                found = communityService.listByCategories(pageable, types);
             }
             return new PageImpl<>(
                     found.getContent().stream().map(post -> CommunityListDTO.build(post)).toList(),

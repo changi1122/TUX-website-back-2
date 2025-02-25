@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -143,9 +144,19 @@ public class ReferenceRoomService {
         return referenceRoomRepository.findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(type, pageable);
     }
 
+    public Page<ReferenceRoom> listByCategories(Pageable pageable, List<ReferenceRoomPostType> types) {
+        return referenceRoomRepository.findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(types, pageable);
+    }
+
     public Page<ReferenceRoom> searchListByCategory(String query, Pageable pageable, ReferenceRoomPostType type) {
         return referenceRoomRepository.findByIsDeletedFalseAndCategoryAndTitleContainingIgnoreCaseOrIsDeletedFalseAndCategoryAndLectureContainingIgnoreCaseOrIsDeletedFalseAndCategoryAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
                 type, query, type, query, type, query, pageable
+        );
+    }
+
+    public Page<ReferenceRoom> searchListByCategories(String query, Pageable pageable, List<ReferenceRoomPostType> types) {
+        return referenceRoomRepository.findByIsDeletedFalseAndCategoryInAndTitleContainingIgnoreCaseOrIsDeletedFalseAndCategoryInAndLectureContainingIgnoreCaseOrIsDeletedFalseAndCategoryInAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
+                types, query, types, query, types, query, pageable
         );
     }
 

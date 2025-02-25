@@ -132,8 +132,16 @@ public class CommunityService {
         return communityRepository.findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(type, pageable);
     }
 
+    public Page<Community> listByCategories(Pageable pageable, List<CommunityPostType> types) {
+        return communityRepository.findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(types, pageable);
+    }
+
     public Page<Community> searchListByCategory(String query, Pageable pageable, CommunityPostType type) {
         return communityRepository.findByIsDeletedFalseAndTitleContainingIgnoreCaseAndCategoryOrderByCreatedDateDesc(query, type, pageable);
+    }
+
+    public Page<Community> searchListByCategories(String query, Pageable pageable, List<CommunityPostType> types) {
+        return communityRepository.findByIsDeletedFalseAndTitleContainingIgnoreCaseAndCategoryInOrderByCreatedDateDesc(query, types, pageable);
     }
 
     public List<Community> listAll() {
