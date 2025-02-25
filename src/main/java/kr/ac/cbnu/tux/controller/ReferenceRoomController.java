@@ -52,10 +52,10 @@ public class ReferenceRoomController {
 
     @PostMapping("/api/referenceroom")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void createWithoutFileUpload(@RequestParam("type") String type, @RequestBody ReferenceRoom data,
+    public void createWithoutFileUpload(ReferenceRoomPostType type, @RequestBody ReferenceRoom data,
                                         @AuthenticationPrincipal User user) {
         try {
-            referenceRoomService.createWithoutFileUpload(convertType(type), data, user);
+            referenceRoomService.createWithoutFileUpload(type, data, user);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -64,10 +64,10 @@ public class ReferenceRoomController {
     @PostMapping(path = "/api/referenceroom/file")
     @ResponseBody
     public Long fileUploadBeforeCreation(
-            @RequestParam("type") String type, @RequestParam("file") MultipartFile multipartFile,
+            ReferenceRoomPostType type, @RequestParam("file") MultipartFile multipartFile,
             @AuthenticationPrincipal User user) {
         try {
-            ReferenceRoom data = referenceRoomService.temporalCreate(convertType(type), user);
+            ReferenceRoom data = referenceRoomService.temporalCreate(type, user);
             Attachment file = attachmentService.create(multipartFile, data);
             referenceRoomService.addAttachment(file, data);
             FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
@@ -111,10 +111,10 @@ public class ReferenceRoomController {
     /* 글 수정 */
     @PutMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(@PathVariable("id") Long id, @RequestParam("type") String type, @RequestBody ReferenceRoom updated,
+    public void update(@PathVariable("id") Long id, ReferenceRoomPostType type, @RequestBody ReferenceRoom updated,
                        @AuthenticationPrincipal User user) {
         try {
-            referenceRoomService.update(id, convertType(type), updated, user);
+            referenceRoomService.update(id, type, updated, user);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -169,13 +169,13 @@ public class ReferenceRoomController {
     @GetMapping("/api/referenceroom/list/category")
     @ResponseBody
     public Page<ReferenceRoomListDTO> listByCategory(
-            @RequestParam(name = "query", defaultValue = "") String query, @RequestParam String type, Pageable pageable) {
+            @RequestParam(name = "query", defaultValue = "") String query, ReferenceRoomPostType type, Pageable pageable) {
         try {
             Page<ReferenceRoom> found;
             if (StringUtils.hasText(query)) {
-                found = referenceRoomService.searchListByCategory(query, pageable, convertType(type));
+                found = referenceRoomService.searchListByCategory(query, pageable, type);
             } else {
-                found = referenceRoomService.listByCategory(pageable, convertType(type));
+                found = referenceRoomService.listByCategory(pageable, type);
             }
             return new PageImpl<>(
                     found.getContent().stream().map(data -> ReferenceRoomListDTO.build(data)).toList(),
@@ -280,14 +280,4 @@ public class ReferenceRoomController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
-
-
-
-    private ReferenceRoomPostType convertType(String type) {
-        if (type.equals("study"))  return ReferenceRoomPostType.STUDY;
-        if (type.equals("exam")) return ReferenceRoomPostType.EXAM;
-        if (type.equals("gallery")) return ReferenceRoomPostType.GALLERY;
-        else return ReferenceRoomPostType.STUDY;
-    }
-
 }

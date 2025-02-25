@@ -55,10 +55,10 @@ public class CommunityController {
 
     @PostMapping("/api/community")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public void createWithoutFileUpload(@RequestParam("type") String type, @RequestBody Community post,
+    public void createWithoutFileUpload(CommunityPostType type, @RequestBody Community post,
                                         @AuthenticationPrincipal User user) {
         try {
-            communityService.createWithoutFileUpload(convertType(type), post, user);
+            communityService.createWithoutFileUpload(type, post, user);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -67,10 +67,10 @@ public class CommunityController {
     @PostMapping(path = "/api/community/file")
     @ResponseBody
     public Long fileUploadBeforeCreation(
-            @RequestParam("type") String type, @RequestParam("file") MultipartFile multipartFile,
+            CommunityPostType type, @RequestParam("file") MultipartFile multipartFile,
             @AuthenticationPrincipal User user) {
         try {
-            Community post = communityService.temporalCreate(convertType(type), user);
+            Community post = communityService.temporalCreate(type, user);
             Attachment file = attachmentService.create(multipartFile, post);
             communityService.addAttachment(file, post);
             FileHandler.saveAttactment("community", post.getId().toString(), multipartFile);
@@ -114,10 +114,10 @@ public class CommunityController {
 
     @PutMapping("/api/community/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(@PathVariable("id") Long id,  @RequestParam("type") String type, @RequestBody Community updated,
+    public void update(@PathVariable("id") Long id,  CommunityPostType type, @RequestBody Community updated,
                        @AuthenticationPrincipal User user) {
         try {
-            communityService.update(id, convertType(type), updated, user);
+            communityService.update(id, type, updated, user);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -171,13 +171,13 @@ public class CommunityController {
     @GetMapping("/api/community/list/category")
     @ResponseBody
     public Page<CommunityListDTO> listByCategory(
-            @RequestParam(name = "query", defaultValue = "") String query, @RequestParam String type, Pageable pageable) {
+            @RequestParam(name = "query", defaultValue = "") String query, CommunityPostType type, Pageable pageable) {
         try {
             Page<Community> found;
             if (StringUtils.hasText(query)) {
-                found = communityService.searchListByCategory(query, pageable, convertType(type));
+                found = communityService.searchListByCategory(query, pageable, type);
             } else {
-                found = communityService.listByCategory(pageable, convertType(type));
+                found = communityService.listByCategory(pageable, type);
             }
             return new PageImpl<>(
                     found.getContent().stream().map(post -> CommunityListDTO.build(post)).toList(),
@@ -280,14 +280,5 @@ public class CommunityController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-    }
-
-
-    private CommunityPostType convertType(String type) {
-        if (type.equals("notice"))  return CommunityPostType.NOTICE;
-        if (type.equals("teamrecruitment")) return CommunityPostType.TEAMRECRUITMENT;
-        if (type.equals("contest")) return CommunityPostType.CONTEST;
-        if (type.equals("job")) return CommunityPostType.JOB;
-        else return CommunityPostType.FREE;
     }
 }
