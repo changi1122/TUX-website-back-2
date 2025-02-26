@@ -30,6 +30,7 @@ import java.net.URLDecoder;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -51,8 +52,7 @@ public class ReferenceRoomController {
     }
 
 
-    /* 파일 업로드 및 글쓰기 */
-
+    /* 파일 업로드 없이 글쓰기 */
     @PostMapping("/api/referenceroom")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void createWithoutFileUpload(ReferenceRoomPostType type, @RequestBody ReferenceRoom data,
@@ -60,6 +60,7 @@ public class ReferenceRoomController {
         referenceRoomService.createWithoutFileUpload(type, data, user);
     }
 
+    /* 글 생성 이전에 파일 업로드시 임시로 글 생성 후 파일 업로드 */
     @PostMapping(path = "/api/referenceroom/file")
     @ResponseBody
     public Long fileUploadBeforeCreation(
@@ -73,6 +74,7 @@ public class ReferenceRoomController {
         return data.getId();
     }
 
+    /* 글이 생성된 이후 파일 업로드 */
     @PostMapping(path = "/api/referenceroom/{id}/file")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addFile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile multipartFile,
@@ -88,6 +90,7 @@ public class ReferenceRoomController {
         }
     }
 
+    /* 임시로 생성된 글 내용 업데이트 */
     @PostMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void updateAfterTemporalCreate(@PathVariable("id") Long id, @RequestBody ReferenceRoom data,
@@ -114,8 +117,13 @@ public class ReferenceRoomController {
     /* 글 읽기 */
     @GetMapping("/api/referenceroom/{id}")
     @ResponseBody
-    public ReferenceRoomDTO read(@PathVariable("id") Long id, @AuthenticationPrincipal User user) {
+    public ReferenceRoomDTO read(@PathVariable("id") Long id, @AuthenticationPrincipal User user) throws AccessDeniedException {
         ReferenceRoom data = referenceRoomService.read(id, user);
+
+        if (data.getCategory().cannotReadBy(user)) {
+            throw new AccessDeniedException("permission denied");
+        }
+
         return ReferenceRoomDTO.build(data);
     }
 
@@ -123,7 +131,12 @@ public class ReferenceRoomController {
 
     @GetMapping("/api/referenceroom/list")
     @ResponseBody
-    public Page<ReferenceRoomListDTO> list(@RequestParam(name = "query", defaultValue = "") String query, Pageable pageable) {
+    public Page<ReferenceRoomListDTO> list(@RequestParam(name = "query", defaultValue = "") String query,
+                                           Pageable pageable, @AuthenticationPrincipal User user) throws AccessDeniedException {
+        if (ReferenceRoomPostType.cannotListBy(user)) {
+            throw new AccessDeniedException("permission denied");
+        }
+
         Page<ReferenceRoom> found;
         if (StringUtils.hasText(query)) {
             found = referenceRoomService.searchList(query, pageable);
@@ -142,7 +155,12 @@ public class ReferenceRoomController {
     @ResponseBody
     public Page<ReferenceRoomListDTO> listByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
-            @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable) {
+            @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
+            @AuthenticationPrincipal User user) throws AccessDeniedException {
+
+        if (types.stream().anyMatch(type -> type.cannotReadBy(user))) {
+            throw new AccessDeniedException("permission denied");
+        }
 
         Page<ReferenceRoom> found;
         if (StringUtils.hasText(query)) {
@@ -177,9 +195,14 @@ public class ReferenceRoomController {
     /* 첨부파일 다운로드 */
     @GetMapping(value = "/api/referenceroom/{id}/file/{filename}")
     public ResponseEntity<FileSystemResource> getFile(
-            @PathVariable("id") String id, @PathVariable("filename") String filename,
-            @RequestParam(name = "aid", defaultValue = "-1") Long aid) throws Exception {
-        
+            @PathVariable("id") Long id, @PathVariable("filename") String filename,
+            @RequestParam(name = "aid", defaultValue = "-1") Long aid, @AuthenticationPrincipal User user) throws Exception {
+
+        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+        if (data.getCategory().cannotReadBy(user)) {
+            throw new AccessDeniedException("permission denied");
+        }
+
         // 다운로드 수 늘리기
         if (aid != -1)
             attachmentService.increaseDownloadCountById(aid);
@@ -237,17 +260,30 @@ public class ReferenceRoomController {
 
 
     @ExceptionHandler(NoSuchElementException.class)
-    public void handleException(NoSuchElementException ex) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+    public ResponseEntity<String> handleException(NoSuchElementException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
     }
 
     @ExceptionHandler(IOException.class)
-    public void handleException(IOException ex) {
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    public ResponseEntity<String> handleException(IOException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleException(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
-    public void handleException(Exception ex) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+    public ResponseEntity<String> handleException(Exception ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 }

@@ -41,9 +41,9 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.DELETE, "/api/community/**").authenticated()
 
                             /* ReferenceRoom */
-                            .requestMatchers("/api/referenceroom/**").hasAnyAuthority(
-                                    UserRole.USER.name(), UserRole.MANAGER.name(), UserRole.ADMIN.name()
-                            )
+                            .requestMatchers(HttpMethod.POST, "/api/referenceroom").authenticated()
+                            .requestMatchers(HttpMethod.PUT, "/api/referenceroom/**").authenticated()
+                            .requestMatchers(HttpMethod.DELETE, "/api/referenceroom/**").authenticated()
 
                             /* User */
                             .requestMatchers(HttpMethod.GET, "/api/auth").authenticated()

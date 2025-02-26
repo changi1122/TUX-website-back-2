@@ -22,8 +22,18 @@ public enum ReferenceRoomPostType {
         return STUDY;
     }
 
-    // TODO 카테고리별 읽기 권한
-    public boolean canRead(User user) throws Exception {
-        throw new Exception("not implemented yeu");
+    // 카테고리별 읽기 권한
+    public boolean cannotReadBy(User user) {
+        if (this == GALLERY) {
+            return false;
+        }
+        else {
+            return (user == null);
+        }
+    }
+
+    // 전체 목록 읽기 권한
+    public static boolean cannotListBy(User user) {
+        return (user == null);
     }
 }
