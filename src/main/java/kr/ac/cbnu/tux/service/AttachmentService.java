@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -62,14 +63,14 @@ public class AttachmentService {
     }
 
     @Transactional
-    public void delete(Attachment file, Community post) throws Exception {
+    public void delete(Attachment file, Community post) throws IOException {
         FileHandler.deleteAttactment("community", post.getId().toString(), file);
         post.removeAttachment(file);
         attachmentRepository.delete(file);
     }
 
     @Transactional
-    public void delete(Attachment file, ReferenceRoom data) throws Exception {
+    public void delete(Attachment file, ReferenceRoom data) throws IOException {
         FileHandler.deleteAttactment("referenceroom", data.getId().toString(), file);
         data.removeAttachment(file);
         attachmentRepository.delete(file);

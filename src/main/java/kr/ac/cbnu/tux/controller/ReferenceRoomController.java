@@ -24,6 +24,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 import java.net.URLDecoder;
 
 import java.io.File;
@@ -31,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Controller
 public class ReferenceRoomController {
@@ -54,57 +57,42 @@ public class ReferenceRoomController {
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void createWithoutFileUpload(ReferenceRoomPostType type, @RequestBody ReferenceRoom data,
                                         @AuthenticationPrincipal User user) {
-        try {
-            referenceRoomService.createWithoutFileUpload(type, data, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        referenceRoomService.createWithoutFileUpload(type, data, user);
     }
 
     @PostMapping(path = "/api/referenceroom/file")
     @ResponseBody
     public Long fileUploadBeforeCreation(
             ReferenceRoomPostType type, @RequestParam("file") MultipartFile multipartFile,
-            @AuthenticationPrincipal User user) {
-        try {
-            ReferenceRoom data = referenceRoomService.temporalCreate(type, user);
-            Attachment file = attachmentService.create(multipartFile, data);
-            referenceRoomService.addAttachment(file, data);
-            FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
-            return data.getId();
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+            @AuthenticationPrincipal User user) throws IOException {
+
+        ReferenceRoom data = referenceRoomService.temporalCreate(type, user);
+        Attachment file = attachmentService.create(multipartFile, data);
+        referenceRoomService.addAttachment(file, data);
+        FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
+        return data.getId();
     }
 
     @PostMapping(path = "/api/referenceroom/{id}/file")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addFile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile multipartFile,
-                        @AuthenticationPrincipal User user) {
-        try {
-            ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+                        @AuthenticationPrincipal User user) throws Exception {
+        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
 
-            if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
-                Attachment file = attachmentService.create(multipartFile, data);
-                referenceRoomService.addAttachment(file, data);
-                FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
-            } else {
-                throw new Exception("User not matched");
-            }
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
+            Attachment file = attachmentService.create(multipartFile, data);
+            referenceRoomService.addAttachment(file, data);
+            FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
+        } else {
+            throw new Exception("user not matched");
         }
     }
 
     @PostMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void updateAfterTemporalCreate(@PathVariable("id") Long id, @RequestBody ReferenceRoom data,
-                                          @AuthenticationPrincipal User user) {
-        try {
-            referenceRoomService.updateAfterTemporalCreate(id, data, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+                                          @AuthenticationPrincipal User user) throws Exception {
+        referenceRoomService.updateAfterTemporalCreate(id, data, user);
     }
 
 
@@ -112,35 +100,23 @@ public class ReferenceRoomController {
     @PutMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void update(@PathVariable("id") Long id, ReferenceRoomPostType type, @RequestBody ReferenceRoom updated,
-                       @AuthenticationPrincipal User user) {
-        try {
-            referenceRoomService.update(id, type, updated, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+                       @AuthenticationPrincipal User user) throws Exception {
+        referenceRoomService.update(id, type, updated, user);
     }
     
     /* 글 삭제 */
     @DeleteMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal User user) {
-        try {
-            referenceRoomService.delete(id, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal User user) throws Exception {
+        referenceRoomService.delete(id, user);
     }
 
     /* 글 읽기 */
     @GetMapping("/api/referenceroom/{id}")
     @ResponseBody
     public ReferenceRoomDTO read(@PathVariable("id") Long id, @AuthenticationPrincipal User user) {
-        try {
-            ReferenceRoom data = referenceRoomService.read(id, user);
-            return ReferenceRoomDTO.build(data);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-        }
+        ReferenceRoom data = referenceRoomService.read(id, user);
+        return ReferenceRoomDTO.build(data);
     }
 
     /* 자료실 리스트 조회 */
@@ -148,22 +124,18 @@ public class ReferenceRoomController {
     @GetMapping("/api/referenceroom/list")
     @ResponseBody
     public Page<ReferenceRoomListDTO> list(@RequestParam(name = "query", defaultValue = "") String query, Pageable pageable) {
-        try {
-            Page<ReferenceRoom> found;
-            if (StringUtils.hasText(query)) {
-                found = referenceRoomService.searchList(query, pageable);
-            } else {
-                found = referenceRoomService.list(pageable);
-            }
-
-            return new PageImpl<>(
-                    found.getContent().stream().map(data -> ReferenceRoomListDTO.build(data)).toList(),
-                    pageable,
-                    found.getTotalElements()
-            );
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        Page<ReferenceRoom> found;
+        if (StringUtils.hasText(query)) {
+            found = referenceRoomService.searchList(query, pageable);
+        } else {
+            found = referenceRoomService.list(pageable);
         }
+
+        return new PageImpl<>(
+                found.getContent().stream().map(data -> ReferenceRoomListDTO.build(data)).toList(),
+                pageable,
+                found.getTotalElements()
+        );
     }
 
     @GetMapping("/api/referenceroom/list/category")
@@ -171,21 +143,18 @@ public class ReferenceRoomController {
     public Page<ReferenceRoomListDTO> listByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable) {
-        try {
-            Page<ReferenceRoom> found;
-            if (StringUtils.hasText(query)) {
-                found = referenceRoomService.searchListByCategories(query, pageable, types);
-            } else {
-                found = referenceRoomService.listByCategories(pageable, types);
-            }
-            return new PageImpl<>(
-                    found.getContent().stream().map(data -> ReferenceRoomListDTO.build(data)).toList(),
-                    pageable,
-                    found.getTotalElements()
-            );
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+
+        Page<ReferenceRoom> found;
+        if (StringUtils.hasText(query)) {
+            found = referenceRoomService.searchListByCategories(query, pageable, types);
+        } else {
+            found = referenceRoomService.listByCategories(pageable, types);
         }
+        return new PageImpl<>(
+                found.getContent().stream().map(data -> ReferenceRoomListDTO.build(data)).toList(),
+                pageable,
+                found.getTotalElements()
+        );
     }
     
     
@@ -194,22 +163,14 @@ public class ReferenceRoomController {
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addComment(@PathVariable("id") Long id, @RequestBody RfComment comment,
                            @AuthenticationPrincipal User user) {
-        try {
-            referenceRoomService.addComment(id, comment, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        referenceRoomService.addComment(id, comment, user);
     }
 
     @DeleteMapping("/api/referenceroom/{id}/comment/{commentId}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteComment(@PathVariable("id") Long id, @PathVariable("commentId") Long commentId,
-                              @AuthenticationPrincipal User user) {
-        try {
-            referenceRoomService.deleteComment(commentId, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+                              @AuthenticationPrincipal User user) throws Exception {
+        referenceRoomService.deleteComment(commentId, user);
     }
 
 
@@ -250,18 +211,14 @@ public class ReferenceRoomController {
     @DeleteMapping(value = "/api/referenceroom/{id}/file/{filename}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable("id") Long id, @PathVariable("filename") String filename,
-                           @AuthenticationPrincipal User user) {
-        try {
-            ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+                           @AuthenticationPrincipal User user) throws Exception {
+        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
 
-            if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
-                Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data).orElseThrow();
-                attachmentService.delete(file, data);
-            } else {
-                throw new Exception("User not matched");
-            }
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
+            Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data).orElseThrow();
+            attachmentService.delete(file, data);
+        } else {
+            throw new Exception("user not matched");
         }
     }
 
@@ -270,15 +227,27 @@ public class ReferenceRoomController {
     @PostMapping("/api/referenceroom/{id}/likes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addLike(@PathVariable("id") Long id, @RequestParam Boolean dislike,
-                        @AuthenticationPrincipal User user) {
-        try {
-            if (user == null)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                        @AuthenticationPrincipal User user) throws Exception {
+        if (user == null)
+            throw new Exception("user not logged in");
 
-            ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
-            likeService.create(data, user, dislike);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+        likeService.create(data, user, dislike);
+    }
+
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public void handleException(NoSuchElementException ex) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(IOException.class)
+    public void handleException(IOException ex) {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public void handleException(Exception ex) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 }

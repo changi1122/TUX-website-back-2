@@ -78,7 +78,7 @@ public class ReferenceRoomService {
             data.setProfessor(updated.getProfessor());
         }
         else {
-            throw new Exception("User not matched");
+            throw new Exception("user not matched");
         }
     }
 
@@ -119,7 +119,7 @@ public class ReferenceRoomService {
     }
 
     /* 글 조회 */
-    public ReferenceRoom read(Long id, User user) throws Exception {
+    public ReferenceRoom read(Long id, User user) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
 
         if (user == null || user != data.getUser())
@@ -180,7 +180,7 @@ public class ReferenceRoomService {
     public void deleteComment(Long commentId, User user)  throws Exception {
         RfComment comment = rfCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new Exception("User not matched");
+            throw new Exception("user not matched");
         }
         comment.setIsDeleted(true);
         comment.setDeletedDate(OffsetDateTime.now());
