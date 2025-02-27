@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
@@ -14,6 +15,13 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<String> handleException(NoSuchElementException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<String> handleException(FileNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
