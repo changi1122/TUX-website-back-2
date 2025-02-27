@@ -6,18 +6,16 @@ import kr.ac.cbnu.tux.domain.Like;
 import kr.ac.cbnu.tux.domain.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.User;
 import kr.ac.cbnu.tux.repository.LikeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class LikeService {
 
-    private LikeRepository likeRepository;
+    private final LikeRepository likeRepository;
 
-    @Autowired
-    public LikeService(LikeRepository likeRepository) {
-        this.likeRepository = likeRepository;
-    }
 
     @Transactional
     public void create(Community post, User user, Boolean dislike) throws Exception {

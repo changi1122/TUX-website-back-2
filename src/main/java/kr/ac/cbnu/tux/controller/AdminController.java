@@ -4,22 +4,18 @@ import kr.ac.cbnu.tux.domain.User;
 import kr.ac.cbnu.tux.dto.UserDTO;
 import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Controller
 public class AdminController {
 
     private final UserService userService;
-
-    @Autowired
-    public AdminController(UserService userService) {
-        this.userService = userService;
-    }
 
 
     /* 최고관리자 전용 */

@@ -3,20 +3,18 @@ package kr.ac.cbnu.tux.service;
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.StaticPage;
 import kr.ac.cbnu.tux.repository.StaticPageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class StaticPageService {
 
     private final StaticPageRepository staticPageRepository;
 
-    @Autowired
-    public StaticPageService(StaticPageRepository staticPageRepository) {
-        this.staticPageRepository = staticPageRepository;
-    }
 
     @Transactional
     public void createAndUpdate(String name, StaticPage updated) {

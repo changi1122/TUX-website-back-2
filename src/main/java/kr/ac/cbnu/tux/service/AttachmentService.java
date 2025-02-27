@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.domain.Community;
 import kr.ac.cbnu.tux.domain.ReferenceRoom;
 import kr.ac.cbnu.tux.repository.AttachmentRepository;
 import kr.ac.cbnu.tux.utility.FileStore;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,17 +15,13 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class AttachmentService {
 
     private final AttachmentRepository attachmentRepository;
     private final FileStore fileStore;
 
-    @Autowired
-    public AttachmentService(AttachmentRepository attachmentRepository, FileStore fileStore) {
-        this.attachmentRepository = attachmentRepository;
-        this.fileStore = fileStore;
-    }
 
     @Transactional
     public Attachment create(MultipartFile multipartFile, ReferenceRoom data) {

@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.repository.CommunityRepository;
 import kr.ac.cbnu.tux.utility.Sanitizer;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class CommunityService {
 
@@ -24,12 +26,6 @@ public class CommunityService {
     private final CmCommentRepository cmCommentRepository;
     private final Sanitizer sanitizer;
 
-    @Autowired
-    public CommunityService(CommunityRepository communityRepository, CmCommentRepository cmCommentRepository, Sanitizer sanitizer) {
-        this.communityRepository = communityRepository;
-        this.cmCommentRepository = cmCommentRepository;
-        this.sanitizer = sanitizer;
-    }
 
     /* 파일 업로드 및 글쓰기 */
 

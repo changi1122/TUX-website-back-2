@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.repository.RfCommentRepository;
 import kr.ac.cbnu.tux.utility.Sanitizer;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class ReferenceRoomService {
 
@@ -24,12 +26,6 @@ public class ReferenceRoomService {
     private final RfCommentRepository rfCommentRepository;
     private final Sanitizer sanitizer;
 
-    @Autowired
-    public ReferenceRoomService(ReferenceRoomRepository referenceRoomRepository, RfCommentRepository rfCommentRepository, Sanitizer sanitizer) {
-        this.referenceRoomRepository = referenceRoomRepository;
-        this.rfCommentRepository = rfCommentRepository;
-        this.sanitizer = sanitizer;
-    }
 
     /* 파일 업로드 및 글쓰기 */
 

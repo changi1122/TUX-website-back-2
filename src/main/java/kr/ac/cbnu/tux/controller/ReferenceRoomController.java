@@ -12,7 +12,7 @@ import kr.ac.cbnu.tux.service.AttachmentService;
 import kr.ac.cbnu.tux.service.LikeService;
 import kr.ac.cbnu.tux.service.ReferenceRoomService;
 import kr.ac.cbnu.tux.utility.FileStore;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
@@ -38,6 +38,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Controller
 public class ReferenceRoomController {
 
@@ -48,16 +49,6 @@ public class ReferenceRoomController {
 
     @Value("${file.dir}")
     private String fileDir;
-
-    @Autowired
-    public ReferenceRoomController(ReferenceRoomService referenceRoomService, AttachmentService attachmentService,
-                                   LikeService likeService, FileStore fileStore) {
-        this.referenceRoomService = referenceRoomService;
-        this.attachmentService = attachmentService;
-        this.likeService = likeService;
-        this.fileStore = fileStore;
-    }
-
 
     /* 파일 업로드 없이 글쓰기 */
     @PostMapping("/api/referenceroom")

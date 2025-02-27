@@ -2,7 +2,7 @@ package kr.ac.cbnu.tux.controller;
 
 import kr.ac.cbnu.tux.domain.StaticPage;
 import kr.ac.cbnu.tux.service.StaticPageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -11,15 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 // 프론트엔드 코드 수정 없이 내용 수정이 가능하게 DB에 저장하도록 개선함 - 2024년 1월 11일
 
+@RequiredArgsConstructor
 @Controller
 public class StaticPageController {
 
     private final StaticPageService staticPageService;
 
-    @Autowired
-    public StaticPageController(StaticPageService staticPageService) {
-        this.staticPageService = staticPageService;
-    }
 
     // 생성 및 수정
     @PostMapping("/api/admin/staticpage/{name}")

@@ -4,7 +4,7 @@ import kr.ac.cbnu.tux.domain.ReferenceRoom;
 import kr.ac.cbnu.tux.dto.GalleryListDTO;
 import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.service.ReferenceRoomService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,15 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+@RequiredArgsConstructor
 @Controller
 public class GalleryController {
 
     private final ReferenceRoomService referenceRoomService;
-
-    @Autowired
-    public GalleryController(ReferenceRoomService referenceRoomService) {
-        this.referenceRoomService = referenceRoomService;
-    }
 
 
     @GetMapping("/api/gallery/list")

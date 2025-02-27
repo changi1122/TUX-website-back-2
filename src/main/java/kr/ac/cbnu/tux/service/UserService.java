@@ -7,6 +7,7 @@ import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.repository.UserRepository;
 import kr.ac.cbnu.tux.security.JwtTokenProvider;
 import kr.ac.cbnu.tux.security.UserAuthentication;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+@RequiredArgsConstructor
 @Service
 public class UserService implements UserDetailsService {
 
@@ -28,11 +30,6 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Transactional
     public void create(User user) throws Exception {
