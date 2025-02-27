@@ -11,8 +11,9 @@ import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.service.AttachmentService;
 import kr.ac.cbnu.tux.service.LikeService;
 import kr.ac.cbnu.tux.service.ReferenceRoomService;
-import kr.ac.cbnu.tux.utility.FileHandler;
+import kr.ac.cbnu.tux.utility.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,13 +44,18 @@ public class ReferenceRoomController {
     private final ReferenceRoomService referenceRoomService;
     private final AttachmentService attachmentService;
     private final LikeService likeService;
+    private final FileStore fileStore;
+
+    @Value("${file.dir}")
+    private String fileDir;
 
     @Autowired
     public ReferenceRoomController(ReferenceRoomService referenceRoomService, AttachmentService attachmentService,
-                                   LikeService likeService) {
+                                   LikeService likeService, FileStore fileStore) {
         this.referenceRoomService = referenceRoomService;
         this.attachmentService = attachmentService;
         this.likeService = likeService;
+        this.fileStore = fileStore;
     }
 
 
@@ -71,7 +77,7 @@ public class ReferenceRoomController {
         ReferenceRoom data = referenceRoomService.temporalCreate(type, user);
         Attachment file = attachmentService.create(multipartFile, data);
         referenceRoomService.addAttachment(file, data);
-        FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
+        fileStore.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
         return data.getId();
     }
 
@@ -85,7 +91,7 @@ public class ReferenceRoomController {
         if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
             Attachment file = attachmentService.create(multipartFile, data);
             referenceRoomService.addAttachment(file, data);
-            FileHandler.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
+            fileStore.saveAttactment("referenceroom", data.getId().toString(), multipartFile);
         } else {
             throw new Exception("user not matched");
         }
@@ -208,8 +214,8 @@ public class ReferenceRoomController {
         if (aid != -1)
             attachmentService.increaseDownloadCountById(aid);
 
-        String path = System.getProperty("user.dir") +
-                String.format("/upload/file/referenceroom/%s/%s", id, URLDecoder.decode(filename, StandardCharsets.UTF_8));
+        String path = fileDir +
+                String.format("file/referenceroom/%s/%s", id, URLDecoder.decode(filename, StandardCharsets.UTF_8));
 
         if (new File(path).exists()) {
             FileSystemResource resource = new FileSystemResource(path);

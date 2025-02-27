@@ -1,6 +1,8 @@
 package kr.ac.cbnu.tux.utility;
 
 import kr.ac.cbnu.tux.domain.Attachment;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -9,11 +11,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class FileHandler {
+@Component
+public class FileStore {
 
-    public static void saveAttactment(String prefix, String id, MultipartFile file) throws java.io.IOException, IllegalStateException {
-        String directoryPath = System.getProperty("user.dir") +
-                "/upload/file/" + prefix + "/" + id;
+    @Value("${file.dir}")
+    private String fileDir;
+
+    public void saveAttactment(String prefix, String id, MultipartFile file) throws java.io.IOException, IllegalStateException {
+        String directoryPath = fileDir + "file/" + prefix + "/" + id;
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
@@ -25,9 +30,8 @@ public class FileHandler {
         file.transferTo(destFile);
     }
 
-    public static void deleteAttactment(String prefix, String id, Attachment file) throws IOException {
-        String directoryPath = System.getProperty("user.dir") +
-                "/upload/file/" + prefix + "/" + id;
+    public void deleteAttactment(String prefix, String id, Attachment file) throws IOException {
+        String directoryPath = fileDir + "file/" + prefix + "/" + id;
         String filePath = directoryPath + "/" + file.getFilename().replaceAll("[\\\\/:*?\"<>| ]", "_");
 
         Files.deleteIfExists(Paths.get(filePath));

@@ -5,7 +5,7 @@ import kr.ac.cbnu.tux.domain.Attachment;
 import kr.ac.cbnu.tux.domain.Community;
 import kr.ac.cbnu.tux.domain.ReferenceRoom;
 import kr.ac.cbnu.tux.repository.AttachmentRepository;
-import kr.ac.cbnu.tux.utility.FileHandler;
+import kr.ac.cbnu.tux.utility.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,10 +18,12 @@ import java.util.Optional;
 public class AttachmentService {
 
     private final AttachmentRepository attachmentRepository;
+    private final FileStore fileStore;
 
     @Autowired
-    public AttachmentService(AttachmentRepository attachmentRepository) {
+    public AttachmentService(AttachmentRepository attachmentRepository, FileStore fileStore) {
         this.attachmentRepository = attachmentRepository;
+        this.fileStore = fileStore;
     }
 
     @Transactional
@@ -64,14 +66,14 @@ public class AttachmentService {
 
     @Transactional
     public void delete(Attachment file, Community post) throws IOException {
-        FileHandler.deleteAttactment("community", post.getId().toString(), file);
+        fileStore.deleteAttactment("community", post.getId().toString(), file);
         post.removeAttachment(file);
         attachmentRepository.delete(file);
     }
 
     @Transactional
     public void delete(Attachment file, ReferenceRoom data) throws IOException {
-        FileHandler.deleteAttactment("referenceroom", data.getId().toString(), file);
+        fileStore.deleteAttactment("referenceroom", data.getId().toString(), file);
         data.removeAttachment(file);
         attachmentRepository.delete(file);
     }

@@ -11,8 +11,9 @@ import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.service.AttachmentService;
 import kr.ac.cbnu.tux.service.CommunityService;
 import kr.ac.cbnu.tux.service.LikeService;
-import kr.ac.cbnu.tux.utility.FileHandler;
+import kr.ac.cbnu.tux.utility.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -42,13 +43,18 @@ public class CommunityController {
     private final CommunityService communityService;
     private final AttachmentService attachmentService;
     private final LikeService likeService;
+    private final FileStore fileStore;
+
+    @Value("${file.dir}")
+    private String fileDir;
 
     @Autowired
     public CommunityController(CommunityService communityService, AttachmentService attachmentService,
-                               LikeService likeService) {
+                               LikeService likeService, FileStore fileStore) {
         this.communityService = communityService;
         this.attachmentService = attachmentService;
         this.likeService = likeService;
+        this.fileStore = fileStore;
     }
 
 
@@ -70,7 +76,7 @@ public class CommunityController {
         Community post = communityService.temporalCreate(type, user);
         Attachment file = attachmentService.create(multipartFile, post);
         communityService.addAttachment(file, post);
-        FileHandler.saveAttactment("community", post.getId().toString(), multipartFile);
+        fileStore.saveAttactment("community", post.getId().toString(), multipartFile);
         return post.getId();
     }
 
@@ -85,7 +91,7 @@ public class CommunityController {
         if (user.getId().equals(post.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
             Attachment file = attachmentService.create(multipartFile, post);
             communityService.addAttachment(file, post);
-            FileHandler.saveAttactment("community", post.getId().toString(), multipartFile);
+            fileStore.saveAttactment("community", post.getId().toString(), multipartFile);
         } else {
             throw new Exception("user not matched");
         }
@@ -191,8 +197,8 @@ public class CommunityController {
         if (aid != -1)
             attachmentService.increaseDownloadCountById(aid);
 
-        String path = System.getProperty("user.dir") +
-                String.format("/upload/file/community/%s/%s", id, URLDecoder.decode(filename, StandardCharsets.UTF_8));
+        String path = fileDir +
+                String.format("file/community/%s/%s", id, URLDecoder.decode(filename, StandardCharsets.UTF_8));
 
         if (new File(path).exists()) {
             FileSystemResource resource = new FileSystemResource(path);

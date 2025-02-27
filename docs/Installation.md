@@ -51,6 +51,12 @@ MariaDB [(none)]> create database tuxweb2 character set utf8mb4 collate utf8mb4_
 /src/main/resources/application.properties
 
 (...)
+# File Upload Path
+# [예시]
+# 윈도우: C:/Users/username/project/TUX-website-back-2/upload/
+# 리눅스: /root/homepage/TUX-website-back-2/upload
+file.dir=<파일을 업로드할 디렉토리 경로 설정>
+
 # JPA
 spring.datasource.url=jdbc:mariadb://${root:localhost}:3306/tuxweb2
 spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
@@ -59,6 +65,8 @@ spring.datasource.password=<MariaDB 비밀번호 입력>
 
 (...)
 ```
+
+업로드할 파일 경로를 설정한다.
 
 JPA를 통해 데이터베이스에 접속하기 위해, application.properties 파일의 spring.datasource.password에 MariaDB root 계정의 비밀번호를 입력한다.
 
@@ -73,8 +81,8 @@ JPA를 통해 데이터베이스에 접속하기 위해, application.properties 
 ```properties
 /.env
 
-PUBLIC_URL=https://tuxserver.cbnu.ac.kr
-REACT_APP_API_URL=https://tuxserver.cbnu.ac.kr
+PUBLIC_URL=https://tux.cbnu.ac.kr
+REACT_APP_API_URL=https://tux.cbnu.ac.kr
 ```
 
 프론트엔드에서 사용하는 PUBLIC_URL 상수 설정을 위해 .env 파일을 호스팅에 사용할 도메인 네임으로 변경한다.
@@ -117,7 +125,7 @@ nginx 설정을 통해 서버 80번 포트로 오는 요청에 대해 /api/로 �
 
 ```nginx
 server {
-        server_name tuxserver.cbnu.ac.kr;
+        server_name tux.cbnu.ac.kr;
 
         location /api/ {
                 proxy_pass http://127.0.0.1:4001;
@@ -145,12 +153,12 @@ server {
 
 
 server {
-    if ($host = tuxserver.cbnu.ac.kr) {
+    if ($host = tux.cbnu.ac.kr) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
 
-        server_name tuxserver.cbnu.ac.kr;
+        server_name tux.cbnu.ac.kr;
     listen 80;
     return 404; # managed by Certbot
 
