@@ -20,10 +20,10 @@ public class StaticPageService {
 
     @Transactional
     public void createAndUpdate(String name, StaticPage updated) {
-        Optional<StaticPage> opage = staticPageRepository.findByName(name);
+        Optional<StaticPage> opPage = staticPageRepository.findByName(name);
 
-        if (opage.isPresent()) {
-            StaticPage page = opage.get();
+        if (opPage.isPresent()) {
+            StaticPage page = opPage.get();
             page.setBody(updated.getBody());
         }
         else {

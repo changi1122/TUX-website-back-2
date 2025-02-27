@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Objects;
 
 @Controller
@@ -53,87 +54,62 @@ public class UserController {
     @GetMapping("/api/auth")
     @ResponseBody
     public UserDTO getCurrent(@AuthenticationPrincipal User user) {
-        try {
-            return UserDTO.build(user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        }
+        return UserDTO.build(user);
     }
 
     @PostMapping("/api/user")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public void create(@RequestBody User user) {
-        try {
-            userService.create(user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+    public void create(@RequestBody User user) throws Exception {
+        userService.create(user);
     }
 
     @PutMapping("/api/user/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(@PathVariable("id") Long id, @RequestBody User user, @AuthenticationPrincipal User currentUser) {
-        try {
-            if (!Objects.deepEquals(currentUser.getId(), id)) {
-                throw new Exception("User not matched");
-            }
+    public void update(@PathVariable("id") Long id, @RequestBody User user,
+                       @AuthenticationPrincipal User currentUser) throws Exception {
 
-            userService.update(id, user);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        if (!Objects.deepEquals(currentUser.getId(), id)) {
+            throw new Exception("user not matched");
         }
+
+        userService.update(id, user);
     }
 
     @DeleteMapping("/api/user/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) {
-        try {
-            if (!Objects.deepEquals(currentUser.getId(), id)) {
-                throw new Exception("User not matched");
-            }
-
-            userService.userDelete(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws Exception {
+        if (!Objects.deepEquals(currentUser.getId(), id)) {
+            throw new Exception("user not matched");
         }
+
+        userService.userDelete(id);
     }
 
     @GetMapping("/api/user/{id}")
     @ResponseBody
-    public UserDTO read(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) {
-        try {
-            String currentUsername = currentUser.getUsername();
-            String currentRole = currentUser.getRole().name();
-            if (currentUsername.equals("anonymousUser") ||
-                    !currentUsername.equals(userService.read(id).orElseThrow().getUsername()) ||
-                    !currentRole.equals(UserRole.MANAGER.name()) && !currentRole.equals(UserRole.ADMIN.name())) {
-                throw new Exception("No permission");
-            }
+    public UserDTO read(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+        String currentUsername = currentUser.getUsername();
+        String currentRole = currentUser.getRole().name();
 
-            return UserDTO.build(userService.read(id).orElseThrow());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        if (currentUsername.equals("anonymousUser") ||
+                !currentUsername.equals(userService.read(id).orElseThrow().getUsername()) ||
+                !currentRole.equals(UserRole.MANAGER.name()) && !currentRole.equals(UserRole.ADMIN.name())) {
+            throw new AccessDeniedException("permission denied");
         }
+
+        return UserDTO.build(userService.read(id).orElseThrow());
     }
 
     @GetMapping("/api/user/check/username")
     @ResponseBody
     public Boolean canUseAsUsername(@RequestParam("username") String username) {
-        try {
-            return userService.canUseAsUsername(username);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        return userService.canUseAsUsername(username);
     }
 
     @GetMapping("/api/user/check/nickname")
     @ResponseBody
     public Boolean canUseAsNickname(@RequestParam("nickname") String nickname) {
-        try {
-            return userService.canUseAsNickname(nickname);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        return userService.canUseAsNickname(nickname);
     }
 
 

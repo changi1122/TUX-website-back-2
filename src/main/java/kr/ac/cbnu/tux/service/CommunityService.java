@@ -73,7 +73,7 @@ public class CommunityService {
             post.setIsDeleted(false);
         }
         else {
-            throw new Exception("User not matched");
+            throw new Exception("user not matched");
         }
     }
 
@@ -92,7 +92,7 @@ public class CommunityService {
             post.setBody(sanitizer.sanitize(updated.getBody()));
             post.setEditedDate(OffsetDateTime.now());
         } else {
-            throw new Exception("User not matched");
+            throw new Exception("user not matched");
         }
     }
 
@@ -108,7 +108,7 @@ public class CommunityService {
         }
     }
 
-    public Community read(Long id, User user) throws Exception {
+    public Community read(Long id, User user) {
         Community post = communityRepository.findById(id).orElseThrow();
 
         if (user == null || user != post.getUser())
@@ -167,10 +167,10 @@ public class CommunityService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId, User user)  throws Exception {
+    public void deleteComment(Long commentId, User user) throws Exception {
         CmComment comment = cmCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().getId().equals(user.getId())) {
-            throw new Exception("User not matched");
+            throw new Exception("user not matched");
         }
         comment.setIsDeleted(true);
         comment.setDeletedDate(OffsetDateTime.now());

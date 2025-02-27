@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 // 연혁, 연락처 등 정적인 페이지를 저장하기 위한 컨트롤러
 
@@ -22,25 +21,17 @@ public class StaticPageController {
         this.staticPageService = staticPageService;
     }
 
-    /* 생성 및 수정 */
+    // 생성 및 수정
     @PostMapping("/api/admin/staticpage/{name}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void createAndUpdate(@PathVariable("name") String name, @RequestBody StaticPage updated) {
-        try {
-            System.out.println("StaticPageController.createAndUpdate");
-            staticPageService.createAndUpdate(name, updated);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
+        staticPageService.createAndUpdate(name, updated);
     }
 
+    // 조회
     @GetMapping("/api/staticpage/{name}")
     @ResponseBody
     public StaticPage read(@PathVariable("name") String name) {
-        try {
-            return staticPageService.read(name);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-        }
+        return staticPageService.read(name);
     }
 }

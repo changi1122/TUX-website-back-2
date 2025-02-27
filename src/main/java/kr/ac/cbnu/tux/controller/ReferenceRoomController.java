@@ -1,6 +1,9 @@
 package kr.ac.cbnu.tux.controller;
 
-import kr.ac.cbnu.tux.domain.*;
+import kr.ac.cbnu.tux.domain.Attachment;
+import kr.ac.cbnu.tux.domain.ReferenceRoom;
+import kr.ac.cbnu.tux.domain.RfComment;
+import kr.ac.cbnu.tux.domain.User;
 import kr.ac.cbnu.tux.dto.ReferenceRoomDTO;
 import kr.ac.cbnu.tux.dto.ReferenceRoomListDTO;
 import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
@@ -25,16 +28,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
-
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Controller
 public class ReferenceRoomController {
@@ -245,7 +246,6 @@ public class ReferenceRoomController {
         }
     }
 
-
     /* 추천 비추천 추가 */
     @PostMapping("/api/referenceroom/{id}/likes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
@@ -256,34 +256,5 @@ public class ReferenceRoomController {
 
         ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
         likeService.create(data, user, dislike);
-    }
-
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<String> handleException(NoSuchElementException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler(IOException.class)
-    public ResponseEntity<String> handleException(IOException ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleException(AccessDeniedException ex) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
     }
 }

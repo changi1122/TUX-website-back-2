@@ -68,7 +68,7 @@ public class UserService implements UserDetailsService {
             if (updated.getPhoneNumber() != null)
                 user.setPhoneNumber(updated.getPhoneNumber());
         } else {
-            throw new Exception("User not found");
+            throw new Exception("user not found");
         }
     }
 
@@ -84,7 +84,7 @@ public class UserService implements UserDetailsService {
             user.setDeleted(true);
             user.setDeletedDate(OffsetDateTime.now());
         } else {
-            throw new Exception("User not found");
+            throw new Exception("user not found");
         }
     }
 
@@ -113,10 +113,10 @@ public class UserService implements UserDetailsService {
 
     public String tryLogin(LoginDTO loginDTO) throws UsernameNotFoundException {
         User user = userRepository.findUserByUsername(loginDTO.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not present"));
+                .orElseThrow(() -> new UsernameNotFoundException("user not present"));
 
         if (user.isBanned() || user.isLocked() || user.isDeleted())
-            throw new UsernameNotFoundException("User not present");
+            throw new UsernameNotFoundException("user not present");
 
         if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
             Authentication authentication = new UserAuthentication(
@@ -124,7 +124,7 @@ public class UserService implements UserDetailsService {
             );
             return JwtTokenProvider.generateToken(authentication);
         } else {
-            throw new IllegalArgumentException("Password not matched");
+            throw new IllegalArgumentException("password not matched");
         }
     }
 
@@ -135,7 +135,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not present"));
+                .orElseThrow(() -> new UsernameNotFoundException("user not present"));
     }
 
     public Boolean canUseAsUsername(String username) {

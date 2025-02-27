@@ -1,5 +1,23 @@
 package kr.ac.cbnu.tux.enums;
 
 public enum UserRole {
-    GUEST, USER, MANAGER, ADMIN
+    GUEST("GUEST"),
+    USER("USER"),
+    MANAGER("MANAGER"),
+    ADMIN("ADMIN");
+
+    private final String value;
+
+    UserRole(String value) {
+        this.value = value;
+    }
+
+    public static UserRole fromString(String value) {
+        for (UserRole role : values()) {
+            if (role.value.equalsIgnoreCase(value)) {
+                return role;
+            }
+        }
+        return GUEST;
+    }
 }
