@@ -98,6 +98,7 @@ public class Community {
 
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Like> likes = new ArrayList<>();
 
     public void addlikes(Like like) {
@@ -107,5 +108,4 @@ public class Community {
             like.setPost(this);
         }
     }
-
 }

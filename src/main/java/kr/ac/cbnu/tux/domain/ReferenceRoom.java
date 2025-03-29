@@ -107,6 +107,7 @@ public class ReferenceRoom {
 
 
     @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Like> likes = new ArrayList<>();
 
     public void addlikes(Like like) {
@@ -116,5 +117,7 @@ public class ReferenceRoom {
             like.setData(this);
         }
     }
+
+
 
 }
