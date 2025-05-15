@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @Transactional(readOnly = true)
-public interface CommunityRepository extends JpaRepository<Community, Long> {
+public interface CommunityRepository extends JpaRepository<Community, Long>, CommunityRepositoryDsl {
     // 메서드 이름 길이가 긴데, 이게 맞는 건지는 -> QueryDSL로 개선하면 좋을 듯...
 
     @EntityGraph("Community.fetchUser")
