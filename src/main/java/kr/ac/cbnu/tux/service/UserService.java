@@ -3,12 +3,12 @@ package kr.ac.cbnu.tux.service;
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.User;
 import kr.ac.cbnu.tux.dto.LoginDTO;
+import kr.ac.cbnu.tux.dto.UserDTO;
 import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.repository.UserRepository;
 import kr.ac.cbnu.tux.security.JwtTokenProvider;
 import kr.ac.cbnu.tux.security.UserAuthentication;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -108,7 +108,7 @@ public class UserService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(password));
     }
 
-    public String tryLogin(LoginDTO loginDTO) throws UsernameNotFoundException {
+    public UserDTO tryLogin(LoginDTO loginDTO) throws UsernameNotFoundException {
         User user = userRepository.findUserByUsername(loginDTO.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not present"));
 
@@ -119,7 +119,10 @@ public class UserService implements UserDetailsService {
             Authentication authentication = new UserAuthentication(
                     user, loginDTO.getPassword(), user.getAuthorities()
             );
-            return JwtTokenProvider.generateToken(authentication);
+            return UserDTO.build(
+                    user,
+                    JwtTokenProvider.generateToken(authentication)
+            );
         } else {
             throw new IllegalArgumentException("password not matched");
         }
@@ -127,6 +130,10 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> read(Long id) {
         return userRepository.findById(id);
+    }
+
+    public User readByUsername(String username) {
+        return userRepository.findUserByUsername(username).orElseThrow();
     }
 
     @Override

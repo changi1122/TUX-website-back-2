@@ -27,12 +27,14 @@ public class UserController {
 
     @PostMapping("/api/auth")
     @ResponseStatus(code = HttpStatus.OK)
-    public void login(final HttpServletRequest request, final HttpServletResponse response,
+    @ResponseBody
+    public UserDTO login(final HttpServletRequest request, final HttpServletResponse response,
                       @RequestBody LoginDTO loginDTO) {
         try {
-            String token = userService.tryLogin(loginDTO);
-            Cookie tokenCookie = createTokenCookie(token, 168 * 60 * 60);
+            UserDTO userAndToken = userService.tryLogin(loginDTO);
+            Cookie tokenCookie = createTokenCookie(userAndToken.getToken().getToken(), 168 * 60 * 60);
             response.addCookie(tokenCookie);
+            return userAndToken;
 
         } catch (Exception e) {
             Cookie emptyCookie = createTokenCookie(null, 0);

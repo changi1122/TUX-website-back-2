@@ -28,7 +28,13 @@ public class UserDTO {
     private OffsetDateTime createdDate;
     private OffsetDateTime deletedDate;
 
+    private TokenDTO token;
+
     public static UserDTO build(User user) {
+        return build(user, null);
+    }
+
+    public static UserDTO build(User user, TokenDTO token) {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -42,6 +48,7 @@ public class UserDTO {
                 .isBanned(user.isBanned())
                 .createdDate(user.getCreatedDate())
                 .deletedDate(user.getDeletedDate())
+                .token(token)
                 .build();
     }
 
