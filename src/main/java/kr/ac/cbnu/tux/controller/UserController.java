@@ -52,7 +52,7 @@ public class UserController {
 
     @GetMapping("/api/auth")
     @ResponseBody
-    public UserDTO getCurrent(@AuthenticationPrincipal User user) {
+    public UserDTO getCurrentUser(@AuthenticationPrincipal User user) {
         return UserDTO.build(user);
     }
 
@@ -76,12 +76,16 @@ public class UserController {
 
     @DeleteMapping("/api/user/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws Exception {
+    public void delete(@PathVariable("id") Long id,
+                       @AuthenticationPrincipal User currentUser, final HttpServletResponse response) throws Exception {
         if (!Objects.deepEquals(currentUser.getId(), id)) {
             throw new Exception("user not matched");
         }
 
         userService.userDelete(id);
+
+        Cookie tokenCookie = createTokenCookie(null, 0);
+        response.addCookie(tokenCookie);
     }
 
     @GetMapping("/api/user/{id}")
