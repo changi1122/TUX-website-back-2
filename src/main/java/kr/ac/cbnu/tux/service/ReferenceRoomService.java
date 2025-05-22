@@ -163,13 +163,13 @@ public class ReferenceRoomService {
     /* 댓글 관련 코드 */
 
     @Transactional
-    public void addComment(Long id, RfComment comment, User user) {
+    public RfComment addComment(Long id, RfComment comment, User user) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
         comment.setCreatedDate(OffsetDateTime.now());
         comment.setIsDeleted(false);
         comment.setData(data);
         comment.setUser(user);
-        rfCommentRepository.save(comment);
+        return rfCommentRepository.save(comment);
     }
 
     @Transactional
