@@ -4,6 +4,7 @@ import kr.ac.cbnu.tux.domain.Attachment;
 import kr.ac.cbnu.tux.domain.CmComment;
 import kr.ac.cbnu.tux.domain.Community;
 import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.dto.CmCommentDTO;
 import kr.ac.cbnu.tux.dto.CommunityDTO;
 import kr.ac.cbnu.tux.dto.CommunityListDTO;
 import kr.ac.cbnu.tux.enums.CommunityPostType;
@@ -164,10 +165,12 @@ public class CommunityController {
     /* 댓글 */
     @PostMapping("/api/community/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void addComment(@PathVariable("id") Long id, @RequestBody CmComment comment,
-                           @AuthenticationPrincipal User user) {
+    @ResponseBody
+    public CmCommentDTO addComment(@PathVariable("id") Long id, @RequestBody CmComment comment,
+                                   @AuthenticationPrincipal User user) {
 
-        communityService.addComment(id, comment, user);
+        CmComment savedComment = communityService.addComment(id, comment, user);
+        return CmCommentDTO.build(savedComment);
     }
 
     @DeleteMapping("/api/community/{id}/comment/{commentId}")

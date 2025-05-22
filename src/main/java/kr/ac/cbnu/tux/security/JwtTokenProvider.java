@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.micrometer.common.util.StringUtils;
 import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.dto.TokenDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -17,7 +18,7 @@ public class JwtTokenProvider {
     private static final Key JWT_SECRET_KEY = Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
 
     // Token Expiration Time
-    private static final int JWT_EXPIRATION_MS = 8 * 24 * 60 * 60 * 1000;
+    private static final int JWT_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 
     private final static JwtParser jwtParser;
 
@@ -27,16 +28,22 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    public static String generateToken(Authentication authentication) {
+    public static TokenDTO generateToken(Authentication authentication) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);
 
-        return Jwts.builder()
-                .setSubject(((UserDetails)authentication.getPrincipal()).getUsername())
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(JWT_SECRET_KEY, SignatureAlgorithm.HS512)
-                .compact();
+        return TokenDTO.build(
+                Jwts.builder()
+                        // username을 "sub"라는 claim으로 토큰에 추가
+                        .setSubject(((UserDetails)authentication.getPrincipal()).getUsername())
+                        // 회원 권한을 "role"이라는 claim으로 토큰에 추가
+                        .claim("role", authentication.getAuthorities())
+                        .setIssuedAt(now)
+                        .setExpiration(expiryDate)
+                        .signWith(JWT_SECRET_KEY, SignatureAlgorithm.HS512)
+                        .compact(),
+                expiryDate.getTime()
+        );
     }
 
     public static String getUsernameFromJwt(String token) {

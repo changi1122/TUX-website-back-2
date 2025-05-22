@@ -27,12 +27,14 @@ public class UserController {
 
     @PostMapping("/api/auth")
     @ResponseStatus(code = HttpStatus.OK)
-    public void login(final HttpServletRequest request, final HttpServletResponse response,
+    @ResponseBody
+    public UserDTO login(final HttpServletRequest request, final HttpServletResponse response,
                       @RequestBody LoginDTO loginDTO) {
         try {
-            String token = userService.tryLogin(loginDTO);
-            Cookie tokenCookie = createTokenCookie(token, 168 * 60 * 60);
+            UserDTO userAndToken = userService.tryLogin(loginDTO);
+            Cookie tokenCookie = createTokenCookie(userAndToken.getToken().getToken(), 168 * 60 * 60);
             response.addCookie(tokenCookie);
+            return userAndToken;
 
         } catch (Exception e) {
             Cookie emptyCookie = createTokenCookie(null, 0);
@@ -50,7 +52,7 @@ public class UserController {
 
     @GetMapping("/api/auth")
     @ResponseBody
-    public UserDTO getCurrent(@AuthenticationPrincipal User user) {
+    public UserDTO getCurrentUser(@AuthenticationPrincipal User user) {
         return UserDTO.build(user);
     }
 
@@ -74,12 +76,16 @@ public class UserController {
 
     @DeleteMapping("/api/user/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws Exception {
+    public void delete(@PathVariable("id") Long id,
+                       @AuthenticationPrincipal User currentUser, final HttpServletResponse response) throws Exception {
         if (!Objects.deepEquals(currentUser.getId(), id)) {
             throw new Exception("user not matched");
         }
 
         userService.userDelete(id);
+
+        Cookie tokenCookie = createTokenCookie(null, 0);
+        response.addCookie(tokenCookie);
     }
 
     @GetMapping("/api/user/{id}")

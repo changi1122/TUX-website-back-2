@@ -152,14 +152,14 @@ public class CommunityService {
     /* 댓글 관련 코드 */
 
     @Transactional
-    public void addComment(Long id, CmComment comment, User user) {
+    public CmComment addComment(Long id, CmComment comment, User user) {
         Community post = communityRepository.findById(id).orElseThrow();
 
         comment.setCreatedDate(OffsetDateTime.now());
         comment.setIsDeleted(false);
         comment.setPost(post);
         comment.setUser(user);
-        cmCommentRepository.save(comment);
+        return cmCommentRepository.save(comment);
     }
 
     @Transactional
