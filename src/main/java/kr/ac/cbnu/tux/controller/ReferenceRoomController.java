@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.domain.RfComment;
 import kr.ac.cbnu.tux.domain.User;
 import kr.ac.cbnu.tux.dto.ReferenceRoomDTO;
 import kr.ac.cbnu.tux.dto.ReferenceRoomListDTO;
+import kr.ac.cbnu.tux.dto.RfCommentDTO;
 import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.service.AttachmentService;
@@ -177,9 +178,11 @@ public class ReferenceRoomController {
     /* 댓글 */
     @PostMapping("/api/referenceroom/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void addComment(@PathVariable("id") Long id, @RequestBody RfComment comment,
+    @ResponseBody
+    public RfCommentDTO addComment(@PathVariable("id") Long id, @RequestBody RfComment comment,
                            @AuthenticationPrincipal User user) {
-        referenceRoomService.addComment(id, comment, user);
+        RfComment savedComment = referenceRoomService.addComment(id, comment, user);
+        return RfCommentDTO.build(savedComment);
     }
 
     @DeleteMapping("/api/referenceroom/{id}/comment/{commentId}")
