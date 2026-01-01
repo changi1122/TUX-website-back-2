@@ -72,6 +72,7 @@ public class ReferenceRoomService {
                 data.setBody(updated.getBody());
 
             data.setTitle(updated.getTitle());
+            data.setEditorVersion(updated.getEditorVersion());
             data.setIsDeleted(false);
             data.setIsAnonymized(updated.getIsAnonymized());
             data.setLecture(updated.getLecture());
@@ -100,6 +101,7 @@ public class ReferenceRoomService {
 
             data.setCategory(updatedCategory);
             data.setTitle(updated.getTitle());
+            data.setEditorVersion(updated.getEditorVersion());
             data.setIsAnonymized(updated.getIsAnonymized());
             data.setLecture(updated.getLecture());
             data.setSemester(updated.getSemester());
