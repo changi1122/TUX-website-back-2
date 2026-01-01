@@ -47,6 +47,8 @@ public class Community {
 
     private OffsetDateTime deletedDate;
 
+    private Short editorVersion;
+
     @Column(nullable = false)
     private Long view;
 

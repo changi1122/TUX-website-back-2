@@ -23,6 +23,7 @@ public class CommunityDTO {
     private String body;
     private OffsetDateTime createdDate;
     private OffsetDateTime editedDate;
+    private short editorVersion;
     private Long view;
     private Long authorId;
     private String author;
@@ -64,6 +65,7 @@ public class CommunityDTO {
                 .body(post.getBody())
                 .createdDate(post.getCreatedDate())
                 .editedDate(post.getEditedDate())
+                .editorVersion(post.getEditorVersion() == null ? 1 : post.getEditorVersion())
                 .view(post.getView())
                 .authorId(post.getUser().getId())
                 .author(post.getUser().getNickname())
