@@ -47,6 +47,8 @@ public class ReferenceRoom {
 
     private OffsetDateTime deletedDate;
 
+    private Short editorVersion;
+
     @Column(nullable = false)
     private Long view;
     

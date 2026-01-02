@@ -31,8 +31,10 @@ public class CommunityService {
 
     @Transactional
     public void createWithoutFileUpload(CommunityPostType type, Community post, User user) {
+        if (isSanitizationRequired(post))
+            post.setBody(sanitizer.sanitize(post.getBody()));
+
         post.setCategory(type);
-        post.setBody(sanitizer.sanitize(post.getBody()));
         post.setCreatedDate(OffsetDateTime.now());
         post.setIsDeleted(false);
         post.setView(0L);
@@ -64,9 +66,14 @@ public class CommunityService {
     public void updateAfterTemporalCreate(Long id, Community updated, User user) throws Exception {
         Community post = communityRepository.findById(id).orElseThrow();
         if (user.getId().equals(post.getUser().getId())) {
+            if (isSanitizationRequired(updated))
+                post.setBody(sanitizer.sanitize(updated.getBody()));
+            else
+                post.setBody(updated.getBody());
+
             post.setTitle(updated.getTitle());
-            post.setBody(sanitizer.sanitize(updated.getBody()));
             post.setIsDeleted(false);
+            post.setEditorVersion(updated.getEditorVersion());
         }
         else {
             throw new Exception("user not matched");
@@ -83,10 +90,15 @@ public class CommunityService {
         Community post = communityRepository.findById(id).orElseThrow();
 
         if (post.getUser().getId().equals(user.getId()) || user.getRole() == UserRole.ADMIN) {
+            if (isSanitizationRequired(updated))
+                post.setBody(sanitizer.sanitize(updated.getBody()));
+            else
+                post.setBody(updated.getBody());
+
             post.setCategory(updatedCategory);
             post.setTitle(updated.getTitle());
-            post.setBody(sanitizer.sanitize(updated.getBody()));
             post.setEditedDate(OffsetDateTime.now());
+            post.setEditorVersion(updated.getEditorVersion());
         } else {
             throw new Exception("user not matched");
         }
@@ -170,5 +182,9 @@ public class CommunityService {
         }
         comment.setIsDeleted(true);
         comment.setDeletedDate(OffsetDateTime.now());
+    }
+
+    private boolean isSanitizationRequired(Community post) {
+        return post.getEditorVersion() == null || post.getEditorVersion() != 2;
     }
 }

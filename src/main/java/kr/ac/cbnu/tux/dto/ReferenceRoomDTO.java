@@ -21,6 +21,7 @@ public class ReferenceRoomDTO {
     private String body;
     private OffsetDateTime createdDate;
     private OffsetDateTime editedDate;
+    private short editorVersion;
     private Long view;
     private Long authorId;
     private String author;
@@ -67,6 +68,7 @@ public class ReferenceRoomDTO {
                 .body(data.getBody())
                 .createdDate(data.getCreatedDate())
                 .editedDate(data.getEditedDate())
+                .editorVersion(data.getEditorVersion() == null ? 1 : data.getEditorVersion())
                 .view(data.getView())
                 .authorId(data.getUser().getId())
                 .author((data.getIsAnonymized()) ? "익명" : data.getUser().getNickname())

@@ -9,7 +9,6 @@ import kr.ac.cbnu.tux.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.repository.RfCommentRepository;
 import kr.ac.cbnu.tux.utility.Sanitizer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,8 +30,10 @@ public class ReferenceRoomService {
 
     @Transactional
     public void createWithoutFileUpload(ReferenceRoomPostType type, ReferenceRoom data, User user) {
+        if (isSanitizationRequired(data))
+            data.setBody(sanitizer.sanitize(data.getBody()));
+
         data.setCategory(type);
-        data.setBody(sanitizer.sanitize(data.getBody()));
         data.setIsDeleted(false);
         data.setCreatedDate(OffsetDateTime.now());
         data.setView(0L);
@@ -65,8 +66,13 @@ public class ReferenceRoomService {
     public void updateAfterTemporalCreate(Long id, ReferenceRoom updated, User user) throws Exception {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
         if (user.getId().equals(data.getUser().getId())) {
+            if (isSanitizationRequired(updated))
+                data.setBody(sanitizer.sanitize(updated.getBody()));
+            else
+                data.setBody(updated.getBody());
+
             data.setTitle(updated.getTitle());
-            data.setBody(sanitizer.sanitize(updated.getBody()));
+            data.setEditorVersion(updated.getEditorVersion());
             data.setIsDeleted(false);
             data.setIsAnonymized(updated.getIsAnonymized());
             data.setLecture(updated.getLecture());
@@ -88,9 +94,14 @@ public class ReferenceRoomService {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
 
         if (data.getUser().getId().equals(user.getId()) || user.getRole() == UserRole.ADMIN) {
+            if (isSanitizationRequired(updated))
+                data.setBody(sanitizer.sanitize(updated.getBody()));
+            else
+                data.setBody(updated.getBody());
+
             data.setCategory(updatedCategory);
             data.setTitle(updated.getTitle());
-            data.setBody(sanitizer.sanitize(updated.getBody()));
+            data.setEditorVersion(updated.getEditorVersion());
             data.setIsAnonymized(updated.getIsAnonymized());
             data.setLecture(updated.getLecture());
             data.setSemester(updated.getSemester());
@@ -182,4 +193,7 @@ public class ReferenceRoomService {
         comment.setDeletedDate(OffsetDateTime.now());
     }
 
+    private boolean isSanitizationRequired(ReferenceRoom data) {
+        return data.getEditorVersion() == null || data.getEditorVersion() != 2;
+    }
 }
