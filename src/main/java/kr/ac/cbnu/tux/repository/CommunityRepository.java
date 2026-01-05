@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,5 +69,5 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
         DELETE FROM Community p
         WHERE p.id IN (:postIds)
     """)
-    int deleteByIds(@Param("postIds") List<Long> postIds);
+    int deleteByIds(List<Long> postIds);
 }

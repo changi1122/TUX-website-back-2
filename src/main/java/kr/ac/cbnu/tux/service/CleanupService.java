@@ -1,9 +1,6 @@
 package kr.ac.cbnu.tux.service;
 
-import kr.ac.cbnu.tux.repository.AttachmentRepository;
-import kr.ac.cbnu.tux.repository.CmCommentRepository;
-import kr.ac.cbnu.tux.repository.CommunityRepository;
-import kr.ac.cbnu.tux.repository.LikeRepository;
+import kr.ac.cbnu.tux.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,8 +17,10 @@ public class CleanupService {
     private static final int BATCH_SIZE = 100;
 
     private final CommunityRepository communityRepository;
+    private final ReferenceRoomRepository referenceRoomRepository;
     private final LikeRepository likeRepository;
     private final CmCommentRepository cmCommentRepository;
+    private final RfCommentRepository rfCommentRepository;
     private final AttachmentRepository attachmentRepository;
     private final TransactionTemplate transactionTemplate;
 
@@ -30,7 +29,7 @@ public class CleanupService {
         int totalDeleted = 0;
         int maxLoops = 100; // 무한 루프 방지용
 
-        log.info("[1년 경과 게시물 정리 시작] 기준 시간: {} 이전", threshold);
+        log.info("[삭제 1년 경과 게시물 정리 시작] 기준 시간: {} 이전", threshold);
 
         for (int i = 0; i <= maxLoops; i++) {
             List<Long> postIds = communityRepository.findExpiredDeletedPostIds(threshold, BATCH_SIZE);
@@ -59,8 +58,43 @@ public class CleanupService {
             }
         }
 
-        log.info("[1년 경과 게시물 정리 종료] 총 {}개 삭제됨", totalDeleted);
+        log.info("[삭제 1년 경과 게시물 정리 종료] 총 {}개 삭제됨", totalDeleted);
     }
 
+    public void deleteExpiredDeletedData() {
+        LocalDateTime threshold = LocalDateTime.now().minusYears(1);
+        int totalDeleted = 0;
+        int maxLoops = 100; // 무한 루프 방지용
 
+        log.info("[삭제 1년 경과 자료실 정리 시작] 기준 시간: {} 이전", threshold);
+
+        for (int i = 0; i <= maxLoops; i++) {
+            List<Long> dataIds = referenceRoomRepository.findExpiredDeletedDataIds(threshold, BATCH_SIZE);
+            if (dataIds.isEmpty()) {
+                break;
+            }
+
+            try {
+                Integer deletedCounts = transactionTemplate.execute(status -> {
+                    likeRepository.deleteByDataIds(dataIds);
+                    rfCommentRepository.deleteByDataIds(dataIds);
+                    attachmentRepository.deleteByDataIds(dataIds);
+                    return referenceRoomRepository.deleteByIds(dataIds);
+                });
+
+                if (deletedCounts == null || deletedCounts == 0) {
+                    break;
+                }
+
+                totalDeleted += deletedCounts;
+                log.info("[Batch {}] {}개 삭제 완료 (누적: {})", i + 1, deletedCounts, totalDeleted);
+            }
+            catch (Exception e) {
+                log.error("[삭제 처리 중 오류 발생] dataIds={}. 프로세스를 중단합니다.", dataIds, e);
+                break;
+            }
+        }
+
+        log.info("[삭제 1년 경과 자료실 정리 종료] 총 {}개 삭제됨", totalDeleted);
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -48,4 +49,19 @@ public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Lo
     @Query("update ReferenceRoom d set d.view = d.view + 1 where d.id = :id")
     @Modifying
     void updateViewById(Long id);
+
+    @Query(value = """
+        SELECT id
+        FROM reference_room
+        WHERE is_deleted = 1 AND deleted_date < :threshold
+        LIMIT :batchSize
+    """, nativeQuery = true)
+    List<Long> findExpiredDeletedDataIds(LocalDateTime threshold, int batchSize);
+
+    @Modifying
+    @Query(value = """
+        DELETE FROM ReferenceRoom d
+        WHERE d.id IN (:dataIds)
+    """)
+    int deleteByIds(List<Long> dataIds);
 }
