@@ -22,4 +22,10 @@ public class CleanupScheduler {
     public void cleanupDeletedReferenceRoomData() {
         cleanupService.deleteExpiredDeletedData();
     }
+
+    // 매월 1일 새벽 3시에 실행
+    @Scheduled(cron = "0 0 3 1 * *")
+    public void cleanupUnusedFiles() {
+        cleanupService.deleteUnusedFiles();
+    }
 }

@@ -39,4 +39,12 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
         WHERE data_id IN (:dataIds)
     """, nativeQuery = true)
     int deleteByDataIds(List<Long> dataIds);
+
+    @Query(value = """
+        SELECT *
+        FROM attachment
+        WHERE data_id IS NULL AND post_id IS NULL
+        LIMIT :batchSize
+    """, nativeQuery = true)
+    List<Attachment> findUnusedAttachments(int batchSize);
 }
