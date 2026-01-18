@@ -1,9 +1,9 @@
 package kr.ac.cbnu.tux.controller;
 
-import kr.ac.cbnu.tux.domain.Attachment;
-import kr.ac.cbnu.tux.domain.CmComment;
-import kr.ac.cbnu.tux.domain.Community;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.Attachment;
+import kr.ac.cbnu.tux.entity.CmComment;
+import kr.ac.cbnu.tux.entity.Community;
+import kr.ac.cbnu.tux.entity.User;
 import kr.ac.cbnu.tux.dto.CmCommentDTO;
 import kr.ac.cbnu.tux.dto.CommunityDTO;
 import kr.ac.cbnu.tux.dto.CommunityListDTO;

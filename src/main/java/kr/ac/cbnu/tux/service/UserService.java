@@ -1,7 +1,7 @@
 package kr.ac.cbnu.tux.service;
 
 import jakarta.transaction.Transactional;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.User;
 import kr.ac.cbnu.tux.dto.LoginDTO;
 import kr.ac.cbnu.tux.dto.UserDTO;
 import kr.ac.cbnu.tux.enums.UserRole;

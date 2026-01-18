@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.repository;
 
-import kr.ac.cbnu.tux.domain.Community;
+import kr.ac.cbnu.tux.entity.Community;
 import kr.ac.cbnu.tux.enums.CommunityPostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

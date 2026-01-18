@@ -4,7 +4,6 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.micrometer.common.util.StringUtils;
-import kr.ac.cbnu.tux.domain.User;
 import kr.ac.cbnu.tux.dto.TokenDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;

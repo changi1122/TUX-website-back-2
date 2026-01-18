@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.controller;
 
-import kr.ac.cbnu.tux.domain.StaticPage;
+import kr.ac.cbnu.tux.entity.StaticPage;
 import kr.ac.cbnu.tux.service.StaticPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,13 +1,12 @@
 package kr.ac.cbnu.tux.service;
 
 import jakarta.transaction.Transactional;
-import kr.ac.cbnu.tux.domain.Attachment;
-import kr.ac.cbnu.tux.domain.Community;
-import kr.ac.cbnu.tux.domain.ReferenceRoom;
+import kr.ac.cbnu.tux.entity.Attachment;
+import kr.ac.cbnu.tux.entity.Community;
+import kr.ac.cbnu.tux.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.repository.AttachmentRepository;
 import kr.ac.cbnu.tux.utility.FileStore;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

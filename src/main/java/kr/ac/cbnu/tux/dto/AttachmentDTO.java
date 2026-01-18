@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.dto;
 
-import kr.ac.cbnu.tux.domain.Attachment;
+import kr.ac.cbnu.tux.entity.Attachment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

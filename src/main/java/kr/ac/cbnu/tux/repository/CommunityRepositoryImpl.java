@@ -1,11 +1,11 @@
 package kr.ac.cbnu.tux.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import kr.ac.cbnu.tux.domain.Community;
+import kr.ac.cbnu.tux.entity.Community;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import static kr.ac.cbnu.tux.domain.QCommunity.*;
+import static kr.ac.cbnu.tux.entity.QCommunity.*;
 
 @Repository
 @RequiredArgsConstructor

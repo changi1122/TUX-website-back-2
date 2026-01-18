@@ -1,9 +1,9 @@
-package kr.ac.cbnu.tux.domain;
+package kr.ac.cbnu.tux.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
+import kr.ac.cbnu.tux.enums.CommunityPostType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,21 +13,21 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// 자료실
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@NamedEntityGraph(name = "ReferenceRoom.fetchUser", attributeNodes = @NamedAttributeNode("user"))
-public class ReferenceRoom {
+@NamedEntityGraph(name = "Community.fetchUser", attributeNodes = @NamedAttributeNode("user"))
+public class Community {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private ReferenceRoomPostType category;
+    private CommunityPostType category;
 
     @Column(nullable = false)
     @NotEmpty
@@ -51,15 +51,6 @@ public class ReferenceRoom {
 
     @Column(nullable = false)
     private Long view;
-    
-    /* 자료실 특수 정보 */
-    @Column(nullable = false)
-    private Boolean isAnonymized;   // 익명 여부
-
-    private String lecture;         // 강의 이름
-    private String semester;        // 학기
-    private String professor;       // 교수
-    
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -69,33 +60,33 @@ public class ReferenceRoom {
     public void setUser(User user) {
         this.user = user;
 
-        if (user != null && !user.getDatas().contains(this)) {
-            user.getDatas().add(this);
+        if (user != null && !user.getPosts().contains(this)) {
+            user.getPosts().add(this);
         }
     }
 
 
-    @OneToMany(mappedBy = "data", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
     @Builder.Default
-    private List<RfComment> comments = new ArrayList<>();
+    private List<CmComment> comments = new ArrayList<>();
 
-    public void addComment(RfComment comment) {
+    public void addComment(CmComment comment) {
         this.comments.add(comment);
 
-        if (comment.getData() != this) {
-            comment.setData(this);
+        if (comment.getPost() != this) {
+            comment.setPost(this);
         }
     }
 
-    @OneToMany(mappedBy = "data", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
     @Builder.Default
     private List<Attachment> attachments = new ArrayList<>();
 
     public void addAttachment(Attachment file) {
         this.attachments.add(file);
 
-        if (file.getData() != this) {
-            file.setData(this);
+        if (file.getPost() != this) {
+            file.setPost(this);
         }
     }
 
@@ -108,18 +99,15 @@ public class ReferenceRoom {
     }
 
 
-    @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Like> likes = new ArrayList<>();
 
     public void addlikes(Like like) {
         this.likes.add(like);
 
-        if (like.getData() != this) {
-            like.setData(this);
+        if (like.getPost() != this) {
+            like.setPost(this);
         }
     }
-
-
-
 }

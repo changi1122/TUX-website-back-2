@@ -1,6 +1,5 @@
 package kr.ac.cbnu.tux.utility;
 
-import kr.ac.cbnu.tux.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;

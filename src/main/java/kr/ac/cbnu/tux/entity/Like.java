@@ -1,4 +1,4 @@
-package kr.ac.cbnu.tux.domain;
+package kr.ac.cbnu.tux.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

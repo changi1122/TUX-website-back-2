@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.service;
 
-import kr.ac.cbnu.tux.domain.Attachment;
+import kr.ac.cbnu.tux.entity.Attachment;
 import kr.ac.cbnu.tux.repository.*;
 import kr.ac.cbnu.tux.utility.FileStore;
 import lombok.RequiredArgsConstructor;

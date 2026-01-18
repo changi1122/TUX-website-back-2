@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.dto;
 
-import kr.ac.cbnu.tux.domain.RfComment;
+import kr.ac.cbnu.tux.entity.RfComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

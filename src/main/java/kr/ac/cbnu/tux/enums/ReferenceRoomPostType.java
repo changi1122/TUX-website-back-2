@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.enums;
 
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.User;
 
 public enum ReferenceRoomPostType {
     STUDY("study"),         // 강의/스터디

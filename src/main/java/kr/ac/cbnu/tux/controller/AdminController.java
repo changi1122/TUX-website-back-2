@@ -1,7 +1,7 @@
 package kr.ac.cbnu.tux.controller;
 
 import jakarta.annotation.PostConstruct;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.User;
 import kr.ac.cbnu.tux.dto.UserDTO;
 import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.service.UserService;

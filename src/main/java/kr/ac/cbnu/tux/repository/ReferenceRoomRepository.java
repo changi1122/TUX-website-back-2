@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.repository;
 
-import kr.ac.cbnu.tux.domain.ReferenceRoom;
+import kr.ac.cbnu.tux.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

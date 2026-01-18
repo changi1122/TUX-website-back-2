@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.utility;
 
-import kr.ac.cbnu.tux.domain.Attachment;
+import kr.ac.cbnu.tux.entity.Attachment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;

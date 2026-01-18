@@ -1,4 +1,4 @@
-package kr.ac.cbnu.tux.domain;
+package kr.ac.cbnu.tux.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
-// ReferenceRoom Comment
+// CommunityComment
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RfComment {
+public class CmComment {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,20 +41,20 @@ public class RfComment {
     public void setUser(User user) {
         this.user = user;
 
-        if (user != null && !user.getRfComments().contains(this)) {
-            user.getRfComments().add(this);
+        if (user != null && !user.getCmComments().contains(this)) {
+            user.getCmComments().add(this);
         }
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "data_id")
-    private ReferenceRoom data;
+    @JoinColumn(name = "post_id")
+    private Community post;
 
-    public void setData(ReferenceRoom data) {
-        this.data = data;
+    public void setPost(Community post) {
+        this.post = post;
 
-        if (data != null && !data.getComments().contains(this)) {
-            data.getComments().add(this);
+        if (post != null && !post.getComments().contains(this)) {
+            post.getComments().add(this);
         }
     }
 

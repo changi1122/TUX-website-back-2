@@ -1,9 +1,9 @@
 package kr.ac.cbnu.tux.controller;
 
-import kr.ac.cbnu.tux.domain.Attachment;
-import kr.ac.cbnu.tux.domain.ReferenceRoom;
-import kr.ac.cbnu.tux.domain.RfComment;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.Attachment;
+import kr.ac.cbnu.tux.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.entity.RfComment;
+import kr.ac.cbnu.tux.entity.User;
 import kr.ac.cbnu.tux.dto.ReferenceRoomDTO;
 import kr.ac.cbnu.tux.dto.ReferenceRoomListDTO;
 import kr.ac.cbnu.tux.dto.RfCommentDTO;

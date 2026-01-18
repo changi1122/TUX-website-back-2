@@ -1,8 +1,6 @@
 package kr.ac.cbnu.tux.dto;
 
-import kr.ac.cbnu.tux.domain.Community;
-import kr.ac.cbnu.tux.domain.Like;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.Community;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

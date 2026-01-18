@@ -1,7 +1,7 @@
 package kr.ac.cbnu.tux.repository;
 
 
-import kr.ac.cbnu.tux.domain.Community;
+import kr.ac.cbnu.tux.entity.Community;
 
 public interface CommunityRepositoryDsl {
 

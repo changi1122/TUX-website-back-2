@@ -2,7 +2,7 @@ package kr.ac.cbnu.tux.service;
 
 
 import jakarta.transaction.Transactional;
-import kr.ac.cbnu.tux.domain.*;
+import kr.ac.cbnu.tux.entity.*;
 import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.enums.UserRole;
 import kr.ac.cbnu.tux.repository.ReferenceRoomRepository;

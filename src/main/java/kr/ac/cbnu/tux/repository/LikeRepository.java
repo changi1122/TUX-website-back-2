@@ -1,9 +1,9 @@
 package kr.ac.cbnu.tux.repository;
 
-import kr.ac.cbnu.tux.domain.Community;
-import kr.ac.cbnu.tux.domain.Like;
-import kr.ac.cbnu.tux.domain.ReferenceRoom;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.Community;
+import kr.ac.cbnu.tux.entity.Like;
+import kr.ac.cbnu.tux.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

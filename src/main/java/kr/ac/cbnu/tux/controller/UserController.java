@@ -3,7 +3,7 @@ package kr.ac.cbnu.tux.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.ac.cbnu.tux.domain.User;
+import kr.ac.cbnu.tux.entity.User;
 import kr.ac.cbnu.tux.dto.LoginDTO;
 import kr.ac.cbnu.tux.dto.UserDTO;
 import kr.ac.cbnu.tux.enums.UserRole;
