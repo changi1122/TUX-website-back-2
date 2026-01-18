@@ -1,10 +1,10 @@
 package kr.ac.cbnu.tux.controller;
 
 import jakarta.annotation.PostConstruct;
-import kr.ac.cbnu.tux.entity.User;
-import kr.ac.cbnu.tux.dto.UserDTO;
-import kr.ac.cbnu.tux.enums.UserRole;
-import kr.ac.cbnu.tux.service.UserService;
+import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.dto.response.UserDTO;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.service.UserService;
 import kr.ac.cbnu.tux.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;

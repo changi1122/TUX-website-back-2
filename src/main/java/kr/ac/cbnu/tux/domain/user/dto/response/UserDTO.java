@@ -1,7 +1,7 @@
-package kr.ac.cbnu.tux.dto;
+package kr.ac.cbnu.tux.domain.user.dto.response;
 
-import kr.ac.cbnu.tux.entity.User;
-import kr.ac.cbnu.tux.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

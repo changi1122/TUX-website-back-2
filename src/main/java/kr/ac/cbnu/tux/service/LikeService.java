@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.entity.Community;
 import kr.ac.cbnu.tux.entity.Like;
 import kr.ac.cbnu.tux.entity.ReferenceRoom;
-import kr.ac.cbnu.tux.entity.User;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.repository.LikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.security;
 
-import kr.ac.cbnu.tux.entity.User;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 

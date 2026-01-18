@@ -1,6 +1,5 @@
-package kr.ac.cbnu.tux.dto;
+package kr.ac.cbnu.tux.domain.user.dto.request;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

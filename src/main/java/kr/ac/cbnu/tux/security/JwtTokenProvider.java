@@ -4,17 +4,19 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.micrometer.common.util.StringUtils;
-import kr.ac.cbnu.tux.dto.TokenDTO;
+import kr.ac.cbnu.tux.domain.user.dto.response.TokenDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 public class JwtTokenProvider {
 
     private static final String JWT_SECRET = "wewklfjlwejfl;wjeflwejfl;kjsdc;ljeilwjrhfl;iwejf;lawjklfehklfhwkjehfkjer";
-    private static final Key JWT_SECRET_KEY = Keys.hmacShaKeyFor(JWT_SECRET.getBytes());
+    private static final SecretKey JWT_SECRET_KEY = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
 
     // Token Expiration Time
     private static final int JWT_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -22,8 +24,8 @@ public class JwtTokenProvider {
     private final static JwtParser jwtParser;
 
     static {
-        jwtParser = Jwts.parserBuilder()
-                .setSigningKey(JWT_SECRET_KEY)
+        jwtParser = Jwts.parser()
+                .verifyWith(JWT_SECRET_KEY)
                 .build();
     }
 
@@ -34,19 +36,19 @@ public class JwtTokenProvider {
         return TokenDTO.build(
                 Jwts.builder()
                         // username을 "sub"라는 claim으로 토큰에 추가
-                        .setSubject(((UserDetails)authentication.getPrincipal()).getUsername())
+                        .subject(((UserDetails)authentication.getPrincipal()).getUsername())
                         // 회원 권한을 "role"이라는 claim으로 토큰에 추가
                         .claim("role", authentication.getAuthorities())
-                        .setIssuedAt(now)
-                        .setExpiration(expiryDate)
-                        .signWith(JWT_SECRET_KEY, SignatureAlgorithm.HS512)
+                        .issuedAt(now)
+                        .expiration(expiryDate)
+                        .signWith(JWT_SECRET_KEY, Jwts.SIG.HS512)
                         .compact(),
                 expiryDate.getTime()
         );
     }
 
     public static String getUsernameFromJwt(String token) {
-        Claims claims = jwtParser.parseClaimsJws(token).getBody();
+        Claims claims = jwtParser.parseSignedClaims(token).getPayload();
         return claims.getSubject();
     }
 
@@ -55,7 +57,7 @@ public class JwtTokenProvider {
             return false;
 
         try {
-            jwtParser.parseClaimsJws(token);
+            jwtParser.parseSignedClaims(token);
             return true;
         } catch (SignatureException ex) {
             //log.error("Invalid JWT signature");

@@ -1,13 +1,13 @@
-package kr.ac.cbnu.tux.controller;
+package kr.ac.cbnu.tux.domain.user.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.ac.cbnu.tux.entity.User;
-import kr.ac.cbnu.tux.dto.LoginDTO;
-import kr.ac.cbnu.tux.dto.UserDTO;
-import kr.ac.cbnu.tux.enums.UserRole;
-import kr.ac.cbnu.tux.service.UserService;
+import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.dto.request.LoginDTO;
+import kr.ac.cbnu.tux.domain.user.dto.response.UserDTO;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

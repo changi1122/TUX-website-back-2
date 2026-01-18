@@ -3,6 +3,7 @@ package kr.ac.cbnu.tux.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.enums.CommunityPostType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

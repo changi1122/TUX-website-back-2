@@ -1,10 +1,14 @@
-package kr.ac.cbnu.tux.entity;
+package kr.ac.cbnu.tux.domain.user.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import kr.ac.cbnu.tux.enums.UserRole;
+import kr.ac.cbnu.tux.entity.CmComment;
+import kr.ac.cbnu.tux.entity.Community;
+import kr.ac.cbnu.tux.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.entity.RfComment;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.entity;
 
 import jakarta.persistence.*;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,11 +1,11 @@
-package kr.ac.cbnu.tux.service;
+package kr.ac.cbnu.tux.domain.user.service;
 
 import jakarta.transaction.Transactional;
-import kr.ac.cbnu.tux.entity.User;
-import kr.ac.cbnu.tux.dto.LoginDTO;
-import kr.ac.cbnu.tux.dto.UserDTO;
-import kr.ac.cbnu.tux.enums.UserRole;
-import kr.ac.cbnu.tux.repository.UserRepository;
+import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.dto.request.LoginDTO;
+import kr.ac.cbnu.tux.domain.user.dto.response.UserDTO;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.security.JwtTokenProvider;
 import kr.ac.cbnu.tux.security.UserAuthentication;
 import lombok.RequiredArgsConstructor;

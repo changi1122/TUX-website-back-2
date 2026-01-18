@@ -1,7 +1,7 @@
-package kr.ac.cbnu.tux.repository;
+package kr.ac.cbnu.tux.domain.user.repository;
 
-import kr.ac.cbnu.tux.entity.User;
-import kr.ac.cbnu.tux.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

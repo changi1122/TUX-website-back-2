@@ -1,11 +1,9 @@
-package kr.ac.cbnu.tux.dto;
+package kr.ac.cbnu.tux.domain.user.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor

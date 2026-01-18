@@ -1,4 +1,4 @@
-package kr.ac.cbnu.tux.enums;
+package kr.ac.cbnu.tux.domain.user.enums;
 
 public enum UserRole {
     GUEST("GUEST"),

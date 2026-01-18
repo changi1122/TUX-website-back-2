@@ -1,35 +1,22 @@
-package kr.ac.cbnu.tux.controller;
+package kr.ac.cbnu.tux.domain.user.controller;
 
 import kr.ac.cbnu.tux.config.SecurityConfig;
-import kr.ac.cbnu.tux.repository.UserRepository;
-import kr.ac.cbnu.tux.security.JwtAuthenticationFilter;
-import kr.ac.cbnu.tux.service.UserService;
-import org.apache.logging.log4j.util.LambdaUtil;
+import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
+import kr.ac.cbnu.tux.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 @Import(SecurityConfig.class)
@@ -40,11 +27,11 @@ class UserControllerTest {
     @Autowired
     WebApplicationContext context;
 
-    @MockBean
+    @MockitoBean
     private UserService service;
-    @MockBean
+    @MockitoBean
     private UserRepository userRepository;
-    @MockBean
+    @MockitoBean
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach

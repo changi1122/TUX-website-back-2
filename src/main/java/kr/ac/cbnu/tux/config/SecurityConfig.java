@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.config;
 
-import kr.ac.cbnu.tux.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

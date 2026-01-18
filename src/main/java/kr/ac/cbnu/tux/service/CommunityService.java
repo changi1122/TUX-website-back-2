@@ -1,9 +1,10 @@
 package kr.ac.cbnu.tux.service;
 
 import jakarta.transaction.Transactional;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.entity.*;
 import kr.ac.cbnu.tux.enums.CommunityPostType;
-import kr.ac.cbnu.tux.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.repository.CommunityRepository;
 import kr.ac.cbnu.tux.utility.Sanitizer;

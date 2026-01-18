@@ -2,9 +2,10 @@ package kr.ac.cbnu.tux.service;
 
 
 import jakarta.transaction.Transactional;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.entity.*;
 import kr.ac.cbnu.tux.enums.ReferenceRoomPostType;
-import kr.ac.cbnu.tux.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.repository.RfCommentRepository;
 import kr.ac.cbnu.tux.utility.Sanitizer;
