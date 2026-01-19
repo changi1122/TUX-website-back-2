@@ -74,6 +74,26 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public UserResponse tryLogin(LoginRequest loginRequest) {
+        User user = userRepository.findUserByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("user not present"));
+
+        if (user.isBanned() || user.isLocked() || user.isDeleted())
+            throw new RuntimeException("user not present");
+
+        if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            Authentication authentication = new UserAuthentication(
+                    user, null, user.getAuthorities()
+            );
+            return UserResponse.build(
+                    user,
+                    JwtTokenProvider.generateToken(authentication)
+            );
+        } else {
+            throw new IllegalArgumentException("password not matched");
+        }
+    }
+
     public void hardDelete(Long id) {
         User user = userRepository.findById(id).orElseThrow();
         userRepository.delete(user);
@@ -95,26 +115,6 @@ public class UserService implements UserDetailsService {
     public void setTemporalPassword(Long id, String password) {
         User user = userRepository.findById(id).orElseThrow();
         user.setPassword(passwordEncoder.encode(password));
-    }
-
-    public UserResponse tryLogin(LoginRequest loginRequest) throws UsernameNotFoundException {
-        User user = userRepository.findUserByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("user not present"));
-
-        if (user.isBanned() || user.isLocked() || user.isDeleted())
-            throw new UsernameNotFoundException("user not present");
-
-        if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            Authentication authentication = new UserAuthentication(
-                    user, null, user.getAuthorities()
-            );
-            return UserResponse.build(
-                    user,
-                    JwtTokenProvider.generateToken(authentication)
-            );
-        } else {
-            throw new IllegalArgumentException("password not matched");
-        }
     }
 
     public User readUser(Long id) {

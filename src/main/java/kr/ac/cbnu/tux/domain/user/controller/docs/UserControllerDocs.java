@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 import java.util.Objects;
 
-@Tag(name = "회원", description = "회원 API")
+@Tag(name = "회원(user)", description = "회원 API")
 public interface UserControllerDocs {
 
     @Operation(method = "POST", summary = "회원가입", description = "새로운 회원을 생성합니다.")

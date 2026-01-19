@@ -23,37 +23,13 @@ import java.nio.file.AccessDeniedException;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
+import static kr.ac.cbnu.tux.utility.CookieUtils.createTokenCookie;
+
 @RequiredArgsConstructor
 @Controller
 public class UserController implements UserControllerDocs {
 
     private final UserService userService;
-
-
-    @PostMapping("/api/auth")
-    @ResponseStatus(code = HttpStatus.OK)
-    @ResponseBody
-    public UserResponse login(final HttpServletRequest request, final HttpServletResponse response,
-                              @RequestBody LoginRequest loginRequest) {
-        try {
-            UserResponse userAndToken = userService.tryLogin(loginRequest);
-            Cookie tokenCookie = createTokenCookie(userAndToken.getToken().getToken(), 168 * 60 * 60);
-            response.addCookie(tokenCookie);
-            return userAndToken;
-
-        } catch (Exception e) {
-            Cookie emptyCookie = createTokenCookie(null, 0);
-            response.addCookie(emptyCookie);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/api/auth")
-    @ResponseStatus(code = HttpStatus.OK)
-    public void logout(final HttpServletRequest request, final HttpServletResponse response) {
-        Cookie tokenCookie = createTokenCookie(null, 0);
-        response.addCookie(tokenCookie);
-    }
 
     @GetMapping("/api/auth")
     @ResponseBody
@@ -124,11 +100,4 @@ public class UserController implements UserControllerDocs {
         return (role == UserRole.MANAGER || role == UserRole.ADMIN);
     }
 
-    private Cookie createTokenCookie(String token, int age) {
-        Cookie cookie = new Cookie("token", token);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(age);
-        cookie.setPath("/");
-        return cookie;
-    }
 }
