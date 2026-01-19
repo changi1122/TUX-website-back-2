@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTO {
+public class UserResponse {
 
     private Long id;
     private String username;
@@ -28,14 +28,14 @@ public class UserDTO {
     private OffsetDateTime createdDate;
     private OffsetDateTime deletedDate;
 
-    private TokenDTO token;
+    private Token token;
 
-    public static UserDTO build(User user) {
+    public static UserResponse build(User user) {
         return build(user, null);
     }
 
-    public static UserDTO build(User user, TokenDTO token) {
-        return UserDTO.builder()
+    public static UserResponse build(User user, Token token) {
+        return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .nickname(user.getNickname())

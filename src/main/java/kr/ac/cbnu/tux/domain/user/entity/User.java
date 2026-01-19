@@ -156,5 +156,15 @@ public class User implements UserDetails {
         }
     }
 
+    public void initializeUser(OffsetDateTime now) {
+        this.role = UserRole.GUEST;
+        this.isLocked = false;
+        this.isBanned = false;
+        this.isDeleted = false;
+        this.setCreatedDate(now);
+    }
 
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

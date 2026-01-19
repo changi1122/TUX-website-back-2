@@ -1,9 +1,10 @@
 package kr.ac.cbnu.tux.domain.user.service;
 
 import jakarta.transaction.Transactional;
+import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import kr.ac.cbnu.tux.domain.user.dto.request.LoginDTO;
-import kr.ac.cbnu.tux.domain.user.dto.response.UserDTO;
+import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
+import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.security.JwtTokenProvider;
@@ -32,19 +33,21 @@ public class UserService implements UserDetailsService {
 
 
     @Transactional
-    public void create(User user) throws Exception {
-        if (!userRepository.existsByUsername(user.getUsername()) && !user.getUsername().equals("anonymousUser")
-                && Pattern.matches(PASSWORD_RULE, user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setRole(UserRole.GUEST);
-            user.setBanned(false);
-            user.setBanned(false);
-            user.setDeleted(false);
-            user.setCreatedDate(OffsetDateTime.now());
-            userRepository.save(user);
-        } else {
-            throw new Exception("username is not unique / password rule not matched");
+    public void createUser(SignupRequest signupRequest, OffsetDateTime now) {
+
+        if (userRepository.existsByUsername(signupRequest.getUsername()) ||
+            "anonymousUser".equals(signupRequest.getUsername())) {
+            throw new RuntimeException("username is not unique");
         }
+
+        if (!Pattern.matches(PASSWORD_RULE, signupRequest.getPassword())) {
+            throw new RuntimeException("password rule not matched");
+        }
+
+        User createdUser = signupRequest.toEntity();
+        createdUser.initializeUser(now);
+        createdUser.updatePassword(passwordEncoder.encode(signupRequest.getPassword()));
+        userRepository.save(createdUser);
     }
 
     @Transactional
@@ -108,18 +111,18 @@ public class UserService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(password));
     }
 
-    public UserDTO tryLogin(LoginDTO loginDTO) throws UsernameNotFoundException {
-        User user = userRepository.findUserByUsername(loginDTO.getUsername())
+    public UserResponse tryLogin(LoginRequest loginRequest) throws UsernameNotFoundException {
+        User user = userRepository.findUserByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("user not present"));
 
         if (user.isBanned() || user.isLocked() || user.isDeleted())
             throw new UsernameNotFoundException("user not present");
 
-        if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+        if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             Authentication authentication = new UserAuthentication(
-                    user, loginDTO.getPassword(), user.getAuthorities()
+                    user, null, user.getAuthorities()
             );
-            return UserDTO.build(
+            return UserResponse.build(
                     user,
                     JwtTokenProvider.generateToken(authentication)
             );

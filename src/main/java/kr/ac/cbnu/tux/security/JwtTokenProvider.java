@@ -4,13 +4,12 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.micrometer.common.util.StringUtils;
-import kr.ac.cbnu.tux.domain.user.dto.response.TokenDTO;
+import kr.ac.cbnu.tux.domain.user.dto.response.Token;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 
 public class JwtTokenProvider {
@@ -29,11 +28,11 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    public static TokenDTO generateToken(Authentication authentication) {
+    public static Token generateToken(Authentication authentication) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);
 
-        return TokenDTO.build(
+        return Token.build(
                 Jwts.builder()
                         // username을 "sub"라는 claim으로 토큰에 추가
                         .subject(((UserDetails)authentication.getPrincipal()).getUsername())

@@ -2,7 +2,7 @@ package kr.ac.cbnu.tux.controller;
 
 import jakarta.annotation.PostConstruct;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import kr.ac.cbnu.tux.domain.user.dto.response.UserDTO;
+import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import kr.ac.cbnu.tux.utility.FileStore;
@@ -40,16 +40,16 @@ public class AdminController {
     
     @GetMapping("/api/admin/user/waiting")
     @ResponseBody
-    public List<UserDTO> listAllGuest() {
+    public List<UserResponse> listAllGuest() {
         List<User> found = userService.listAllWaitingUser();
-        return found.stream().map(user -> UserDTO.build(user)).toList();
+        return found.stream().map(user -> UserResponse.build(user)).toList();
     }
 
     @GetMapping("/api/admin/user/member")
     @ResponseBody
-    public List<UserDTO> listAllMemberNotGuest() {
+    public List<UserResponse> listAllMemberNotGuest() {
         List<User> found = userService.listAllUserNotGuest();
-        return found.stream().map(user -> UserDTO.build(user)).toList();
+        return found.stream().map(user -> UserResponse.build(user)).toList();
     }
 
     @PostMapping("/api/admin/user/{id}/role/{role}")

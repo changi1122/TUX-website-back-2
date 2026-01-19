@@ -3,19 +3,22 @@ package kr.ac.cbnu.tux.domain.user.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import kr.ac.cbnu.tux.domain.user.dto.request.LoginDTO;
-import kr.ac.cbnu.tux.domain.user.dto.response.UserDTO;
+import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
+import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.AccessDeniedException;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @RequiredArgsConstructor
@@ -28,10 +31,10 @@ public class UserController {
     @PostMapping("/api/auth")
     @ResponseStatus(code = HttpStatus.OK)
     @ResponseBody
-    public UserDTO login(final HttpServletRequest request, final HttpServletResponse response,
-                      @RequestBody LoginDTO loginDTO) {
+    public UserResponse login(final HttpServletRequest request, final HttpServletResponse response,
+                              @RequestBody LoginRequest loginRequest) {
         try {
-            UserDTO userAndToken = userService.tryLogin(loginDTO);
+            UserResponse userAndToken = userService.tryLogin(loginRequest);
             Cookie tokenCookie = createTokenCookie(userAndToken.getToken().getToken(), 168 * 60 * 60);
             response.addCookie(tokenCookie);
             return userAndToken;
@@ -52,14 +55,14 @@ public class UserController {
 
     @GetMapping("/api/auth")
     @ResponseBody
-    public UserDTO getCurrentUser(@AuthenticationPrincipal User user) {
-        return UserDTO.build(user);
+    public UserResponse getCurrentUser(@AuthenticationPrincipal User user) {
+        return UserResponse.build(user);
     }
 
     @PostMapping("/api/user")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public void create(@RequestBody User user) throws Exception {
-        userService.create(user);
+    public void createUser(@Validated @RequestBody SignupRequest signupRequest) {
+        userService.createUser(signupRequest, OffsetDateTime.now());
     }
 
     @PutMapping("/api/user/{id}")
@@ -90,7 +93,7 @@ public class UserController {
 
     @GetMapping("/api/user/{id}")
     @ResponseBody
-    public UserDTO read(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+    public UserResponse read(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
         String currentUsername = currentUser.getUsername();
         String currentRole = currentUser.getRole().name();
 
@@ -100,7 +103,7 @@ public class UserController {
             throw new AccessDeniedException("permission denied");
         }
 
-        return UserDTO.build(userService.read(id).orElseThrow());
+        return UserResponse.build(userService.read(id).orElseThrow());
     }
 
     @GetMapping("/api/user/check/username")

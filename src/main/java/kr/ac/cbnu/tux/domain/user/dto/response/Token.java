@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TokenDTO {
+public class Token {
 
     private String token;
     private Long expiresIn;
 
-    public static TokenDTO build(String token, long expiresIn) {
-        return TokenDTO.builder()
+    public static Token build(String token, long expiresIn) {
+        return Token.builder()
                 .token(token)
                 .expiresIn(expiresIn)
                 .build();
