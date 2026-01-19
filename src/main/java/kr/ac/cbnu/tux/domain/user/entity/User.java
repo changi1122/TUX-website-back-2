@@ -1,9 +1,7 @@
 package kr.ac.cbnu.tux.domain.user.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.entity.CmComment;
 import kr.ac.cbnu.tux.entity.Community;
 import kr.ac.cbnu.tux.entity.ReferenceRoom;
@@ -34,16 +32,12 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    @NotEmpty @Size(min = 4)
-    @Pattern(regexp = "[a-zA-Z\\d_]+", message = "Username Rule : only alphabet + number + _")
     private String username;    // 로그인에 사용되는 아이디
 
     @Column(nullable = false)
-    @NotEmpty
     private String nickname;    // 외부로 공개되는 닉네임 (작성자명)
 
     @Column(nullable = false)
-    @NotEmpty
     private String password;    // 로그인에 사용되는 비밀번호 (암호화되어 저장됨)
 
     @Column(nullable = false)
@@ -57,7 +51,6 @@ public class User implements UserDetails {
     */
 
     @Column(nullable = false)
-    @NotEmpty @Pattern(regexp = ".+@.+", message = "Invalid email address")
     private String email;       // 이메일 주소
 
     private String department;      // 학과
@@ -166,5 +159,27 @@ public class User implements UserDetails {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void updateUserData(UserDataRequest request) {
+        if (request.getNickname() != null)
+            this.nickname = request.getNickname();
+        if (request.getEmail() != null)
+            this.email = request.getEmail();
+        if (request.getDepartment() != null)
+            this.department = request.getDepartment();
+        if (request.getStudentNumber() != null)
+            this.studentNumber = request.getStudentNumber();
+        if (request.getPhoneNumber() != null)
+            this.phoneNumber = request.getPhoneNumber();
+    }
+
+    public void deleteUserData(OffsetDateTime now) {
+        this.password = "-";
+        this.email = "-@-";
+        this.department = "-";
+        this.phoneNumber = "-";
+        this.isDeleted = true;
+        this.deletedDate = now;
     }
 }

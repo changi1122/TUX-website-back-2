@@ -12,8 +12,7 @@ import lombok.Getter;
 @Builder
 public class SignupRequest {
 
-    @Schema(description = "Username must be at least 4 characters long and contain only letters, numbers, or underscores.\n" +
-                          "로그인에 사용되는 아이디")
+    @Schema(description = "Username must be at least 4 characters long and contain only letters, numbers, or underscores.")
     @NotEmpty @Size(min = 4)
     @Pattern(regexp = "[a-zA-Z\\d_]+", message = "Username Rule : only alphabet + number + _")
     private String username;

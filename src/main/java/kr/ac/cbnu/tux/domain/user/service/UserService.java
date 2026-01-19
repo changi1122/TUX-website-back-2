@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.user.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
+import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
@@ -33,59 +34,44 @@ public class UserService implements UserDetailsService {
 
 
     @Transactional
-    public void createUser(SignupRequest signupRequest, OffsetDateTime now) {
+    public void createUser(SignupRequest request, OffsetDateTime now) {
 
-        if (userRepository.existsByUsername(signupRequest.getUsername()) ||
-            "anonymousUser".equals(signupRequest.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername()) ||
+            "anonymousUser".equals(request.getUsername())) {
             throw new RuntimeException("username is not unique");
         }
 
-        if (!Pattern.matches(PASSWORD_RULE, signupRequest.getPassword())) {
+        if (!Pattern.matches(PASSWORD_RULE, request.getPassword())) {
             throw new RuntimeException("password rule not matched");
         }
 
-        User createdUser = signupRequest.toEntity();
+        User createdUser = request.toEntity();
         createdUser.initializeUser(now);
-        createdUser.updatePassword(passwordEncoder.encode(signupRequest.getPassword()));
+        createdUser.updatePassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(createdUser);
     }
 
     @Transactional
-    public void update(Long id, User updated) throws Exception {
-        Optional<User> opUser = userRepository.findById(id);
-        if (opUser.isPresent()) {
-            User user = opUser.get();
-            if (updated.getNickname() != null)
-                user.setNickname(updated.getNickname());
-            if (updated.getPassword() != null)
-                user.setPassword(passwordEncoder.encode(updated.getPassword()));
-            if (updated.getEmail() != null)
-                user.setEmail(updated.getEmail());
-            if (updated.getDepartment() != null)
-                user.setDepartment(updated.getDepartment());
-            if (updated.getStudentNumber() != null)
-                user.setStudentNumber(updated.getStudentNumber());
-            if (updated.getPhoneNumber() != null)
-                user.setPhoneNumber(updated.getPhoneNumber());
-        } else {
-            throw new Exception("user not found");
+    public void updateUser(Long id, UserDataRequest request) {
+
+        User user = userRepository.findById(id).orElseThrow();
+        user.updateUserData(request);
+
+        if (request.getPassword() != null) {
+            if (!Pattern.matches(PASSWORD_RULE, request.getPassword())) {
+                throw new RuntimeException("password rule not matched");
+            }
+
+            user.updatePassword(passwordEncoder.encode(request.getPassword()));
         }
+        userRepository.save(user);
     }
 
     @Transactional
-    public void userDelete(Long id) throws Exception {
-        Optional<User> opUser = userRepository.findById(id);
-        if (opUser.isPresent()) {
-            User user = opUser.get();
-            user.setPassword("-");
-            user.setEmail("-@-");
-            user.setDepartment("-");
-            user.setPhoneNumber("-");
-            user.setDeleted(true);
-            user.setDeletedDate(OffsetDateTime.now());
-        } else {
-            throw new Exception("user not found");
-        }
+    public void deleteUserSoftly(Long id, OffsetDateTime now) {
+        User user = userRepository.findById(id).orElseThrow();
+        user.deleteUserData(now);
+        userRepository.save(user);
     }
 
     public void hardDelete(Long id) {
@@ -131,8 +117,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public Optional<User> read(Long id) {
-        return userRepository.findById(id);
+    public User readUser(Long id) {
+        return userRepository.findById(id).orElseThrow();
     }
 
     public User readByUsername(String username) {
@@ -145,16 +131,12 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("user not present"));
     }
 
-    public Boolean canUseAsUsername(String username) {
+    public boolean canUseAsUsername(String username) {
         return !userRepository.existsByUsername(username);
     }
 
-    public Boolean canUseAsNickname(String nickname) {
+    public boolean canUseAsNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
-    }
-
-    public Boolean canUseAsEmail(String email) {
-        return !userRepository.existsByEmail(email);
     }
 
     public List<User> listAllWaitingUser() {

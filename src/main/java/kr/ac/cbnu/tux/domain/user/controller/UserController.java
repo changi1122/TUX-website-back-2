@@ -3,7 +3,9 @@ package kr.ac.cbnu.tux.domain.user.controller;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.ac.cbnu.tux.domain.user.controller.docs.UserControllerDocs;
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
+import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
@@ -23,7 +25,7 @@ import java.util.Objects;
 
 @RequiredArgsConstructor
 @Controller
-public class UserController {
+public class UserController implements UserControllerDocs {
 
     private final UserService userService;
 
@@ -61,31 +63,32 @@ public class UserController {
 
     @PostMapping("/api/user")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public void createUser(@Validated @RequestBody SignupRequest signupRequest) {
-        userService.createUser(signupRequest, OffsetDateTime.now());
+    public void createUser(@Validated @RequestBody SignupRequest request) {
+        userService.createUser(request, OffsetDateTime.now());
     }
 
     @PutMapping("/api/user/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void update(@PathVariable("id") Long id, @RequestBody User user,
-                       @AuthenticationPrincipal User currentUser) throws Exception {
+    public void updateUser(@PathVariable Long id, @Validated @RequestBody UserDataRequest request,
+                       @AuthenticationPrincipal User currentUser) {
 
         if (!Objects.deepEquals(currentUser.getId(), id)) {
-            throw new Exception("user not matched");
+            throw new RuntimeException("user not matched");
         }
 
-        userService.update(id, user);
+        userService.updateUser(id, request);
     }
 
     @DeleteMapping("/api/user/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void delete(@PathVariable("id") Long id,
-                       @AuthenticationPrincipal User currentUser, final HttpServletResponse response) throws Exception {
+    public void deleteUser(@PathVariable Long id,
+                       @AuthenticationPrincipal User currentUser, final HttpServletResponse response) {
+
         if (!Objects.deepEquals(currentUser.getId(), id)) {
-            throw new Exception("user not matched");
+            throw new RuntimeException("user not matched");
         }
 
-        userService.userDelete(id);
+        userService.deleteUserSoftly(id, OffsetDateTime.now());
 
         Cookie tokenCookie = createTokenCookie(null, 0);
         response.addCookie(tokenCookie);
@@ -93,31 +96,33 @@ public class UserController {
 
     @GetMapping("/api/user/{id}")
     @ResponseBody
-    public UserResponse read(@PathVariable("id") Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+    public UserResponse readUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
         String currentUsername = currentUser.getUsername();
-        String currentRole = currentUser.getRole().name();
+        User foundUser = userService.readUser(id);
 
-        if (currentUsername.equals("anonymousUser") ||
-                !currentUsername.equals(userService.read(id).orElseThrow().getUsername()) ||
-                !currentRole.equals(UserRole.MANAGER.name()) && !currentRole.equals(UserRole.ADMIN.name())) {
+        if ("anonymousUser".equals(currentUsername) || !currentUsername.equals(foundUser.getUsername()) ||
+                !canReadUserData(currentUser.getRole())) {
             throw new AccessDeniedException("permission denied");
         }
 
-        return UserResponse.build(userService.read(id).orElseThrow());
+        return UserResponse.build(foundUser);
     }
 
     @GetMapping("/api/user/check/username")
     @ResponseBody
-    public Boolean canUseAsUsername(@RequestParam("username") String username) {
+    public boolean canUseAsUsername(@RequestParam String username) {
         return userService.canUseAsUsername(username);
     }
 
     @GetMapping("/api/user/check/nickname")
     @ResponseBody
-    public Boolean canUseAsNickname(@RequestParam("nickname") String nickname) {
+    public boolean canUseAsNickname(@RequestParam String nickname) {
         return userService.canUseAsNickname(nickname);
     }
 
+    private boolean canReadUserData(UserRole role) {
+        return (role == UserRole.MANAGER || role == UserRole.ADMIN);
+    }
 
     private Cookie createTokenCookie(String token, int age) {
         Cookie cookie = new Cookie("token", token);

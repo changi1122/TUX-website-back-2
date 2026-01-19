@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.user.service;
 
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
+import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.factory.UserFactory;
@@ -86,5 +87,51 @@ class UserServiceTest extends IntegrationTestSupport {
         assertThatThrownBy(() -> userService.createUser(signupRequest, now))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("username is not unique");
+    }
+
+    @Test
+    @DisplayName("회원 정보를 수정한다")
+    void updateUser() {
+        // given
+        userService.createUser(UserFactory.createSignupRequest(
+                        "test1", "password1", "a@a.com"),
+                OffsetDateTime.now()
+        );
+        User existingUser = userRepository.findUserByUsername("test1").orElseThrow();
+        String oldPassword = existingUser.getPassword();
+
+        UserDataRequest request = UserDataRequest.builder()
+                .nickname("새닉네임")
+                .password("password2")
+                .build();
+
+        // when
+        userService.updateUser(existingUser.getId(), request);
+
+        // then
+        User foundUser = userRepository.findUserByUsername("test1").orElseThrow();
+        assertThat(foundUser).extracting("nickname", "email", "department", "studentNumber", "phoneNumber")
+                .contains("새닉네임", existingUser.getEmail(), existingUser.getDepartment(), existingUser.getStudentNumber(), existingUser.getPhoneNumber());
+        assertThat(foundUser.getPassword()).isNotEqualTo(oldPassword);
+    }
+
+    @Test
+    @DisplayName("회원을 탈퇴한다")
+    void deleteUser() {
+        // given
+        userService.createUser(UserFactory.createSignupRequest(
+                        "test1", "password1", "a@a.com"),
+                OffsetDateTime.now()
+        );
+        User existingUser = userRepository.findUserByUsername("test1").orElseThrow();
+        OffsetDateTime now = OffsetDateTime.now();
+
+        // when
+        userService.deleteUserSoftly(existingUser.getId(), now);
+
+        // then
+        User foundUser = userRepository.findUserByUsername("test1").orElseThrow();
+        assertThat(foundUser).extracting("password", "email", "department", "phoneNumber", "isDeleted", "deletedDate")
+                .contains("-", "-@-", "-", "-", true, now);
     }
 }
