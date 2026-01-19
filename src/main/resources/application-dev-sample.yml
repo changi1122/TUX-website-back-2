@@ -1,0 +1,9 @@
+spring:
+  # Database
+  datasource:
+    username: Username
+    password: Password
+
+# File Upload Path
+file:
+  dir: .../PATH/TO/UPLOAD/FILE/.../

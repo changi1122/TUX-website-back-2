@@ -1,0 +1,34 @@
+server:
+  port: ${SERVER_PORT:4001}
+
+spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:dev}
+
+  # Max Request/File Size
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:51MB}
+
+  # Database
+  datasource:
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tuxweb2}
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
+
+  #JPA
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+
+# File Upload Path
+file:
+  dir: ${UPLOAD_DIR:./upload/}
