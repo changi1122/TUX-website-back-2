@@ -94,7 +94,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void hardDelete(Long id) {
+    public void deleteUserHardly(Long id) {
         User user = userRepository.findById(id).orElseThrow();
         userRepository.delete(user);
     }
@@ -103,18 +103,21 @@ public class UserService implements UserDetailsService {
     public void ban(Long id) {
         User user = userRepository.findById(id).orElseThrow();
         user.setBanned(true);
+        userRepository.save(user);
     }
 
     @Transactional
     public void changeUserRole(Long id, UserRole role) {
         User user = userRepository.findById(id).orElseThrow();
         user.setRole(role);
+        userRepository.save(user);
     }
 
     @Transactional
     public void setTemporalPassword(Long id, String password) {
         User user = userRepository.findById(id).orElseThrow();
         user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
     }
 
     public User readUser(Long id) {

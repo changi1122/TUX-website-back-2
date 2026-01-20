@@ -1,4 +1,4 @@
-package kr.ac.cbnu.tux.entity;
+package kr.ac.cbnu.tux.domain.admin.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;

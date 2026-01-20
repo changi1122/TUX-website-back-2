@@ -1,10 +1,12 @@
-package kr.ac.cbnu.tux.controller;
+package kr.ac.cbnu.tux.domain.admin.controller;
 
-import kr.ac.cbnu.tux.entity.StaticPage;
-import kr.ac.cbnu.tux.service.StaticPageService;
+import kr.ac.cbnu.tux.domain.admin.controller.docs.StaticPageControllerDocs;
+import kr.ac.cbnu.tux.domain.admin.entity.StaticPage;
+import kr.ac.cbnu.tux.domain.admin.service.StaticPageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 // 연혁, 연락처 등 정적인 페이지를 저장하기 위한 컨트롤러
@@ -13,22 +15,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @Controller
-public class StaticPageController {
+public class StaticPageController implements StaticPageControllerDocs {
 
     private final StaticPageService staticPageService;
 
-
-    // 생성 및 수정
     @PostMapping("/api/admin/staticpage/{name}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void createAndUpdate(@PathVariable("name") String name, @RequestBody StaticPage updated) {
+    public void createAndUpdate(@PathVariable String name, @Validated @RequestBody StaticPage updated) {
         staticPageService.createAndUpdate(name, updated);
     }
 
-    // 조회
     @GetMapping("/api/staticpage/{name}")
     @ResponseBody
-    public StaticPage read(@PathVariable("name") String name) {
+    public StaticPage read(@PathVariable String name) {
         return staticPageService.read(name);
     }
 }

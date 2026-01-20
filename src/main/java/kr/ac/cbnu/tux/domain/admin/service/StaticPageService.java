@@ -1,8 +1,8 @@
-package kr.ac.cbnu.tux.service;
+package kr.ac.cbnu.tux.domain.admin.service;
 
 import jakarta.transaction.Transactional;
-import kr.ac.cbnu.tux.entity.StaticPage;
-import kr.ac.cbnu.tux.repository.StaticPageRepository;
+import kr.ac.cbnu.tux.domain.admin.entity.StaticPage;
+import kr.ac.cbnu.tux.domain.admin.repository.StaticPageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,6 @@ import java.util.Optional;
 public class StaticPageService {
 
     private final StaticPageRepository staticPageRepository;
-
 
     @Transactional
     public void createAndUpdate(String name, StaticPage updated) {
@@ -31,5 +30,4 @@ public class StaticPageService {
     public StaticPage read(String name) {
         return staticPageRepository.findByName(name).orElseThrow();
     }
-
 }

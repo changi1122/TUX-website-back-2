@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -133,5 +134,43 @@ class UserServiceTest extends IntegrationTestSupport {
         User foundUser = userRepository.findUserByUsername("test1").orElseThrow();
         assertThat(foundUser).extracting("password", "email", "department", "phoneNumber", "isDeleted", "deletedDate")
                 .contains("-", "-@-", "-", "-", true, now);
+    }
+
+    @Test
+    @DisplayName("가입 승인 대기 중(GUEST)인 회원 목록을 조회한다")
+    void listAllWaitingUser() {
+        // given
+        User user1 = UserFactory.createTestUser("guest1", UserRole.GUEST);
+        User user2 = UserFactory.createTestUser("user1", UserRole.USER);
+        User user3 = UserFactory.createTestUser("manager1", UserRole.MANAGER);
+        User user4 = UserFactory.createTestUser("admin1", UserRole.ADMIN);
+        userRepository.saveAll(List.of(user1, user2, user3, user4));
+
+        // when
+        List<User> waitingUsers = userService.listAllWaitingUser();
+
+        // then
+        assertThat(waitingUsers).hasSize(1)
+                .extracting("username")
+                .contains("guest1");
+    }
+
+    @Test
+    @DisplayName("가입 승인된 상태의 회원 목록을 조회한다")
+    void listAllUserNotGuest() {
+        // given
+        User user1 = UserFactory.createTestUser("guest1", UserRole.GUEST);
+        User user2 = UserFactory.createTestUser("user1", UserRole.USER);
+        User user3 = UserFactory.createTestUser("manager1", UserRole.MANAGER);
+        User user4 = UserFactory.createTestUser("admin1", UserRole.ADMIN);
+        userRepository.saveAll(List.of(user1, user2, user3, user4));
+
+        // when
+        List<User> acceptedUsers = userService.listAllUserNotGuest();
+
+        // then
+        assertThat(acceptedUsers).hasSize(3)
+                .extracting("username")
+                .containsExactlyInAnyOrder("user1", "manager1", "admin1");
     }
 }

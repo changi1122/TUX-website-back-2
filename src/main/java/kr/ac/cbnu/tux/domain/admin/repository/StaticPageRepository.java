@@ -1,6 +1,6 @@
-package kr.ac.cbnu.tux.repository;
+package kr.ac.cbnu.tux.domain.admin.repository;
 
-import kr.ac.cbnu.tux.entity.StaticPage;
+import kr.ac.cbnu.tux.domain.admin.entity.StaticPage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

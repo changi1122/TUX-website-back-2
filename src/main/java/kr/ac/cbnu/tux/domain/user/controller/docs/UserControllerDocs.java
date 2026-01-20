@@ -29,7 +29,6 @@ public interface UserControllerDocs {
     @Operation(method = "DELETE", summary = "회원 탈퇴", description = "회원을 탈퇴합니다.")
     void deleteUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser, final HttpServletResponse response);
 
-
     @Operation(method = "GET", summary = "아이디 사용 가능 여부 조회", description = "아이디를 사용 가능한지 조회합니다.")
     boolean canUseAsUsername(@RequestParam String username);
 
