@@ -1,15 +1,15 @@
 package kr.ac.cbnu.tux.domain.user.service;
 
 import jakarta.transaction.Transactional;
+import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
-import kr.ac.cbnu.tux.domain.user.entity.User;
-import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
-import kr.ac.cbnu.tux.security.JwtTokenProvider;
-import kr.ac.cbnu.tux.security.UserAuthentication;
+import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
+import kr.ac.cbnu.tux.global.security.UserAuthentication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
@@ -100,9 +99,9 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void ban(Long id) {
+    public void ban(Long id, OffsetDateTime now) {
         User user = userRepository.findById(id).orElseThrow();
-        user.setBanned(true);
+        user.ban(now);
         userRepository.save(user);
     }
 

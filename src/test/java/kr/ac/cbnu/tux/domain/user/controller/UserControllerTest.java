@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.domain.user.controller;
 
-import kr.ac.cbnu.tux.config.SecurityConfig;
+import kr.ac.cbnu.tux.global.config.SecurityConfig;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;

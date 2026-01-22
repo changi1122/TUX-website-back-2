@@ -1,16 +1,13 @@
 package kr.ac.cbnu.tux.domain.user.entity;
 
 import jakarta.persistence.*;
+import kr.ac.cbnu.tux.domain.community.entity.CmComment;
+import kr.ac.cbnu.tux.domain.community.entity.Community;
+import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
-import kr.ac.cbnu.tux.entity.CmComment;
-import kr.ac.cbnu.tux.entity.Community;
-import kr.ac.cbnu.tux.entity.ReferenceRoom;
-import kr.ac.cbnu.tux.entity.RfComment;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,11 +17,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
@@ -37,9 +34,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String nickname;    // 외부로 공개되는 닉네임 (작성자명)
 
+    @Setter
     @Column(nullable = false)
     private String password;    // 로그인에 사용되는 비밀번호 (암호화되어 저장됨)
 
+    @Setter
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private UserRole role;      // 회원 권한 등급 (게스트 / 유저 / 매니저 / 어드민)
@@ -154,7 +153,7 @@ public class User implements UserDetails {
         this.isLocked = false;
         this.isBanned = false;
         this.isDeleted = false;
-        this.setCreatedDate(now);
+        this.createdDate = now;
     }
 
     public void updatePassword(String password) {
@@ -181,5 +180,10 @@ public class User implements UserDetails {
         this.phoneNumber = "-";
         this.isDeleted = true;
         this.deletedDate = now;
+    }
+
+    public void ban(OffsetDateTime now) {
+        this.isBanned = true;
+        this.bannedDate = now;
     }
 }

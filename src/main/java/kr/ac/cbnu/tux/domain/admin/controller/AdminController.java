@@ -1,8 +1,8 @@
 package kr.ac.cbnu.tux.domain.admin.controller;
 
 import kr.ac.cbnu.tux.domain.admin.controller.docs.AdminControllerDocs;
-import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -53,6 +54,6 @@ public class AdminController implements AdminControllerDocs {
     @DeleteMapping("/api/admin/user/{id}/ban")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void ban(@PathVariable Long id) {
-        userService.ban(id);
+        userService.ban(id, OffsetDateTime.now());
     }
 }

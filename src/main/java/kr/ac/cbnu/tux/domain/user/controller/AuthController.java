@@ -12,8 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static kr.ac.cbnu.tux.utility.CookieUtils.TOKEN_AGE;
-import static kr.ac.cbnu.tux.utility.CookieUtils.createTokenCookie;
+import static kr.ac.cbnu.tux.global.utility.CookieUtils.TOKEN_AGE;
+import static kr.ac.cbnu.tux.global.utility.CookieUtils.createTokenCookie;
 
 @RequiredArgsConstructor
 @Controller

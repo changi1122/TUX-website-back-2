@@ -1,8 +1,8 @@
 package kr.ac.cbnu.tux.domain.admin.controller;
 
 import kr.ac.cbnu.tux.domain.admin.controller.docs.BannerControllerDocs;
-import kr.ac.cbnu.tux.utility.BannerListStore;
-import kr.ac.cbnu.tux.utility.FileStore;
+import kr.ac.cbnu.tux.global.utility.BannerListStore;
+import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
