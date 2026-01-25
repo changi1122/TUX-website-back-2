@@ -1,16 +1,11 @@
 package kr.ac.cbnu.tux.domain.referenceroom.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -33,11 +28,10 @@ public class ReferenceRoom {
     private ReferenceRoomPostType category;
 
     @Column(nullable = false)
-    @NotEmpty
     private String title;
 
+    @Setter
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
-    @NotEmpty
     private String body;
 
     @Column(nullable = false)
@@ -66,7 +60,6 @@ public class ReferenceRoom {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @NotNull
     private User user;
 
     public void setUser(User user) {
@@ -123,6 +116,10 @@ public class ReferenceRoom {
         }
     }
 
-
-
+    public void initializeData(User user, OffsetDateTime now) {
+        this.isDeleted = false;
+        this.createdDate = now;
+        this.view = 0L;
+        this.user = user;
+    }
 }

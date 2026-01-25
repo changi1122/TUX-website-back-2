@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.community.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
@@ -27,20 +28,17 @@ public class CommunityService {
     private final CmCommentRepository cmCommentRepository;
     private final Sanitizer sanitizer;
 
-
     /* 파일 업로드 및 글쓰기 */
 
     @Transactional
-    public void createWithoutFileUpload(CommunityPostType type, Community post, User user) {
+    public Community createPost(CommunityPostType type, CommunityRequest request, User user, OffsetDateTime now) {
+        Community post = request.toEntity(type);
+
         if (isSanitizationRequired(post))
             post.setBody(sanitizer.sanitize(post.getBody()));
 
-        post.setCategory(type);
-        post.setCreatedDate(OffsetDateTime.now());
-        post.setIsDeleted(false);
-        post.setView(0L);
-        post.setUser(user);
-        communityRepository.save(post);
+        post.initializePost(now, user);
+        return communityRepository.save(post);
     }
 
     @Transactional

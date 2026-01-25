@@ -3,6 +3,8 @@ package kr.ac.cbnu.tux.domain.referenceroom.controller;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
+import kr.ac.cbnu.tux.domain.referenceroom.controller.docs.ReferenceRoomControllerDocs;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomDTO;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListDTO;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentDTO;
@@ -25,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,13 +39,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
 
 @RequiredArgsConstructor
 @Controller
-public class ReferenceRoomController {
+public class ReferenceRoomController implements ReferenceRoomControllerDocs {
 
     private final ReferenceRoomService referenceRoomService;
     private final AttachmentService attachmentService;
@@ -52,16 +56,16 @@ public class ReferenceRoomController {
     /* 파일 업로드 없이 글쓰기 */
     @PostMapping("/api/referenceroom")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void createData(ReferenceRoomPostType type, @RequestBody ReferenceRoom data,
+    public void createData(@RequestParam ReferenceRoomPostType type, @Validated @RequestBody ReferenceRoomRequest request,
                            @AuthenticationPrincipal User user) {
-        referenceRoomService.createWithoutFileUpload(type, data, user);
+        referenceRoomService.createData(type, request, user, OffsetDateTime.now());
     }
 
     /* 글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일 업로드 */
     @PostMapping(path = "/api/referenceroom/file")
     @ResponseBody
     public Long uploadFileBeforeCreateData(
-            ReferenceRoomPostType type, @RequestParam("file") MultipartFile multipartFile,
+            @RequestParam ReferenceRoomPostType type, @RequestParam("file") MultipartFile multipartFile,
             @AuthenticationPrincipal User user) throws IOException {
 
         ReferenceRoom data = referenceRoomService.temporalCreate(type, user);

@@ -3,6 +3,7 @@ package kr.ac.cbnu.tux.domain.referenceroom.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
@@ -32,16 +33,14 @@ public class ReferenceRoomService {
     /* 파일 업로드 및 글쓰기 */
 
     @Transactional
-    public void createWithoutFileUpload(ReferenceRoomPostType type, ReferenceRoom data, User user) {
+    public ReferenceRoom createData(ReferenceRoomPostType type, ReferenceRoomRequest request, User user, OffsetDateTime now) {
+        ReferenceRoom data = request.toEntity(type);
+
         if (isSanitizationRequired(data))
             data.setBody(sanitizer.sanitize(data.getBody()));
 
-        data.setCategory(type);
-        data.setIsDeleted(false);
-        data.setCreatedDate(OffsetDateTime.now());
-        data.setView(0L);
-        data.setUser(user);
-        referenceRoomRepository.save(data);
+        data.initializeData(user, now);
+        return referenceRoomRepository.save(data);
     }
 
     @Transactional

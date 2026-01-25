@@ -1,16 +1,11 @@
 package kr.ac.cbnu.tux.domain.community.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -33,11 +28,10 @@ public class Community {
     private CommunityPostType category;
 
     @Column(nullable = false)
-    @NotEmpty
     private String title;
 
+    @Setter
     @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
-    @NotEmpty
     private String body;
 
     @Column(nullable = false)
@@ -57,7 +51,6 @@ public class Community {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @NotNull
     private User user;
 
     public void setUser(User user) {
@@ -112,5 +105,12 @@ public class Community {
         if (like.getPost() != this) {
             like.setPost(this);
         }
+    }
+
+    public void initializePost(OffsetDateTime now, User user) {
+        this.createdDate = now;
+        this.isDeleted = false;
+        this.view = 0L;
+        this.user = user;
     }
 }

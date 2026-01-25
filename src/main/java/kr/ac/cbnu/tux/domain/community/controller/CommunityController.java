@@ -3,6 +3,8 @@ package kr.ac.cbnu.tux.domain.community.controller;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
+import kr.ac.cbnu.tux.domain.community.controller.docs.CommunityControllerDocs;
+import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentDTO;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityDTO;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListDTO;
@@ -25,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,13 +38,14 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 
 @RequiredArgsConstructor
 @Controller
-public class CommunityController {
+public class CommunityController implements CommunityControllerDocs {
 
     private final CommunityService communityService;
     private final AttachmentService attachmentService;
@@ -51,15 +55,16 @@ public class CommunityController {
     /* 파일 업로드 없이 글쓰기 */
     @PostMapping("/api/community")
     @ResponseStatus(code = HttpStatus.CREATED)
-    public void createPost(CommunityPostType type, @RequestBody Community post, @AuthenticationPrincipal User user) {
-        communityService.createWithoutFileUpload(type, post, user);
+    public void createPost(@RequestParam CommunityPostType type, @Validated @RequestBody CommunityRequest request,
+                           @AuthenticationPrincipal User user) {
+        communityService.createPost(type, request, user, OffsetDateTime.now());
     }
 
     /* 글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일 업로드 */
     @PostMapping(path = "/api/community/file")
     @ResponseBody
     public Long uploadFileBeforeCreatePost(
-            CommunityPostType type, @RequestParam("file") MultipartFile multipartFile,
+            @RequestParam CommunityPostType type, @RequestParam("file") MultipartFile multipartFile,
             @AuthenticationPrincipal User user) throws IOException {
 
         Community post = communityService.temporalCreate(type, user);
