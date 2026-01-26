@@ -42,16 +42,17 @@ public class CommunityService {
     }
 
     @Transactional
-    public Community temporalCreate(CommunityPostType type, User user) {
-        // 첨부파일 사전 업로드
-        Community post = new Community();
-        post.setCategory(type);
-        post.setTitle("Auto creation by uploading file");
-        post.setBody(" ");
-        post.setIsDeleted(true);
-        post.setCreatedDate(OffsetDateTime.now());
-        post.setView(0L);
-        post.setUser(user);
+    public Community createTemporalPostForFile(CommunityPostType type, User user, OffsetDateTime now) {
+        // 첨부파일 사전 업로드를 위한 임시 게시물 생성
+        Community post = Community.builder()
+                .category(type)
+                .title("Auto creation by uploading file")
+                .body(" ")
+                .isDeleted(true)
+                .createdDate(now)
+                .view(0L)
+                .user(user)
+                .build();
 
         return communityRepository.save(post);
     }
@@ -59,6 +60,7 @@ public class CommunityService {
     @Transactional
     public void addAttachment(Attachment file, Community post) {
         post.addAttachment(file);
+        communityRepository.save(post);
     }
 
     @Transactional
@@ -79,8 +81,8 @@ public class CommunityService {
         }
     }
 
-    public Optional<Community> getData(Long id) {
-        return communityRepository.findById(id);
+    public Community getPost(Long id) {
+        return communityRepository.findById(id).orElseThrow();
     }
 
 

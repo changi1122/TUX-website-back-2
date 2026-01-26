@@ -131,9 +131,14 @@ public class CleanupService {
                     attachmentRepository.delete(attachment);
 
                     currentBatchDeleted++;
-                } catch (IOException e) {
-                    log.error("[파일 정리 중 IO 오류] ID: {}, Path: {}, 사유: {}",
+                } catch (RuntimeException e) {
+                    if (e.getCause() instanceof IOException) {
+                        log.error("[파일 정리 중 IO 오류] ID: {}, Path: {}, 사유: {}",
                                 attachment.getId(), attachment.getPath(), e.getMessage());
+                    }
+                    else {
+                        log.error("[파일 정리 중 예상치 못한 오류] ID: {}", attachment.getId(), e);
+                    }
                 } catch (Exception e) {
                     log.error("[파일 정리 중 예상치 못한 오류] ID: {}", attachment.getId(), e);
                 }

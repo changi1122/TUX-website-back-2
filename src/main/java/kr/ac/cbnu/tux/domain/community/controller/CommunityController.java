@@ -33,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -61,34 +60,34 @@ public class CommunityController implements CommunityControllerDocs {
     }
 
     /* 글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일 업로드 */
-    @PostMapping(path = "/api/community/file")
+    @PostMapping(path = "/api/community/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public Long uploadFileBeforeCreatePost(
-            @RequestParam CommunityPostType type, @RequestParam("file") MultipartFile multipartFile,
-            @AuthenticationPrincipal User user) throws IOException {
+    public Long uploadFileBeforeCreatePost(@RequestParam CommunityPostType type,
+                                           @RequestParam("file") MultipartFile file,
+                                           @AuthenticationPrincipal User user) {
 
-        Community post = communityService.temporalCreate(type, user);
-        Attachment file = attachmentService.create(multipartFile, post);
-        communityService.addAttachment(file, post);
-        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), multipartFile);
+        Community post = communityService.createTemporalPostForFile(type, user, OffsetDateTime.now());
+        Attachment attachment = attachmentService.createAttachment(file, post);
+        communityService.addAttachment(attachment, post);
+        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
         return post.getId();
     }
 
     /* 글이 생성된 이후 파일 업로드 */
-    @PostMapping(path = "/api/community/{id}/file")
+    @PostMapping(path = "/api/community/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void uploadFileAfterCreatePost(
-            @PathVariable Long id, @RequestParam("file") MultipartFile multipartFile,
-            @AuthenticationPrincipal User user) throws Exception {
-        Community post = communityService.getData(id).orElseThrow();
+    public void uploadFileAfterCreatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+                                          @AuthenticationPrincipal User user) {
+        Community post = communityService.getPost(id);
 
-        if (user.getId().equals(post.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
-            Attachment file = attachmentService.create(multipartFile, post);
-            communityService.addAttachment(file, post);
-            fileStore.saveAttachment(COMMUNITY, post.getId().toString(), multipartFile);
-        } else {
-            throw new Exception("user not matched");
+        if (!user.getId().equals(post.getUser().getId()) &&
+                !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
+            throw new RuntimeException("user not matched");
         }
+
+        Attachment attachment = attachmentService.createAttachment(file, post);
+        communityService.addAttachment(attachment, post);
+        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
     }
 
     /* 임시로 생성된 글 내용 업데이트 */
@@ -220,11 +219,11 @@ public class CommunityController implements CommunityControllerDocs {
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id, @PathVariable String filename,
                            @AuthenticationPrincipal User user) throws Exception {
-        Community post = communityService.getData(id).orElseThrow();
+        Community post = communityService.getPost(id);
 
         if (user.getId().equals(post.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
-            Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post).orElseThrow();
-            attachmentService.delete(file, post);
+            Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
+            attachmentService.deleteAttachment(file, post);
         } else {
             throw new Exception("user not matched");
         }
@@ -238,7 +237,7 @@ public class CommunityController implements CommunityControllerDocs {
         if (user == null)
             throw new Exception("user not logged in");
 
-        Community post = communityService.getData(id).orElseThrow();
+        Community post = communityService.getPost(id);
         likeService.create(post, user, dislike);
     }
 }

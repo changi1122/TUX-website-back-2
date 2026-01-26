@@ -4,15 +4,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 /* 첨부파일 */
 @Entity
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,11 +19,9 @@ public class Attachment {
     private Long id;
 
     @Column(nullable = false)
-    @NotEmpty
     private String filename;
 
     @Column(nullable = false)
-    @NotEmpty
     private String path;
 
     @Column(nullable = false)

@@ -24,58 +24,65 @@ public class AttachmentService {
     private final AttachmentRepository attachmentRepository;
     private final FileStore fileStore;
 
-
     @Transactional
-    public Attachment create(MultipartFile multipartFile, ReferenceRoom data) {
-        Attachment file = new Attachment();
-        file.setFilename(multipartFile.getOriginalFilename());
-        file.setPath("/api/referenceroom/" + data.getId() + "/file/" +
-                Objects.requireNonNull(multipartFile.getOriginalFilename()).replaceAll("[\\\\/:*?\"<>| ]", "_"));
-        file.setIsImage(multipartFile.getContentType().startsWith("image"));
-        file.setOrder(data.getAttachments().size() + 1);
-        file.setData(data);
-        file.setDownloadCount(0L);
-        return attachmentRepository.save(file);
+    public Attachment createAttachment(MultipartFile file, Community post) {
+        Attachment attachment = Attachment.builder()
+                .filename(file.getOriginalFilename())
+                .path("/api/community/" + post.getId() + "/file/" +
+                        Objects.requireNonNull(file.getOriginalFilename()).replaceAll("[\\\\/:*?\"<>| ]", "_"))
+                .isImage(isImageFile(file))
+                .order(post.getAttachments().size() + 1)
+                .post(post)
+                .downloadCount(0L)
+                .build();
+
+        return attachmentRepository.save(attachment);
     }
 
     @Transactional
-    public Attachment create(MultipartFile multipartFile, Community post) {
-        Attachment file = new Attachment();
-        file.setFilename(multipartFile.getOriginalFilename());
-        file.setPath("/api/community/" + post.getId() + "/file/" +
-                Objects.requireNonNull(multipartFile.getOriginalFilename()).replaceAll("[\\\\/:*?\"<>| ]", "_"));
-        file.setIsImage(multipartFile.getContentType().startsWith("image"));
-        file.setOrder(post.getAttachments().size() + 1);
-        file.setPost(post);
-        file.setDownloadCount(0L);
-        return attachmentRepository.save(file);
+    public Attachment createAttachment(MultipartFile file, ReferenceRoom data) {
+        Attachment attachment = Attachment.builder()
+                .filename(file.getOriginalFilename())
+                .path("/api/referenceroom/" + data.getId() + "/file/" +
+                        Objects.requireNonNull(file.getOriginalFilename()).replaceAll("[\\\\/:*?\"<>| ]", "_"))
+                .isImage(isImageFile(file))
+                .order(data.getAttachments().size() + 1)
+                .data(data)
+                .downloadCount(0L)
+                .build();
+
+        return attachmentRepository.save(attachment);
     }
 
     public void increaseDownloadCountById(Long attachmentId) {
         attachmentRepository.increaseDownloadCountById(attachmentId);
     }
 
-    public Optional<Attachment> getFile(String filename, Community post) {
-        return attachmentRepository.findByFilenameAndPost(filename, post);
+    public Attachment getFile(String filename, Community post) {
+        return attachmentRepository.findByFilenameAndPost(filename, post).orElseThrow();
     }
 
-    public Optional<Attachment> getFile(String filename, ReferenceRoom data) {
-        return attachmentRepository.findByFilenameAndData(filename, data);
+    public Attachment getFile(String filename, ReferenceRoom data) {
+        return attachmentRepository.findByFilenameAndData(filename, data).orElseThrow();
     }
 
     @Transactional
-    public void delete(Attachment file, Community post) throws IOException {
+    public void deleteAttachment(Attachment file, Community post) throws IOException {
         fileStore.deleteAttachment(COMMUNITY, post.getId().toString(), file);
         post.removeAttachment(file);
         attachmentRepository.delete(file);
     }
 
     @Transactional
-    public void delete(Attachment file, ReferenceRoom data) throws IOException {
+    public void deleteAttachment(Attachment file, ReferenceRoom data) throws IOException {
         fileStore.deleteAttachment(REFERENCEROOM, data.getId().toString(), file);
         data.removeAttachment(file);
         attachmentRepository.delete(file);
     }
 
-
+    private boolean isImageFile(MultipartFile multipartFile) {
+        if (multipartFile == null || multipartFile.getContentType() == null)
+            return false;
+        return multipartFile.getContentType().startsWith("image");
+    }
 }

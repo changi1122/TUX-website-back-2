@@ -25,7 +25,7 @@ public class FileStore {
     @Value("${file.dir}")
     private String fileDir;
 
-    public void saveAttachment(AttachmentType prefix, String id, MultipartFile file) throws IOException, IllegalStateException {
+    public void saveAttachment(AttachmentType prefix, String id, MultipartFile file) {
         String directoryPath = fileDir + "file/" + prefix.getValue() + "/" + id;
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
@@ -35,14 +35,24 @@ public class FileStore {
                 .replaceAll("[\\\\/:*?\"<>| ]", "_");
 
         File destFile = new File(filePath);
-        file.transferTo(destFile);
+        try {
+            file.transferTo(destFile);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("io exception while saveAttachment", e);
+        }
     }
 
-    public void deleteAttachment(AttachmentType prefix, String id, Attachment file) throws IOException {
+    public void deleteAttachment(AttachmentType prefix, String id, Attachment file) {
         String directoryPath = fileDir + "file/" + prefix.getValue() + "/" + id;
         String filePath = directoryPath + "/" + file.getFilename().replaceAll("[\\\\/:*?\"<>| ]", "_");
 
-        Files.deleteIfExists(Paths.get(filePath));
+        try {
+            Files.deleteIfExists(Paths.get(filePath));
+        }
+        catch (Exception e) {
+            throw new RuntimeException("io exception while deleteAttachment", e);
+        }
     }
 
     public String getCommunityAttachmentFilePath(String id, String filename) {

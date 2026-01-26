@@ -44,17 +44,18 @@ public class ReferenceRoomService {
     }
 
     @Transactional
-    public ReferenceRoom temporalCreate(ReferenceRoomPostType type, User user) {
-        // 첨부파일 사전 업로드
-        ReferenceRoom data = new ReferenceRoom();
-        data.setCategory(type);
-        data.setTitle("Auto creation by uploading file");
-        data.setBody(" ");
-        data.setIsDeleted(true);
-        data.setCreatedDate(OffsetDateTime.now());
-        data.setView(0L);
-        data.setIsAnonymized(true);
-        data.setUser(user);
+    public ReferenceRoom createTemporalDataForFile(ReferenceRoomPostType type, User user, OffsetDateTime now) {
+        // 첨부파일 사전 업로드를 위한 임시 게시물 생성
+        ReferenceRoom data = ReferenceRoom.builder()
+                .category(type)
+                .title("Auto creation by uploading file")
+                .body(" ")
+                .isDeleted(true)
+                .createdDate(now)
+                .view(0L)
+                .isAnonymized(true)
+                .user(user)
+                .build();
 
         return referenceRoomRepository.save(data);
     }
@@ -62,6 +63,7 @@ public class ReferenceRoomService {
     @Transactional
     public void addAttachment(Attachment file, ReferenceRoom data) {
         data.addAttachment(file);
+        referenceRoomRepository.save(data);
     }
 
     @Transactional
@@ -86,8 +88,8 @@ public class ReferenceRoomService {
         }
     }
 
-    public Optional<ReferenceRoom> getData(Long id) {
-        return referenceRoomRepository.findById(id);
+    public ReferenceRoom getData(Long id) {
+        return referenceRoomRepository.findById(id).orElseThrow();
     }
 
     /* 글 수정 */

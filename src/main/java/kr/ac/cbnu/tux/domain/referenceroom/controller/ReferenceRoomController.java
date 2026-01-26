@@ -33,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
@@ -62,33 +61,33 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     }
 
     /* 글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일 업로드 */
-    @PostMapping(path = "/api/referenceroom/file")
+    @PostMapping(path = "/api/referenceroom/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public Long uploadFileBeforeCreateData(
-            @RequestParam ReferenceRoomPostType type, @RequestParam("file") MultipartFile multipartFile,
-            @AuthenticationPrincipal User user) throws IOException {
+    public Long uploadFileBeforeCreateData(@RequestParam ReferenceRoomPostType type,
+                                           @RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
 
-        ReferenceRoom data = referenceRoomService.temporalCreate(type, user);
-        Attachment file = attachmentService.create(multipartFile, data);
-        referenceRoomService.addAttachment(file, data);
-        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), multipartFile);
+        ReferenceRoom data = referenceRoomService.createTemporalDataForFile(type, user, OffsetDateTime.now());
+        Attachment attachment = attachmentService.createAttachment(file, data);
+        referenceRoomService.addAttachment(attachment, data);
+        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
         return data.getId();
     }
 
     /* 글이 생성된 이후 파일 업로드 */
-    @PostMapping(path = "/api/referenceroom/{id}/file")
+    @PostMapping(path = "/api/referenceroom/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void uploadFileAfterCreateData(@PathVariable Long id, @RequestParam("file") MultipartFile multipartFile,
-                                          @AuthenticationPrincipal User user) throws Exception {
-        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+    public void uploadFileAfterCreateData(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+                                          @AuthenticationPrincipal User user) {
+        ReferenceRoom data = referenceRoomService.getData(id);
 
-        if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
-            Attachment file = attachmentService.create(multipartFile, data);
-            referenceRoomService.addAttachment(file, data);
-            fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), multipartFile);
-        } else {
-            throw new Exception("user not matched");
+        if (!user.getId().equals(data.getUser().getId()) &&
+                !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
+            throw new RuntimeException("user not matched");
         }
+
+        Attachment attachment = attachmentService.createAttachment(file, data);
+        referenceRoomService.addAttachment(attachment, data);
+        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
     }
 
     /* 임시로 생성된 글 내용 업데이트 */
@@ -201,7 +200,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
             @PathVariable Long id, @PathVariable String filename,
             @RequestParam(name = "aid", defaultValue = "-1") Long aid, @AuthenticationPrincipal User user) throws Exception {
 
-        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+        ReferenceRoom data = referenceRoomService.getData(id);
         if (data.getCategory().cannotReadBy(user)) {
             throw new AccessDeniedException("permission denied");
         }
@@ -237,11 +236,11 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id, @PathVariable String filename,
                            @AuthenticationPrincipal User user) throws Exception {
-        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+        ReferenceRoom data = referenceRoomService.getData(id);
 
         if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
-            Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data).orElseThrow();
-            attachmentService.delete(file, data);
+            Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data);
+            attachmentService.deleteAttachment(file, data);
         } else {
             throw new Exception("user not matched");
         }
@@ -255,7 +254,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
         if (user == null)
             throw new Exception("user not logged in");
 
-        ReferenceRoom data = referenceRoomService.getData(id).orElseThrow();
+        ReferenceRoom data = referenceRoomService.getData(id);
         likeService.create(data, user, dislike);
     }
 }
