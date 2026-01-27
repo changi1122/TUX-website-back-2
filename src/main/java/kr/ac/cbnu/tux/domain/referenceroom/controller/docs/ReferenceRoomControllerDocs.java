@@ -2,8 +2,6 @@ package kr.ac.cbnu.tux.domain.referenceroom.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
-import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
@@ -28,4 +26,8 @@ public interface ReferenceRoomControllerDocs {
     @Operation(method = "POST", summary = "(글 생성 이후) 파일 업로드", description = "글쓰기 이후 파일 업로드시 파일을 저장한다.")
     void uploadFileAfterCreateData(@PathVariable Long id, @RequestParam("file") MultipartFile file,
                                    @AuthenticationPrincipal User user);
+
+    @Operation(method = "POST", summary = "(글 생성 이후) 글 작성", description = "임시로 생성된 글의 내용을 작성한다.")
+    void updateTemporalData(@PathVariable Long id, ReferenceRoomPostType type,
+                            @Validated @RequestBody ReferenceRoomRequest request, @AuthenticationPrincipal User user);
 }

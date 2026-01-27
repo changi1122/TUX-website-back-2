@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -37,7 +36,7 @@ public class CommunityService {
         if (isSanitizationRequired(post))
             post.setBody(sanitizer.sanitize(post.getBody()));
 
-        post.initializePost(now, user);
+        post.initializePost(user, now);
         return communityRepository.save(post);
     }
 
@@ -64,33 +63,31 @@ public class CommunityService {
     }
 
     @Transactional
-    public void updateAfterTemporalCreate(Long id, Community updated, User user) throws Exception {
+    public void updateTemporalPost(Long id, CommunityPostType type, CommunityRequest request, User user, OffsetDateTime now) {
         Community post = communityRepository.findById(id).orElseThrow();
-        if (user.getId().equals(post.getUser().getId())) {
-            if (isSanitizationRequired(updated))
-                post.setBody(sanitizer.sanitize(updated.getBody()));
-            else
-                post.setBody(updated.getBody());
 
-            post.setTitle(updated.getTitle());
-            post.setIsDeleted(false);
-            post.setEditorVersion(updated.getEditorVersion());
+        if (!user.equals(post.getUser())) {
+            throw new RuntimeException("user not matched");
         }
-        else {
-            throw new Exception("user not matched");
-        }
+
+        if (isSanitizationRequired(request))
+            post.setBody(sanitizer.sanitize(request.getBody()));
+        else
+            post.setBody(request.getBody());
+
+        post.updateTemporalPost(type, request.getTitle(), request.getEditorVersion(), now);
+        communityRepository.save(post);
     }
 
     public Community getPost(Long id) {
         return communityRepository.findById(id).orElseThrow();
     }
 
-
     @Transactional
     public void update(Long id, CommunityPostType updatedCategory, Community updated, User user) throws Exception {
         Community post = communityRepository.findById(id).orElseThrow();
 
-        if (post.getUser().getId().equals(user.getId()) || user.getRole() == UserRole.ADMIN) {
+        if (post.getUser().equals(user) || user.getRole() == UserRole.ADMIN) {
             if (isSanitizationRequired(updated))
                 post.setBody(sanitizer.sanitize(updated.getBody()));
             else
@@ -109,7 +106,7 @@ public class CommunityService {
     public void delete(Long id, User user) throws Exception {
         Community post = communityRepository.findById(id).orElseThrow();
         if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.MANAGER ||
-                user.getId().equals(post.getUser().getId())) {
+                user.equals(post.getUser())) {
             post.setIsDeleted(true);
             post.setDeletedDate(OffsetDateTime.now());
         } else {
@@ -178,7 +175,7 @@ public class CommunityService {
     @Transactional
     public void deleteComment(Long commentId, User user) throws Exception {
         CmComment comment = cmCommentRepository.findById(commentId).orElseThrow();
-        if (!comment.getUser().getId().equals(user.getId())) {
+        if (!comment.getUser().equals(user)) {
             throw new Exception("user not matched");
         }
         comment.setIsDeleted(true);
@@ -187,5 +184,9 @@ public class CommunityService {
 
     private boolean isSanitizationRequired(Community post) {
         return post.getEditorVersion() == null || post.getEditorVersion() != 2;
+    }
+
+    private boolean isSanitizationRequired(CommunityRequest request) {
+        return request.getEditorVersion() == null || request.getEditorVersion() != 2;
     }
 }

@@ -80,8 +80,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
                                           @AuthenticationPrincipal User user) {
         ReferenceRoom data = referenceRoomService.getData(id);
 
-        if (!user.getId().equals(data.getUser().getId()) &&
-                !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
+        if (!user.equals(data.getUser()) && !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
             throw new RuntimeException("user not matched");
         }
 
@@ -93,9 +92,9 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     /* 임시로 생성된 글 내용 업데이트 */
     @PostMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void updateTemporalData(@PathVariable Long id, @RequestBody ReferenceRoom data,
-                                   @AuthenticationPrincipal User user) throws Exception {
-        referenceRoomService.updateAfterTemporalCreate(id, data, user);
+    public void updateTemporalData(@PathVariable Long id, ReferenceRoomPostType type,
+                                   @Validated @RequestBody ReferenceRoomRequest request, @AuthenticationPrincipal User user) {
+        referenceRoomService.updateTemporalData(id, type, request, user, OffsetDateTime.now());
     }
 
 
@@ -238,7 +237,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
                            @AuthenticationPrincipal User user) throws Exception {
         ReferenceRoom data = referenceRoomService.getData(id);
 
-        if (user.getId().equals(data.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
+        if (user.equals(data.getUser()) || user.getRole() == UserRole.ADMIN) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data);
             attachmentService.deleteAttachment(file, data);
         } else {

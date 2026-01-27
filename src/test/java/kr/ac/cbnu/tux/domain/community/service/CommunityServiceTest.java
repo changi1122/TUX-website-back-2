@@ -1,23 +1,31 @@
 package kr.ac.cbnu.tux.domain.community.service;
 
+import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
-import kr.ac.cbnu.tux.domain.community.factory.CommunityFactory;
 import kr.ac.cbnu.tux.domain.community.repository.CommunityRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
+import kr.ac.cbnu.tux.global.utility.FileStore;
+import kr.ac.cbnu.tux.utility.FileUtils;
 import kr.ac.cbnu.tux.utility.IntegrationTestSupport;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 
+import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 import static kr.ac.cbnu.tux.domain.community.factory.CommunityFactory.createRequest;
 import static kr.ac.cbnu.tux.domain.user.factory.UserFactory.createTestUser;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommunityServiceTest extends IntegrationTestSupport {
@@ -27,7 +35,24 @@ class CommunityServiceTest extends IntegrationTestSupport {
     @Autowired
     CommunityRepository communityRepository;
     @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
+    @Autowired
+    AttachmentService attachmentService;
+    @Autowired
+    FileStore fileStore;
+
+    @Value("${file.dir}")
+    private String uploadDir;
+
+    @BeforeEach
+    void setUp() {
+        FileUtils.createFolderIfNotExists(new File(uploadDir));
+    }
+
+    @AfterEach
+    void tearDown() {
+        FileUtils.deleteFolderContents(new File(uploadDir));
+    }
 
     @Test
     @DisplayName("파일 첨부하지 않고 새로운 글을 작성한다")
@@ -61,5 +86,42 @@ class CommunityServiceTest extends IntegrationTestSupport {
                 .contains(request.getTitle(), "", request.getEditorVersion(), 0L, user);
     }
 
+    @Test
+    @DisplayName("파일 업로드를 위해 임시 생성된 글을 작성 완료한다")
+    void updateTemporalPost() throws IOException {
+        // 글을 임시 생성하고 파일을 업로드한다
 
+        // given
+        User user = userRepository.save(createTestUser("author", UserRole.USER));
+        MockMultipartFile file = FileUtils.getUploadFile();
+        OffsetDateTime now = OffsetDateTime.now();
+
+        // when
+        Community post = communityService.createTemporalPostForFile(CommunityPostType.FREE, user, now);
+        Attachment attachment = attachmentService.createAttachment(file, post);
+        communityService.addAttachment(attachment, post);
+        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
+
+        // then
+        Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
+        assertThat(foundPost).extracting("category", "user", "createdDate", "isDeleted")
+                .contains(CommunityPostType.FREE, user, now, true);
+        assertThat(foundPost.getAttachments()).hasSize(1)
+                .extracting("filename", "isImage")
+                .contains(tuple("sky.jpg", true));
+
+        // 임시 생성된 글의 내용을 작성한다
+
+        // given
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        OffsetDateTime newCreatedDate = OffsetDateTime.now();
+
+        // when
+        communityService.updateTemporalPost(post.getId(), CommunityPostType.NOTICE, request, user, newCreatedDate);
+
+        // then
+        foundPost = communityRepository.findById(post.getId()).orElseThrow();
+        assertThat(foundPost).extracting("category", "title", "body", "createdDate", "isDeleted")
+                .contains(CommunityPostType.NOTICE, request.getTitle(), request.getBody(), newCreatedDate, false);
+    }
 }

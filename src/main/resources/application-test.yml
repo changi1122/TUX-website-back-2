@@ -2,3 +2,7 @@ spring:
   # Database
   datasource:
     url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tuxweb2_test}
+
+# File Upload Path
+file:
+  dir: ${UPLOAD_DIR:./upload_test/}

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -67,25 +66,29 @@ public class ReferenceRoomService {
     }
 
     @Transactional
-    public void updateAfterTemporalCreate(Long id, ReferenceRoom updated, User user) throws Exception {
+    public void updateTemporalData(Long id, ReferenceRoomPostType type, ReferenceRoomRequest request, User user, OffsetDateTime now) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
-        if (user.getId().equals(data.getUser().getId())) {
-            if (isSanitizationRequired(updated))
-                data.setBody(sanitizer.sanitize(updated.getBody()));
-            else
-                data.setBody(updated.getBody());
 
-            data.setTitle(updated.getTitle());
-            data.setEditorVersion(updated.getEditorVersion());
-            data.setIsDeleted(false);
-            data.setIsAnonymized(updated.getIsAnonymized());
-            data.setLecture(updated.getLecture());
-            data.setSemester(updated.getSemester());
-            data.setProfessor(updated.getProfessor());
+        if (!user.equals(data.getUser())) {
+            throw new RuntimeException("user not matched");
         }
-        else {
-            throw new Exception("user not matched");
-        }
+
+        if (isSanitizationRequired(request))
+            data.setBody(sanitizer.sanitize(request.getBody()));
+        else
+            data.setBody(request.getBody());
+
+        data.updateTemporalData(
+                type,
+                request.getTitle(),
+                request.getEditorVersion(),
+                request.getIsAnonymized(),
+                request.getLecture(),
+                request.getSemester(),
+                request.getProfessor(),
+                now
+        );
+        referenceRoomRepository.save(data);
     }
 
     public ReferenceRoom getData(Long id) {
@@ -97,7 +100,7 @@ public class ReferenceRoomService {
     public void update(Long id, ReferenceRoomPostType updatedCategory, ReferenceRoom updated, User user) throws Exception {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
 
-        if (data.getUser().getId().equals(user.getId()) || user.getRole() == UserRole.ADMIN) {
+        if (data.getUser().equals(user) || user.getRole() == UserRole.ADMIN) {
             if (isSanitizationRequired(updated))
                 data.setBody(sanitizer.sanitize(updated.getBody()));
             else
@@ -120,8 +123,7 @@ public class ReferenceRoomService {
     @Transactional
     public void delete(Long id, User user) throws Exception {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
-        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.MANAGER ||
-                user.getId().equals(data.getUser().getId())) {
+        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.MANAGER || user.equals(data.getUser())) {
             data.setIsDeleted(true);
             data.setDeletedDate(OffsetDateTime.now());
         } else {
@@ -190,7 +192,7 @@ public class ReferenceRoomService {
     @Transactional
     public void deleteComment(Long commentId, User user)  throws Exception {
         RfComment comment = rfCommentRepository.findById(commentId).orElseThrow();
-        if (!comment.getUser().getId().equals(user.getId())) {
+        if (!comment.getUser().equals(user)) {
             throw new Exception("user not matched");
         }
         comment.setIsDeleted(true);
@@ -199,5 +201,9 @@ public class ReferenceRoomService {
 
     private boolean isSanitizationRequired(ReferenceRoom data) {
         return data.getEditorVersion() == null || data.getEditorVersion() != 2;
+    }
+
+    private boolean isSanitizationRequired(ReferenceRoomRequest request) {
+        return request.getEditorVersion() == null || request.getEditorVersion() != 2;
     }
 }

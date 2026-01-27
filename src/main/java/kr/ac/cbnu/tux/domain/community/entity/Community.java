@@ -107,10 +107,18 @@ public class Community {
         }
     }
 
-    public void initializePost(OffsetDateTime now, User user) {
+    public void initializePost(User user, OffsetDateTime now) {
         this.createdDate = now;
         this.isDeleted = false;
         this.view = 0L;
         this.user = user;
+    }
+
+    public void updateTemporalPost(CommunityPostType type, String title, short editorVersion, OffsetDateTime now) {
+        this.category = (type != null) ? type : this.category;
+        this.title = title;
+        this.createdDate = now;
+        this.isDeleted = false;
+        this.editorVersion = editorVersion;
     }
 }

@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Builder
@@ -95,6 +96,12 @@ public class User implements UserDetails {
         return (!isLocked && !isBanned && !isDeleted);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof User))
+            return false;
+        return Objects.equals(this.id, ((User) obj).getId());
+    }
 
     /* 커뮤니티 글 */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)

@@ -26,4 +26,8 @@ public interface CommunityControllerDocs {
     @Operation(method = "POST", summary = "(글 생성 이후) 파일 업로드", description = "글쓰기 이후 파일 업로드시 파일을 저장한다.")
     void uploadFileAfterCreatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
                                    @AuthenticationPrincipal User user);
+
+    @Operation(method = "POST", summary = "(글 생성 이후) 글 작성", description = "임시로 생성된 글의 내용을 작성한다.")
+    void updateTemporalPost(@PathVariable Long id, CommunityPostType type,
+                            @Validated @RequestBody CommunityRequest request, @AuthenticationPrincipal User user);
 }

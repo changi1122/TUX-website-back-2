@@ -80,8 +80,7 @@ public class CommunityController implements CommunityControllerDocs {
                                           @AuthenticationPrincipal User user) {
         Community post = communityService.getPost(id);
 
-        if (!user.getId().equals(post.getUser().getId()) &&
-                !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
+        if (!user.equals(post.getUser()) && !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
             throw new RuntimeException("user not matched");
         }
 
@@ -93,9 +92,9 @@ public class CommunityController implements CommunityControllerDocs {
     /* 임시로 생성된 글 내용 업데이트 */
     @PostMapping("/api/community/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void updateTemporalPost(@PathVariable Long id, @RequestBody Community post,
-                                   @AuthenticationPrincipal User user) throws Exception {
-        communityService.updateAfterTemporalCreate(id, post, user);
+    public void updateTemporalPost(@PathVariable Long id, CommunityPostType type,
+                                   @Validated @RequestBody CommunityRequest request, @AuthenticationPrincipal User user) {
+        communityService.updateTemporalPost(id, type, request, user, OffsetDateTime.now());
     }
 
     /* 글 수정 */
@@ -221,7 +220,7 @@ public class CommunityController implements CommunityControllerDocs {
                            @AuthenticationPrincipal User user) throws Exception {
         Community post = communityService.getPost(id);
 
-        if (user.getId().equals(post.getUser().getId()) || user.getRole() == UserRole.ADMIN) {
+        if (user.equals(post.getUser()) || user.getRole() == UserRole.ADMIN) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
             attachmentService.deleteAttachment(file, post);
         } else {

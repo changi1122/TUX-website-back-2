@@ -122,4 +122,17 @@ public class ReferenceRoom {
         this.view = 0L;
         this.user = user;
     }
+
+    public void updateTemporalData(ReferenceRoomPostType type, String title, short editorVersion, boolean isAnonymized,
+                                   String lecture, String semester, String professor, OffsetDateTime now) {
+        this.category = (type != null) ? type : this.category;
+        this.title = title;
+        this.createdDate = now;
+        this.isDeleted = false;
+        this.editorVersion = editorVersion;
+        this.isAnonymized = isAnonymized;
+        this.lecture = lecture;
+        this.semester = semester;
+        this.professor = professor;
+    }
 }

@@ -10,9 +10,9 @@ public class ReferenceRoomFactory {
                 .body(body)
                 .editorVersion(editorVersion)
                 .isAnonymized(false)
-                .lecture("")
-                .semester("")
-                .professor("")
+                .lecture("강의")
+                .semester("학기")
+                .professor("교수")
                 .build();
     }
 }
