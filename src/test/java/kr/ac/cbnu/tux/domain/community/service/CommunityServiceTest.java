@@ -13,6 +13,8 @@ import kr.ac.cbnu.tux.global.utility.FileStore;
 import kr.ac.cbnu.tux.utility.FileUtils;
 import kr.ac.cbnu.tux.utility.IntegrationTestSupport;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
@@ -24,8 +26,7 @@ import java.time.OffsetDateTime;
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 import static kr.ac.cbnu.tux.domain.community.factory.CommunityFactory.createRequest;
 import static kr.ac.cbnu.tux.domain.user.factory.UserFactory.createTestUser;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommunityServiceTest extends IntegrationTestSupport {
@@ -123,5 +124,83 @@ class CommunityServiceTest extends IntegrationTestSupport {
         foundPost = communityRepository.findById(post.getId()).orElseThrow();
         assertThat(foundPost).extracting("category", "title", "body", "createdDate", "isDeleted")
                 .contains(CommunityPostType.NOTICE, request.getTitle(), request.getBody(), newCreatedDate, false);
+    }
+
+    @Test
+    @DisplayName("글을 수정한다")
+    void updatePost() {
+        // given
+        User user = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, user, OffsetDateTime.now());
+
+        CommunityRequest updateRequest = createRequest("수정", "<p>수정</p>", (short) 2);
+        OffsetDateTime now = OffsetDateTime.now();
+        User admin = userRepository.save(createTestUser("admin", UserRole.ADMIN));
+
+        // when
+        communityService.updatePost(post.getId(), CommunityPostType.JOB, updateRequest, admin, now);
+        communityService.updatePost(post.getId(), CommunityPostType.NOTICE, updateRequest, user, now);
+
+        // then
+        Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
+        assertThat(foundPost).extracting("category", "title", "body", "editedDate", "editorVersion")
+                .contains(CommunityPostType.NOTICE, updateRequest.getTitle(), updateRequest.getBody(), now, (short) 2);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class, names = {"USER", "MANAGER", "GUEST"})
+    @DisplayName("글을 수정할 권한이 없다면 예외를 던진다")
+    void updatePost_no_permission(UserRole role) {
+        // given
+        User user = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, user, OffsetDateTime.now());
+
+        User userWithoutPermission = userRepository.save(createTestUser("userWithoutPermission", role));
+        CommunityRequest updateRequest = createRequest("수정", "<p>수정</p>", (short) 2);
+
+        // when then
+        assertThatThrownBy(() -> communityService.updatePost(post.getId(), CommunityPostType.NOTICE, updateRequest, userWithoutPermission, OffsetDateTime.now()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("user not matched");
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class, names = {"USER", "MANAGER", "ADMIN"})
+    @DisplayName("글을 삭제한다")
+    void deletePost(UserRole role) {
+        // given
+        User user = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, user, OffsetDateTime.now());
+
+        OffsetDateTime now = OffsetDateTime.now();
+        User actor = (role == UserRole.USER) ? user : userRepository.save(createTestUser(role.toString().toLowerCase(), role));
+
+        // when
+        communityService.deletePost(post.getId(), actor, now);
+
+        // then
+        Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
+        assertThat(foundPost).extracting("isDeleted", "deletedDate")
+                .contains(true, now);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class, names = {"USER", "GUEST"})
+    @DisplayName("글을 삭제할 권한이 없다면 예외를 던진다")
+    void deletePost_no_permission(UserRole role) {
+        // given
+        User user = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, user, OffsetDateTime.now());
+
+        User userWithoutPermission = userRepository.save(createTestUser("userWithoutPermission", role));
+
+        // when then
+        assertThatThrownBy(() -> communityService.deletePost(post.getId(), userWithoutPermission, OffsetDateTime.now()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("user not matched");
     }
 }

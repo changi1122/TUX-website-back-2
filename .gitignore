@@ -44,4 +44,5 @@ out/
 /src/main/generated
 
 upload
+upload_test
 application-dev.yml

@@ -30,4 +30,11 @@ public interface ReferenceRoomControllerDocs {
     @Operation(method = "POST", summary = "(글 생성 이후) 글 작성", description = "임시로 생성된 글의 내용을 작성한다.")
     void updateTemporalData(@PathVariable Long id, ReferenceRoomPostType type,
                             @Validated @RequestBody ReferenceRoomRequest request, @AuthenticationPrincipal User user);
+
+    @Operation(method = "PUT", summary = "글 수정", description = "글의 내용을 수정한다.")
+    void updateData(@PathVariable Long id, ReferenceRoomPostType type,
+                    @Validated @RequestBody ReferenceRoomRequest request, @AuthenticationPrincipal User user);
+
+    @Operation(method = "DELETE", summary = "글 삭제", description = "글을 삭제한다.")
+    void deleteData(@PathVariable Long id, @AuthenticationPrincipal User user);
 }

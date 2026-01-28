@@ -28,6 +28,8 @@ public class ReferenceRoomService {
     private final RfCommentRepository rfCommentRepository;
     private final Sanitizer sanitizer;
 
+    public final static List<UserRole> CAN_EDIT_ROLES = List.of(UserRole.ADMIN);
+    private final static List<UserRole> CAN_DELETE_ROLES = List.of(UserRole.ADMIN, UserRole.MANAGER);
 
     /* 파일 업로드 및 글쓰기 */
 
@@ -62,7 +64,6 @@ public class ReferenceRoomService {
     @Transactional
     public void addAttachment(Attachment file, ReferenceRoom data) {
         data.addAttachment(file);
-        referenceRoomRepository.save(data);
     }
 
     @Transactional
@@ -88,7 +89,6 @@ public class ReferenceRoomService {
                 request.getProfessor(),
                 now
         );
-        referenceRoomRepository.save(data);
     }
 
     public ReferenceRoom getData(Long id) {
@@ -97,38 +97,40 @@ public class ReferenceRoomService {
 
     /* 글 수정 */
     @Transactional
-    public void update(Long id, ReferenceRoomPostType updatedCategory, ReferenceRoom updated, User user) throws Exception {
+    public void updateData(Long id, ReferenceRoomPostType type, ReferenceRoomRequest request, User user, OffsetDateTime now) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
 
-        if (data.getUser().equals(user) || user.getRole() == UserRole.ADMIN) {
-            if (isSanitizationRequired(updated))
-                data.setBody(sanitizer.sanitize(updated.getBody()));
-            else
-                data.setBody(updated.getBody());
-
-            data.setCategory(updatedCategory);
-            data.setTitle(updated.getTitle());
-            data.setEditorVersion(updated.getEditorVersion());
-            data.setIsAnonymized(updated.getIsAnonymized());
-            data.setLecture(updated.getLecture());
-            data.setSemester(updated.getSemester());
-            data.setProfessor(updated.getProfessor());
-            data.setEditedDate(OffsetDateTime.now());
-        } else {
-            throw new Exception("user not matched");
+        if (!user.equals(data.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
+            throw new RuntimeException("user not matched");
         }
+
+        if (isSanitizationRequired(request))
+            data.setBody(sanitizer.sanitize(request.getBody()));
+        else
+            data.setBody(request.getBody());
+
+        data.updateData(
+                type,
+                request.getTitle(),
+                request.getEditorVersion(),
+                request.getIsAnonymized(),
+                request.getLecture(),
+                request.getSemester(),
+                request.getProfessor(),
+                now
+        );
     }
 
     /* 글 삭제 */
     @Transactional
-    public void delete(Long id, User user) throws Exception {
+    public void deleteData(Long id, User user, OffsetDateTime now) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
-        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.MANAGER || user.equals(data.getUser())) {
-            data.setIsDeleted(true);
-            data.setDeletedDate(OffsetDateTime.now());
-        } else {
-            throw new Exception("user not matched");
+
+        if (!user.equals(data.getUser()) && !CAN_DELETE_ROLES.contains(user.getRole())) {
+            throw new RuntimeException("user not matched");
         }
+
+        data.deleteData(now);
     }
 
     /* 글 조회 */

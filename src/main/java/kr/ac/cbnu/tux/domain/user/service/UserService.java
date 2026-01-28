@@ -63,14 +63,12 @@ public class UserService implements UserDetailsService {
 
             user.updatePassword(passwordEncoder.encode(request.getPassword()));
         }
-        userRepository.save(user);
     }
 
     @Transactional
     public void deleteUserSoftly(Long id, OffsetDateTime now) {
         User user = userRepository.findById(id).orElseThrow();
         user.deleteUserData(now);
-        userRepository.save(user);
     }
 
     public UserResponse tryLogin(LoginRequest loginRequest) {
@@ -102,21 +100,18 @@ public class UserService implements UserDetailsService {
     public void ban(Long id, OffsetDateTime now) {
         User user = userRepository.findById(id).orElseThrow();
         user.ban(now);
-        userRepository.save(user);
     }
 
     @Transactional
     public void changeUserRole(Long id, UserRole role) {
         User user = userRepository.findById(id).orElseThrow();
         user.setRole(role);
-        userRepository.save(user);
     }
 
     @Transactional
     public void setTemporalPassword(Long id, String password) {
         User user = userRepository.findById(id).orElseThrow();
         user.setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
     }
 
     public User readUser(Long id) {

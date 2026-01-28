@@ -121,4 +121,16 @@ public class Community {
         this.isDeleted = false;
         this.editorVersion = editorVersion;
     }
+
+    public void updatePost(CommunityPostType type, String title, short editorVersion, OffsetDateTime now) {
+        this.category = type;
+        this.title = title;
+        this.editorVersion = editorVersion;
+        this.editedDate = now;
+    }
+
+    public void deletePost(OffsetDateTime now) {
+        this.isDeleted = true;
+        this.deletedDate = now;
+    }
 }

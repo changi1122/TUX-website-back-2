@@ -135,4 +135,21 @@ public class ReferenceRoom {
         this.semester = semester;
         this.professor = professor;
     }
+
+    public void updateData(ReferenceRoomPostType type, String title, short editorVersion, boolean isAnonymized,
+                           String lecture, String semester, String professor, OffsetDateTime now) {
+        this.category = type;
+        this.title = title;
+        this.editorVersion = editorVersion;
+        this.isAnonymized = isAnonymized;
+        this.lecture = lecture;
+        this.semester = semester;
+        this.professor = professor;
+        this.editedDate = now;
+    }
+
+    public void deleteData(OffsetDateTime now) {
+        this.isDeleted = true;
+        this.deletedDate = now;
+    }
 }

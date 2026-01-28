@@ -13,7 +13,6 @@ import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.community.service.CommunityService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
@@ -41,6 +40,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
+import static kr.ac.cbnu.tux.domain.community.service.CommunityService.CAN_EDIT_ROLES;
 
 @RequiredArgsConstructor
 @Controller
@@ -80,7 +80,7 @@ public class CommunityController implements CommunityControllerDocs {
                                           @AuthenticationPrincipal User user) {
         Community post = communityService.getPost(id);
 
-        if (!user.equals(post.getUser()) && !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
+        if (!user.equals(post.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
         }
 
@@ -100,16 +100,16 @@ public class CommunityController implements CommunityControllerDocs {
     /* 글 수정 */
     @PutMapping("/api/community/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void updatePost(@PathVariable Long id, CommunityPostType type, @RequestBody Community updated,
-                           @AuthenticationPrincipal User user) throws Exception {
-        communityService.update(id, type, updated, user);
+    public void updatePost(@PathVariable Long id, CommunityPostType type, @Validated @RequestBody CommunityRequest request,
+                           @AuthenticationPrincipal User user) {
+        communityService.updatePost(id, type, request, user, OffsetDateTime.now());
     }
 
     /* 글 삭제 */
     @DeleteMapping("/api/community/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void deletePost(@PathVariable Long id, @AuthenticationPrincipal User user) throws Exception {
-        communityService.delete(id, user);
+    public void deletePost(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        communityService.deletePost(id, user, OffsetDateTime.now());
     }
 
     /* 글 읽기 */
@@ -220,7 +220,7 @@ public class CommunityController implements CommunityControllerDocs {
                            @AuthenticationPrincipal User user) throws Exception {
         Community post = communityService.getPost(id);
 
-        if (user.equals(post.getUser()) || user.getRole() == UserRole.ADMIN) {
+        if (user.equals(post.getUser()) || !CAN_EDIT_ROLES.contains(user.getRole())) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
             attachmentService.deleteAttachment(file, post);
         } else {

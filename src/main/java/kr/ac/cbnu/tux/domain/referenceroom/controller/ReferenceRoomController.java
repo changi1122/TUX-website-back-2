@@ -13,7 +13,6 @@ import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
@@ -42,6 +41,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
+import static kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService.CAN_EDIT_ROLES;
 
 @RequiredArgsConstructor
 @Controller
@@ -80,7 +80,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
                                           @AuthenticationPrincipal User user) {
         ReferenceRoom data = referenceRoomService.getData(id);
 
-        if (!user.equals(data.getUser()) && !List.of(UserRole.ADMIN, UserRole.MANAGER).contains(user.getRole())) {
+        if (!user.equals(data.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
         }
 
@@ -101,16 +101,16 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     /* 글 수정 */
     @PutMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void updateData(@PathVariable Long id, ReferenceRoomPostType type, @RequestBody ReferenceRoom updated,
-                           @AuthenticationPrincipal User user) throws Exception {
-        referenceRoomService.update(id, type, updated, user);
+    public void updateData(@PathVariable Long id, ReferenceRoomPostType type,
+                           @Validated @RequestBody ReferenceRoomRequest request, @AuthenticationPrincipal User user) {
+        referenceRoomService.updateData(id, type, request, user, OffsetDateTime.now());
     }
     
     /* 글 삭제 */
     @DeleteMapping("/api/referenceroom/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void deleteData(@PathVariable Long id, @AuthenticationPrincipal User user) throws Exception {
-        referenceRoomService.delete(id, user);
+    public void deleteData(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        referenceRoomService.deleteData(id, user, OffsetDateTime.now());
     }
 
     /* 글 읽기 */
@@ -237,7 +237,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
                            @AuthenticationPrincipal User user) throws Exception {
         ReferenceRoom data = referenceRoomService.getData(id);
 
-        if (user.equals(data.getUser()) || user.getRole() == UserRole.ADMIN) {
+        if (user.equals(data.getUser()) || !CAN_EDIT_ROLES.contains(user.getRole())) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data);
             attachmentService.deleteAttachment(file, data);
         } else {

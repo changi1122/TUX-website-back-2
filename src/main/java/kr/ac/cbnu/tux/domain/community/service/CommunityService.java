@@ -27,6 +27,9 @@ public class CommunityService {
     private final CmCommentRepository cmCommentRepository;
     private final Sanitizer sanitizer;
 
+    public final static List<UserRole> CAN_EDIT_ROLES = List.of(UserRole.ADMIN);
+    private final static List<UserRole> CAN_DELETE_ROLES = List.of(UserRole.ADMIN, UserRole.MANAGER);
+
     /* 파일 업로드 및 글쓰기 */
 
     @Transactional
@@ -59,7 +62,6 @@ public class CommunityService {
     @Transactional
     public void addAttachment(Attachment file, Community post) {
         post.addAttachment(file);
-        communityRepository.save(post);
     }
 
     @Transactional
@@ -76,7 +78,6 @@ public class CommunityService {
             post.setBody(request.getBody());
 
         post.updateTemporalPost(type, request.getTitle(), request.getEditorVersion(), now);
-        communityRepository.save(post);
     }
 
     public Community getPost(Long id) {
@@ -84,34 +85,30 @@ public class CommunityService {
     }
 
     @Transactional
-    public void update(Long id, CommunityPostType updatedCategory, Community updated, User user) throws Exception {
+    public void updatePost(Long id, CommunityPostType type, CommunityRequest request, User user, OffsetDateTime now) {
         Community post = communityRepository.findById(id).orElseThrow();
 
-        if (post.getUser().equals(user) || user.getRole() == UserRole.ADMIN) {
-            if (isSanitizationRequired(updated))
-                post.setBody(sanitizer.sanitize(updated.getBody()));
-            else
-                post.setBody(updated.getBody());
-
-            post.setCategory(updatedCategory);
-            post.setTitle(updated.getTitle());
-            post.setEditedDate(OffsetDateTime.now());
-            post.setEditorVersion(updated.getEditorVersion());
-        } else {
-            throw new Exception("user not matched");
+        if (!user.equals(post.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
+            throw new RuntimeException("user not matched");
         }
+
+        if (isSanitizationRequired(request))
+            post.setBody(sanitizer.sanitize(request.getBody()));
+        else
+            post.setBody(request.getBody());
+
+        post.updatePost(type, request.getTitle(), request.getEditorVersion(), now);
     }
 
     @Transactional
-    public void delete(Long id, User user) throws Exception {
+    public void deletePost(Long id, User user, OffsetDateTime now) {
         Community post = communityRepository.findById(id).orElseThrow();
-        if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.MANAGER ||
-                user.equals(post.getUser())) {
-            post.setIsDeleted(true);
-            post.setDeletedDate(OffsetDateTime.now());
-        } else {
-            throw new Exception("user not matched");
+
+        if (!user.equals(post.getUser()) && !CAN_DELETE_ROLES.contains(user.getRole())) {
+            throw new RuntimeException("user not matched");
         }
+
+        post.deletePost(now);
     }
 
     public Community read(Long id, User user) {
