@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RfCommentDTO {
+public class RfCommentResponse {
 
     private Long id;
     private String body;
@@ -20,9 +20,9 @@ public class RfCommentDTO {
     private Long authorId;
     private String author;
 
-    public static RfCommentDTO build(RfComment comment) {
+    public static RfCommentResponse build(RfComment comment) {
 
-        return RfCommentDTO.builder()
+        return RfCommentResponse.builder()
                 .id(comment.getId())
                 .body(comment.getBody())
                 .createdDate(comment.getCreatedDate())

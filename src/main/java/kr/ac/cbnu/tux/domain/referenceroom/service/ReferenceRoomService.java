@@ -134,10 +134,12 @@ public class ReferenceRoomService {
     }
 
     /* 글 조회 */
-    public ReferenceRoom read(Long id, User user) {
+    public ReferenceRoom readData(Long id, User user) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
+        if (data.getCategory().cannotReadBy(user))
+            throw new RuntimeException("permission denied");
 
-        if (user == null || user != data.getUser())
+        if (!data.getUser().equals(user))
             referenceRoomRepository.updateViewById(id);
 
         return data;

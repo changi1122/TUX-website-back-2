@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AttachmentDTO {
+public class AttachmentResponse {
 
     private Long id;
     private String filename;
@@ -19,8 +19,8 @@ public class AttachmentDTO {
     private Integer order;
     private Long downloadCount;
 
-    public static AttachmentDTO build(Attachment file) {
-        return AttachmentDTO.builder()
+    public static AttachmentResponse build(Attachment file) {
+        return AttachmentResponse.builder()
                 .id(file.getId())
                 .filename(file.getFilename())
                 .path(file.getPath())

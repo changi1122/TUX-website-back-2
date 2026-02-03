@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.domain.community.service;
 
+import jakarta.persistence.EntityManager;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
@@ -41,6 +42,8 @@ class CommunityServiceTest extends IntegrationTestSupport {
     AttachmentService attachmentService;
     @Autowired
     FileStore fileStore;
+    @Autowired
+    EntityManager entityManager;
 
     @Value("${file.dir}")
     private String uploadDir;
@@ -202,5 +205,42 @@ class CommunityServiceTest extends IntegrationTestSupport {
         assertThatThrownBy(() -> communityService.deletePost(post.getId(), userWithoutPermission, OffsetDateTime.now()))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("user not matched");
+    }
+
+    @Test
+    @DisplayName("글을 조회하면 조회수가 증가한다")
+    void readPost() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
+
+        User reader = userRepository.save(createTestUser("reader", UserRole.USER));
+
+        // when
+        communityService.readPost(post.getId(), reader);
+
+        // then
+        entityManager.clear();  // 1차 캐시 비우기
+        Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
+        assertThat(foundPost).extracting("title", "body", "editorVersion", "view", "user")
+                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), 1L, author);
+    }
+
+    @Test
+    @DisplayName("작성자 본인이 글을 조회하면 조회수가 증가하지 않는다")
+    void readPost_self_view() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
+
+        // when
+        communityService.readPost(post.getId(), author);
+
+        // then
+        entityManager.clear();  // 1차 캐시 비우기
+        Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
+        assertThat(foundPost.getView()).isEqualTo(0L);
     }
 }

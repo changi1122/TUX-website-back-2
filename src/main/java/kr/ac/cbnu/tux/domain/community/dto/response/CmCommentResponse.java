@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CmCommentDTO {
+public class CmCommentResponse {
 
 
     private Long id;
@@ -21,9 +21,9 @@ public class CmCommentDTO {
     private Long authorId;
     private String author;
 
-    public static CmCommentDTO build(CmComment comment) {
+    public static CmCommentResponse build(CmComment comment) {
 
-        return CmCommentDTO.builder()
+        return CmCommentResponse.builder()
                 .id(comment.getId())
                 .body(comment.getBody())
                 .createdDate(comment.getCreatedDate())

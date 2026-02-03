@@ -98,8 +98,8 @@ public class User implements UserDetails {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof User))
-            return false;
+        if (this == obj) return true;
+        if (!(obj instanceof User)) return false;
         return Objects.equals(this.id, ((User) obj).getId());
     }
 

@@ -5,8 +5,8 @@ import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.community.controller.docs.CommunityControllerDocs;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
-import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentDTO;
-import kr.ac.cbnu.tux.domain.community.dto.response.CommunityDTO;
+import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentResponse;
+import kr.ac.cbnu.tux.domain.community.dto.response.CommunityResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListDTO;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
@@ -115,14 +115,12 @@ public class CommunityController implements CommunityControllerDocs {
     /* 글 읽기 */
     @GetMapping("/api/community/{id}")
     @ResponseBody
-    public CommunityDTO readPost(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        Community post = communityService.read(id, user);
-        return CommunityDTO.build(post);
+    public CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        Community post = communityService.readPost(id, user);
+        return CommunityResponse.build(post);
     }
 
-
     /* 게시판 리스트 조회 */
-
     @GetMapping("/api/community/list")
     @ResponseBody
     public Page<CommunityListDTO> listPosts(@RequestParam(name = "query", defaultValue = "") String query,
@@ -165,11 +163,11 @@ public class CommunityController implements CommunityControllerDocs {
     @PostMapping("/api/community/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     @ResponseBody
-    public CmCommentDTO addComment(@PathVariable Long id, @RequestBody CmComment comment,
-                                   @AuthenticationPrincipal User user) {
+    public CmCommentResponse addComment(@PathVariable Long id, @RequestBody CmComment comment,
+                                        @AuthenticationPrincipal User user) {
 
         CmComment savedComment = communityService.addComment(id, comment, user);
-        return CmCommentDTO.build(savedComment);
+        return CmCommentResponse.build(savedComment);
     }
 
     @DeleteMapping("/api/community/{id}/comment/{commentId}")

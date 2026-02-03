@@ -111,10 +111,9 @@ public class CommunityService {
         post.deletePost(now);
     }
 
-    public Community read(Long id, User user) {
+    public Community readPost(Long id, User user) {
         Community post = communityRepository.findById(id).orElseThrow();
-
-        if (user == null || user != post.getUser())
+        if (!post.getUser().equals(user))
             communityRepository.updateViewById(id);
 
         return post;

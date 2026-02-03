@@ -3,6 +3,7 @@ package kr.ac.cbnu.tux.domain.referenceroom.controller.docs;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,4 +38,7 @@ public interface ReferenceRoomControllerDocs {
 
     @Operation(method = "DELETE", summary = "글 삭제", description = "글을 삭제한다.")
     void deleteData(@PathVariable Long id, @AuthenticationPrincipal User user);
+
+    @Operation(method = "GET", summary = "글 조회", description = "글을 조회한다.")
+    ReferenceRoomResponse readData(@PathVariable Long id, @AuthenticationPrincipal User user);
 }

@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.domain.community.dto.response;
 
-import kr.ac.cbnu.tux.domain.common.dto.AttachmentDTO;
+import kr.ac.cbnu.tux.domain.common.dto.AttachmentResponse;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CommunityDTO {
+public class CommunityResponse {
 
     private Long id;
     private String category;
@@ -26,22 +26,22 @@ public class CommunityDTO {
     private Long view;
     private Long authorId;
     private String author;
-    List<AttachmentDTO> files;
-    private List<CmCommentDTO> comments;
+    List<AttachmentResponse> files;
+    private List<CmCommentResponse> comments;
     private Long likes;
     List<String> likedPeople;
     private Long dislikes;
 
-    public static CommunityDTO build(Community post) {
-        List<AttachmentDTO> files = post.getAttachments().stream()
+    public static CommunityResponse build(Community post) {
+        List<AttachmentResponse> files = post.getAttachments().stream()
                 .sorted((c1, c2) -> c1.getOrder().compareTo(c2.getOrder()))
-                .map(c -> AttachmentDTO.build(c))
+                .map(c -> AttachmentResponse.build(c))
                 .toList();
 
-        List<CmCommentDTO> comments = post.getComments().stream()
+        List<CmCommentResponse> comments = post.getComments().stream()
                 .filter(c -> !c.getIsDeleted())
                 .sorted((c1, c2) -> c1.getCreatedDate().compareTo(c2.getCreatedDate()))
-                .map(c -> CmCommentDTO.build(c))
+                .map(c -> CmCommentResponse.build(c))
                 .toList();
 
         Long likes = post.getLikes().stream()
@@ -57,7 +57,7 @@ public class CommunityDTO {
                 .filter(l -> l.getDislike())
                 .count();
 
-        return CommunityDTO.builder()
+        return CommunityResponse.builder()
                 .id(post.getId())
                 .category(post.getCategory().name())
                 .title(post.getTitle())

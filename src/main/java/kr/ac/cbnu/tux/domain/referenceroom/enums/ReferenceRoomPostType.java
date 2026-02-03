@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.referenceroom.enums;
 
 import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 
 public enum ReferenceRoomPostType {
     STUDY("study"),         // 강의/스터디
@@ -28,12 +29,12 @@ public enum ReferenceRoomPostType {
             return false;
         }
         else {
-            return (user == null);
+            return (user == null || user.getRole() == UserRole.GUEST);
         }
     }
 
     // 전체 목록 읽기 권한
     public static boolean cannotListBy(User user) {
-        return (user == null);
+        return (user == null || user.getRole() == UserRole.GUEST);
     }
 }

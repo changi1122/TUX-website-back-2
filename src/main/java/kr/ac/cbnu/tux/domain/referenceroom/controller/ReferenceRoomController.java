@@ -5,9 +5,9 @@ import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.referenceroom.controller.docs.ReferenceRoomControllerDocs;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
-import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomDTO;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListDTO;
-import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentDTO;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
@@ -34,7 +34,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
@@ -116,24 +115,18 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     /* 글 읽기 */
     @GetMapping("/api/referenceroom/{id}")
     @ResponseBody
-    public ReferenceRoomDTO readData(@PathVariable Long id, @AuthenticationPrincipal User user) throws AccessDeniedException {
-        ReferenceRoom data = referenceRoomService.read(id, user);
-
-        if (data.getCategory().cannotReadBy(user)) {
-            throw new AccessDeniedException("permission denied");
-        }
-
-        return ReferenceRoomDTO.build(data);
+    public ReferenceRoomResponse readData(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        ReferenceRoom data = referenceRoomService.readData(id, user);
+        return ReferenceRoomResponse.build(data);
     }
 
     /* 자료실 리스트 조회 */
-
     @GetMapping("/api/referenceroom/list")
     @ResponseBody
     public Page<ReferenceRoomListDTO> listData(@RequestParam(name = "query", defaultValue = "") String query,
-                                               Pageable pageable, @AuthenticationPrincipal User user) throws AccessDeniedException {
+                                               Pageable pageable, @AuthenticationPrincipal User user) {
         if (ReferenceRoomPostType.cannotListBy(user)) {
-            throw new AccessDeniedException("permission denied");
+            throw new RuntimeException("permission denied");
         }
 
         Page<ReferenceRoom> found;
@@ -155,10 +148,10 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     public Page<ReferenceRoomListDTO> listDataByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
-            @AuthenticationPrincipal User user) throws AccessDeniedException {
+            @AuthenticationPrincipal User user) {
 
         if (types.stream().anyMatch(type -> type.cannotReadBy(user))) {
-            throw new AccessDeniedException("permission denied");
+            throw new RuntimeException("permission denied");
         }
 
         Page<ReferenceRoom> found;
@@ -179,10 +172,10 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @PostMapping("/api/referenceroom/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     @ResponseBody
-    public RfCommentDTO addComment(@PathVariable Long id, @RequestBody RfComment comment,
-                                   @AuthenticationPrincipal User user) {
+    public RfCommentResponse addComment(@PathVariable Long id, @RequestBody RfComment comment,
+                                        @AuthenticationPrincipal User user) {
         RfComment savedComment = referenceRoomService.addComment(id, comment, user);
-        return RfCommentDTO.build(savedComment);
+        return RfCommentResponse.build(savedComment);
     }
 
     @DeleteMapping("/api/referenceroom/{id}/comment/{commentId}")
@@ -201,7 +194,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
 
         ReferenceRoom data = referenceRoomService.getData(id);
         if (data.getCategory().cannotReadBy(user)) {
-            throw new AccessDeniedException("permission denied");
+            throw new RuntimeException("permission denied");
         }
 
         // 다운로드 수 늘리기

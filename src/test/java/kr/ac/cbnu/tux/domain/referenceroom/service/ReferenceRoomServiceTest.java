@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.domain.referenceroom.service;
 
+import jakarta.persistence.EntityManager;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
@@ -46,6 +47,8 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
     AttachmentService attachmentService;
     @Autowired
     FileStore fileStore;
+    @Autowired
+    EntityManager entityManager;
 
     @Value("${file.dir}")
     private String uploadDir;
@@ -171,6 +174,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class, names = {"USER", "MANAGER", "ADMIN"})
+    @DisplayName("글을 삭제한다")
     void deleteData(UserRole role) {
         // given
         User user = userRepository.save(createTestUser("author", UserRole.USER));
@@ -205,4 +209,113 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("user not matched");
     }
+
+    @Test
+    @DisplayName("글을 조회하면 조회수가 증가한다")
+    void readData() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
+
+        User reader = userRepository.save(createTestUser("reader", UserRole.USER));
+
+        // when
+        referenceRoomService.readData(data.getId(), reader);
+
+        // then
+        entityManager.clear();
+        ReferenceRoom foundData = referenceRoomRepository.findById(data.getId()).orElseThrow();
+        assertThat(foundData).extracting("title", "body", "editorVersion", "view", "user")
+                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), 1L, author);
+    }
+
+    @Test
+    @DisplayName("작성자 본인이 글을 조회하면 조회수가 증가하지 않는다")
+    void readData_self_view() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
+
+        // when
+        referenceRoomService.readData(data.getId(), author);
+
+        // then
+        entityManager.clear();
+        ReferenceRoom foundData = referenceRoomRepository.findById(data.getId()).orElseThrow();
+        assertThat(foundData).extracting("title", "body", "editorVersion", "view", "user")
+                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), 0L, author);
+    }
+
+    @Test
+    @DisplayName("GALLERY 카테고리는 비로그인 사용자도 조회할 수 있다")
+    void readData_gallery_without_login() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.GALLERY, request, author, OffsetDateTime.now());
+
+        // when
+        ReferenceRoom result = referenceRoomService.readData(data.getId(), null);
+
+        // then
+        assertThat(result.getId()).isEqualTo(data.getId());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class, names = {"USER", "MANAGER", "ADMIN"})
+    @DisplayName("GALLERY 카테고리는 로그인한 사용자도 조회할 수 있다")
+    void readData_gallery_with_login(UserRole role) {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.GALLERY, request, author, OffsetDateTime.now());
+
+        User reader = userRepository.save(createTestUser("reader", role));
+
+        // when
+        ReferenceRoom result = referenceRoomService.readData(data.getId(), reader);
+
+        // then
+        assertThat(result.getId()).isEqualTo(data.getId());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ReferenceRoomPostType.class, names = {"STUDY", "EXAM"})
+    @DisplayName("STUDY, EXAM 카테고리는 비로그인 사용자와 GUEST가 조회할 수 없다")
+    void readData_study_exam_without_permission(ReferenceRoomPostType type) {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(type, request, author, OffsetDateTime.now());
+
+        User guest = userRepository.save(createTestUser("guest", UserRole.GUEST));
+
+        // when then
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), null))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("permission denied");
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), guest))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("permission denied");
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class, names = {"USER", "MANAGER", "ADMIN"})
+    @DisplayName("STUDY, EXAM 카테고리는 로그인한 사용자가 조회할 수 있다")
+    void readData_study_exam_with_login(UserRole role) {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom studyData = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
+        ReferenceRoom examData = referenceRoomService.createData(ReferenceRoomPostType.EXAM, request, author, OffsetDateTime.now());
+
+        User reader = userRepository.save(createTestUser("reader", role));
+
+        // when then
+        assertThat(referenceRoomService.readData(studyData.getId(), reader).getId()).isEqualTo(studyData.getId());
+        assertThat(referenceRoomService.readData(examData.getId(), reader).getId()).isEqualTo(examData.getId());
+    }
+
 }

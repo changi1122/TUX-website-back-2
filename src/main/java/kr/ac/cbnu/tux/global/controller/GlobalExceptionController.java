@@ -11,7 +11,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 
 @ControllerAdvice(basePackages = "kr.ac.cbnu.tux.controller")
-public class ExceptionControllerAdvice {
+public class GlobalExceptionController {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<String> handleException(NoSuchElementException ex) {
@@ -43,6 +43,11 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
+        if (ex.getMessage().equals("permission denied")) // 임시
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(ex.getMessage());
+
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());

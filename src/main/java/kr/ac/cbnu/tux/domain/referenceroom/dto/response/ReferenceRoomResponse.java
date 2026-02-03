@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.domain.referenceroom.dto.response;
 
-import kr.ac.cbnu.tux.domain.common.dto.AttachmentDTO;
+import kr.ac.cbnu.tux.domain.common.dto.AttachmentResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReferenceRoomDTO {
+public class ReferenceRoomResponse {
 
     private Long id;
     private String category;
@@ -26,8 +26,8 @@ public class ReferenceRoomDTO {
     private Long view;
     private Long authorId;
     private String author;
-    List<AttachmentDTO> files;
-    List<RfCommentDTO> comments;
+    List<AttachmentResponse> files;
+    List<RfCommentResponse> comments;
     private Long likes;
     List<String> likedPeople;
     private Long dislikes;
@@ -37,16 +37,16 @@ public class ReferenceRoomDTO {
     private String semester;
     private String professor;
 
-    public static ReferenceRoomDTO build(ReferenceRoom data) {
-        List<AttachmentDTO> files = data.getAttachments().stream()
+    public static ReferenceRoomResponse build(ReferenceRoom data) {
+        List<AttachmentResponse> files = data.getAttachments().stream()
                 .sorted((c1, c2) -> c1.getOrder().compareTo(c2.getOrder()))
-                .map(c -> AttachmentDTO.build(c))
+                .map(c -> AttachmentResponse.build(c))
                 .toList();
 
-        List<RfCommentDTO> comments = data.getComments().stream()
+        List<RfCommentResponse> comments = data.getComments().stream()
                 .filter(c -> !c.getIsDeleted())
                 .sorted((c1, c2) -> c1.getCreatedDate().compareTo(c2.getCreatedDate()))
-                .map(c -> RfCommentDTO.build(c))
+                .map(c -> RfCommentResponse.build(c))
                 .toList();
 
         Long likes = data.getLikes().stream()
@@ -62,7 +62,7 @@ public class ReferenceRoomDTO {
                 .filter(l -> l.getDislike())
                 .count();
 
-        return ReferenceRoomDTO.builder()
+        return ReferenceRoomResponse.builder()
                 .id(data.getId())
                 .category(data.getCategory().name())
                 .title(data.getTitle())

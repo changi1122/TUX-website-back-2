@@ -1,6 +1,6 @@
 package kr.ac.cbnu.tux.domain.referenceroom.dto.response;
 
-import kr.ac.cbnu.tux.domain.common.dto.AttachmentDTO;
+import kr.ac.cbnu.tux.domain.common.dto.AttachmentResponse;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ public class GalleryListDTO {
 
     private Long id;
     private String category;
-    private AttachmentDTO mainImage;
+    private AttachmentResponse mainImage;
     private String title;
     private OffsetDateTime createdDate;
     private OffsetDateTime editedDate;
@@ -40,7 +40,7 @@ public class GalleryListDTO {
         return GalleryListDTO.builder()
                 .id(data.getId())
                 .category(data.getCategory().name())
-                .mainImage((imageFiles.size() > 0) ? AttachmentDTO.build(imageFiles.get(0)) : null)
+                .mainImage((imageFiles.size() > 0) ? AttachmentResponse.build(imageFiles.get(0)) : null)
                 .title(data.getTitle())
                 .createdDate(data.getCreatedDate())
                 .editedDate(data.getEditedDate())
