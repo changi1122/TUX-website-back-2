@@ -17,28 +17,30 @@ public class LikeService {
 
 
     @Transactional
-    public void create(Community post, User user, Boolean dislike) throws Exception {
+    public void createLike(Community post, User user, Boolean dislike) {
         if (!likeRepository.existsByPostAndUserAndDislike(post, user, dislike)) {
-            Like like = new Like();
-            like.setPost(post);
-            like.setUser(user);
-            like.setDislike(dislike);
+            Like like = Like.builder()
+                    .post(post)
+                    .user(user)
+                    .dislike(dislike)
+                    .build();
             likeRepository.save(like);
         } else {
-            throw new Exception("already like/dislike given");
+            throw new RuntimeException("already like/dislike given");
         }
     }
 
     @Transactional
-    public void create(ReferenceRoom data, User user, Boolean dislike) throws Exception {
+    public void createLike(ReferenceRoom data, User user, Boolean dislike) {
         if (!likeRepository.existsByDataAndUserAndDislike(data, user, dislike)) {
-            Like like = new Like();
-            like.setData(data);
-            like.setUser(user);
-            like.setDislike(dislike);
+            Like like = Like.builder()
+                    .data(data)
+                    .user(user)
+                    .dislike(dislike)
+                    .build();
             likeRepository.save(like);
         } else {
-            throw new Exception("already like/dislike given");
+            throw new RuntimeException("already like/dislike given");
         }
     }
 }

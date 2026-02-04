@@ -32,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -182,7 +184,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @GetMapping(value = "/api/referenceroom/{id}/file/{filename}")
     public ResponseEntity<FileSystemResource> getFile(
             @PathVariable Long id, @PathVariable String filename,
-            @RequestParam(name = "aid", defaultValue = "-1") Long aid, @AuthenticationPrincipal User user) throws Exception {
+            @RequestParam(name = "aid", defaultValue = "-1") Long aid, @AuthenticationPrincipal User user) throws UnsupportedEncodingException {
 
         ReferenceRoom data = referenceRoomService.getData(id);
         if (data.getCategory().cannotReadBy(user)) {
@@ -219,14 +221,14 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @DeleteMapping(value = "/api/referenceroom/{id}/file/{filename}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id, @PathVariable String filename,
-                           @AuthenticationPrincipal User user) throws Exception {
+                           @AuthenticationPrincipal User user) throws IOException {
         ReferenceRoom data = referenceRoomService.getData(id);
 
         if (user.equals(data.getUser()) || !CAN_EDIT_ROLES.contains(user.getRole())) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data);
             attachmentService.deleteAttachment(file, data);
         } else {
-            throw new Exception("user not matched");
+            throw new RuntimeException("user not matched");
         }
     }
 
@@ -234,11 +236,11 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @PostMapping("/api/referenceroom/{id}/likes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addLike(@PathVariable Long id, @RequestParam Boolean dislike,
-                        @AuthenticationPrincipal User user) throws Exception {
+                        @AuthenticationPrincipal User user) {
         if (user == null)
-            throw new Exception("user not logged in");
+            throw new RuntimeException("user not logged in");
 
         ReferenceRoom data = referenceRoomService.getData(id);
-        likeService.create(data, user, dislike);
+        likeService.createLike(data, user, dislike);
     }
 }

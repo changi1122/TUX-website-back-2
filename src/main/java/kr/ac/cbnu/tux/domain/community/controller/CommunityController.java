@@ -32,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -175,7 +177,7 @@ public class CommunityController implements CommunityControllerDocs {
     @GetMapping(value = "/api/community/{id}/file/{filename}")
     public ResponseEntity<FileSystemResource> getFile(
             @PathVariable String id, @PathVariable String filename,
-            @RequestParam(name = "aid", defaultValue = "-1") Long aid) throws Exception {
+            @RequestParam(name = "aid", defaultValue = "-1") Long aid) throws UnsupportedEncodingException {
 
         // 다운로드 수 늘리기
         if (aid != -1)
@@ -207,14 +209,14 @@ public class CommunityController implements CommunityControllerDocs {
     @DeleteMapping(value = "/api/community/{id}/file/{filename}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id, @PathVariable String filename,
-                           @AuthenticationPrincipal User user) throws Exception {
+                           @AuthenticationPrincipal User user) throws IOException {
         Community post = communityService.getPost(id);
 
         if (user.equals(post.getUser()) || !CAN_EDIT_ROLES.contains(user.getRole())) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
             attachmentService.deleteAttachment(file, post);
         } else {
-            throw new Exception("user not matched");
+            throw new RuntimeException("user not matched");
         }
     }
 
@@ -222,11 +224,11 @@ public class CommunityController implements CommunityControllerDocs {
     @PostMapping("/api/community/{id}/likes")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void addLike(@PathVariable Long id, @RequestParam Boolean dislike,
-                        @AuthenticationPrincipal User user) throws Exception {
+                        @AuthenticationPrincipal User user) {
         if (user == null)
-            throw new Exception("user not logged in");
+            throw new RuntimeException("user not logged in");
 
         Community post = communityService.getPost(id);
-        likeService.create(post, user, dislike);
+        likeService.createLike(post, user, dislike);
     }
 }

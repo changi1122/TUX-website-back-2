@@ -15,8 +15,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @Tag(name = "커뮤니티(community)", description = "커뮤니티 API")
@@ -62,4 +66,16 @@ public interface CommunityControllerDocs {
 
     @Operation(method = "DELETE", summary = "댓글 삭제", description = "댓글을 삭제한다.")
     void deleteComment(@PathVariable Long id, @PathVariable Long commentId, @AuthenticationPrincipal User user);
+
+    @Operation(method = "GET", summary = "첨부파일 다운로드", description = "첨부파일을 다운로드한다.")
+    ResponseEntity<FileSystemResource> getFile(@PathVariable String id, @PathVariable String filename,
+                                               @RequestParam(name = "aid", defaultValue = "-1") Long aid) throws UnsupportedEncodingException;
+
+    @Operation(method = "DELETE", summary = "첨부파일 삭제", description = "첨부파일을 삭제한다.")
+    void deleteFile(@PathVariable Long id, @PathVariable String filename,
+                    @AuthenticationPrincipal User user) throws IOException;
+
+    @Operation(method = "POST", summary = "추천/비추천", description = "글에 추천 또는 비추천을 추가한다.")
+    void addLike(@PathVariable Long id, @RequestParam Boolean dislike,
+                 @AuthenticationPrincipal User user);
 }
