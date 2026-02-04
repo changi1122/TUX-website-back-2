@@ -4,9 +4,12 @@ import jakarta.persistence.EntityManager;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.ReferenceRoomRepository;
+import kr.ac.cbnu.tux.domain.referenceroom.repository.RfCommentRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
@@ -41,6 +44,8 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
     ReferenceRoomService referenceRoomService;
     @Autowired
     ReferenceRoomRepository referenceRoomRepository;
+    @Autowired
+    RfCommentRepository rfCommentRepository;
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -316,6 +321,71 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         // when then
         assertThat(referenceRoomService.readData(studyData.getId(), reader).getId()).isEqualTo(studyData.getId());
         assertThat(referenceRoomService.readData(examData.getId(), reader).getId()).isEqualTo(examData.getId());
+    }
+
+    @Test
+    @DisplayName("댓글을 작성한다")
+    void addComment() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
+
+        User commenter = userRepository.save(createTestUser("commenter", UserRole.USER));
+        RfCommentRequest commentRequest = RfCommentRequest.builder().body("댓글 내용").build();
+        OffsetDateTime now = OffsetDateTime.now();
+
+        // when
+        RfComment comment = referenceRoomService.addComment(data.getId(), commentRequest, commenter, now);
+
+        // then
+        RfComment foundComment = rfCommentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(foundComment).extracting("body", "isDeleted", "createdDate", "user")
+                .contains("댓글 내용", false, now, commenter);
+        assertThat(foundComment.getData().getId()).isEqualTo(data.getId());
+    }
+
+    @Test
+    @DisplayName("댓글을 삭제한다")
+    void deleteComment() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
+
+        User commenter = userRepository.save(createTestUser("commenter", UserRole.USER));
+        RfCommentRequest commentRequest = RfCommentRequest.builder().body("댓글 내용").build();
+        RfComment comment = referenceRoomService.addComment(data.getId(), commentRequest, commenter, OffsetDateTime.now());
+
+        OffsetDateTime now = OffsetDateTime.now();
+
+        // when
+        referenceRoomService.deleteComment(comment.getId(), commenter, now);
+
+        // then
+        RfComment foundComment = rfCommentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(foundComment).extracting("isDeleted", "deletedDate")
+                .contains(true, now);
+    }
+
+    @Test
+    @DisplayName("댓글 작성자가 아니면 삭제할 수 없다")
+    void deleteComment_no_permission() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
+
+        User commenter = userRepository.save(createTestUser("commenter", UserRole.USER));
+        RfCommentRequest commentRequest = RfCommentRequest.builder().body("댓글 내용").build();
+        RfComment comment = referenceRoomService.addComment(data.getId(), commentRequest, commenter, OffsetDateTime.now());
+
+        User otherUser = userRepository.save(createTestUser("other", UserRole.USER));
+
+        // when then
+        assertThatThrownBy(() -> referenceRoomService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("user not matched");
     }
 
 }

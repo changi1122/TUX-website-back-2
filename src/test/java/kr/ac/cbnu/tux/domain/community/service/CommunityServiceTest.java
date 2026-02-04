@@ -3,9 +3,12 @@ package kr.ac.cbnu.tux.domain.community.service;
 import jakarta.persistence.EntityManager;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
+import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
+import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
+import kr.ac.cbnu.tux.domain.community.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.domain.community.repository.CommunityRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
@@ -36,6 +39,8 @@ class CommunityServiceTest extends IntegrationTestSupport {
     CommunityService communityService;
     @Autowired
     CommunityRepository communityRepository;
+    @Autowired
+    CmCommentRepository cmCommentRepository;
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -242,5 +247,70 @@ class CommunityServiceTest extends IntegrationTestSupport {
         entityManager.clear();  // 1차 캐시 비우기
         Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
         assertThat(foundPost.getView()).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("댓글을 작성한다")
+    void addComment() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
+
+        User commenter = userRepository.save(createTestUser("commenter", UserRole.USER));
+        CmCommentRequest commentRequest = CmCommentRequest.builder().body("댓글 내용").build();
+        OffsetDateTime now = OffsetDateTime.now();
+
+        // when
+        CmComment comment = communityService.addComment(post.getId(), commentRequest, commenter, now);
+
+        // then
+        CmComment foundComment = cmCommentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(foundComment).extracting("body", "isDeleted", "createdDate", "user")
+                .contains("댓글 내용", false, now, commenter);
+        assertThat(foundComment.getPost().getId()).isEqualTo(post.getId());
+    }
+
+    @Test
+    @DisplayName("댓글을 삭제한다")
+    void deleteComment() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
+
+        User commenter = userRepository.save(createTestUser("commenter", UserRole.USER));
+        CmCommentRequest commentRequest = CmCommentRequest.builder().body("댓글 내용").build();
+        CmComment comment = communityService.addComment(post.getId(), commentRequest, commenter, OffsetDateTime.now());
+
+        OffsetDateTime now = OffsetDateTime.now();
+
+        // when
+        communityService.deleteComment(comment.getId(), commenter, now);
+
+        // then
+        CmComment foundComment = cmCommentRepository.findById(comment.getId()).orElseThrow();
+        assertThat(foundComment).extracting("isDeleted", "deletedDate")
+                .contains(true, now);
+    }
+
+    @Test
+    @DisplayName("댓글 작성자가 아니면 삭제할 수 없다")
+    void deleteComment_no_permission() {
+        // given
+        User author = userRepository.save(createTestUser("author", UserRole.USER));
+        CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
+        Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
+
+        User commenter = userRepository.save(createTestUser("commenter", UserRole.USER));
+        CmCommentRequest commentRequest = CmCommentRequest.builder().body("댓글 내용").build();
+        CmComment comment = communityService.addComment(post.getId(), commentRequest, commenter, OffsetDateTime.now());
+
+        User otherUser = userRepository.save(createTestUser("other", UserRole.USER));
+
+        // when then
+        assertThatThrownBy(() -> communityService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("user not matched");
     }
 }

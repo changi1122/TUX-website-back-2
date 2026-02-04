@@ -4,6 +4,7 @@ package kr.ac.cbnu.tux.domain.referenceroom.service;
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
@@ -184,23 +185,20 @@ public class ReferenceRoomService {
     /* 댓글 관련 코드 */
 
     @Transactional
-    public RfComment addComment(Long id, RfComment comment, User user) {
+    public RfComment addComment(Long id, RfCommentRequest request, User user, OffsetDateTime now) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
-        comment.setCreatedDate(OffsetDateTime.now());
-        comment.setIsDeleted(false);
-        comment.setData(data);
-        comment.setUser(user);
+        RfComment comment = request.toEntity();
+        comment.initializeComment(data, user, now);
         return rfCommentRepository.save(comment);
     }
 
     @Transactional
-    public void deleteComment(Long commentId, User user)  throws Exception {
+    public void deleteComment(Long commentId, User user, OffsetDateTime now) {
         RfComment comment = rfCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().equals(user)) {
-            throw new Exception("user not matched");
+            throw new RuntimeException("user not matched");
         }
-        comment.setIsDeleted(true);
-        comment.setDeletedDate(OffsetDateTime.now());
+        comment.deleteComment(now);
     }
 
     private boolean isSanitizationRequired(ReferenceRoom data) {

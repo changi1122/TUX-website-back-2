@@ -1,19 +1,14 @@
 package kr.ac.cbnu.tux.domain.community.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import kr.ac.cbnu.tux.domain.user.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
 // CommunityComment
 @Entity
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +18,6 @@ public class CmComment {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @NotEmpty
     private String body;
 
     @Column(nullable = false)
@@ -36,7 +30,6 @@ public class CmComment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @NotNull
     private User user;
 
     public void setUser(User user) {
@@ -59,4 +52,15 @@ public class CmComment {
         }
     }
 
+    public void initializeComment(Community post, User user, OffsetDateTime now) {
+        this.user = user;
+        this.post = post;
+        this.isDeleted = false;
+        this.createdDate = now;
+    }
+
+    public void deleteComment(OffsetDateTime now) {
+        this.isDeleted = true;
+        this.deletedDate = now;
+    }
 }

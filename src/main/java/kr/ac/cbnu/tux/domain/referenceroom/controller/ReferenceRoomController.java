@@ -5,6 +5,7 @@ import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.referenceroom.controller.docs.ReferenceRoomControllerDocs;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentResponse;
@@ -163,17 +164,17 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @PostMapping("/api/referenceroom/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     @ResponseBody
-    public RfCommentResponse addComment(@PathVariable Long id, @RequestBody RfComment comment,
+    public RfCommentResponse addComment(@PathVariable Long id, @Validated @RequestBody RfCommentRequest request,
                                         @AuthenticationPrincipal User user) {
-        RfComment savedComment = referenceRoomService.addComment(id, comment, user);
-        return RfCommentResponse.build(savedComment);
+        RfComment savedComment = referenceRoomService.addComment(id, request, user, OffsetDateTime.now());
+        return RfCommentResponse.of(savedComment);
     }
 
     @DeleteMapping("/api/referenceroom/{id}/comment/{commentId}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void deleteComment(@PathVariable Long id, @PathVariable("commentId") Long commentId,
-                              @AuthenticationPrincipal User user) throws Exception {
-        referenceRoomService.deleteComment(commentId, user);
+    public void deleteComment(@PathVariable Long id, @PathVariable Long commentId,
+                              @AuthenticationPrincipal User user) {
+        referenceRoomService.deleteComment(commentId, user, OffsetDateTime.now());
     }
 
 

@@ -3,8 +3,10 @@ package kr.ac.cbnu.tux.domain.referenceroom.controller.docs;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomResponse;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
@@ -55,4 +57,11 @@ public interface ReferenceRoomControllerDocs {
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
             @AuthenticationPrincipal User user);
+
+    @Operation(method = "POST", summary = "댓글 작성", description = "글에 댓글을 작성한다.")
+    RfCommentResponse addComment(@PathVariable Long id, @Validated @RequestBody RfCommentRequest request,
+                                 @AuthenticationPrincipal User user);
+
+    @Operation(method = "DELETE", summary = "댓글 삭제", description = "댓글을 삭제한다.")
+    void deleteComment(@PathVariable Long id, @PathVariable Long commentId, @AuthenticationPrincipal User user);
 }

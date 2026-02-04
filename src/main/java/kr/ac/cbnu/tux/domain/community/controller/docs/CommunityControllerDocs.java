@@ -2,7 +2,9 @@ package kr.ac.cbnu.tux.domain.community.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
+import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityResponse;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
@@ -53,4 +55,11 @@ public interface CommunityControllerDocs {
     CommunityListResponse listPostsByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam("type") List<CommunityPostType> types, Pageable pageable);
+
+    @Operation(method = "POST", summary = "댓글 작성", description = "글에 댓글을 작성한다.")
+    CmCommentResponse addComment(@PathVariable Long id, @Validated @RequestBody CmCommentRequest request,
+                                 @AuthenticationPrincipal User user);
+
+    @Operation(method = "DELETE", summary = "댓글 삭제", description = "댓글을 삭제한다.")
+    void deleteComment(@PathVariable Long id, @PathVariable Long commentId, @AuthenticationPrincipal User user);
 }

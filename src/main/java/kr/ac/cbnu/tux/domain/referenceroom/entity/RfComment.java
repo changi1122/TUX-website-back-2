@@ -1,8 +1,6 @@
 package kr.ac.cbnu.tux.domain.referenceroom.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +21,6 @@ public class RfComment {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    @NotEmpty
     private String body;
 
     @Column(nullable = false)
@@ -36,7 +33,6 @@ public class RfComment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    @NotNull
     private User user;
 
     public void setUser(User user) {
@@ -59,4 +55,15 @@ public class RfComment {
         }
     }
 
+    public void initializeComment(ReferenceRoom data, User user, OffsetDateTime now) {
+        this.user = user;
+        this.data = data;
+        this.createdDate = now;
+        this.isDeleted = false;
+    }
+
+    public void deleteComment(OffsetDateTime now) {
+        this.isDeleted = true;
+        this.deletedDate = now;
+    }
 }

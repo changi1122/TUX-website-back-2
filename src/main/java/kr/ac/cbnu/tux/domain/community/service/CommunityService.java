@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.community.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
@@ -158,24 +159,20 @@ public class CommunityService {
     /* 댓글 관련 코드 */
 
     @Transactional
-    public CmComment addComment(Long id, CmComment comment, User user) {
+    public CmComment addComment(Long id, CmCommentRequest request, User user, OffsetDateTime now) {
         Community post = communityRepository.findById(id).orElseThrow();
-
-        comment.setCreatedDate(OffsetDateTime.now());
-        comment.setIsDeleted(false);
-        comment.setPost(post);
-        comment.setUser(user);
+        CmComment comment = request.toEntity();
+        comment.initializeComment(post, user, now);
         return cmCommentRepository.save(comment);
     }
 
     @Transactional
-    public void deleteComment(Long commentId, User user) throws Exception {
+    public void deleteComment(Long commentId, User user, OffsetDateTime now) {
         CmComment comment = cmCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().equals(user)) {
-            throw new Exception("user not matched");
+            throw new RuntimeException("user not matched");
         }
-        comment.setIsDeleted(true);
-        comment.setDeletedDate(OffsetDateTime.now());
+        comment.deleteComment(now);
     }
 
     private boolean isSanitizationRequired(Community post) {

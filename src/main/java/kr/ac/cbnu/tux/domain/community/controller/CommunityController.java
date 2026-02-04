@@ -4,6 +4,7 @@ import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.community.controller.docs.CommunityControllerDocs;
+import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListResponse;
@@ -154,19 +155,19 @@ public class CommunityController implements CommunityControllerDocs {
     @PostMapping("/api/community/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     @ResponseBody
-    public CmCommentResponse addComment(@PathVariable Long id, @RequestBody CmComment comment,
+    public CmCommentResponse addComment(@PathVariable Long id, @Validated @RequestBody CmCommentRequest request,
                                         @AuthenticationPrincipal User user) {
 
-        CmComment savedComment = communityService.addComment(id, comment, user);
+        CmComment savedComment = communityService.addComment(id, request, user, OffsetDateTime.now());
         return CmCommentResponse.of(savedComment);
     }
 
     @DeleteMapping("/api/community/{id}/comment/{commentId}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteComment(@PathVariable Long id, @PathVariable Long commentId,
-                              @AuthenticationPrincipal User user) throws Exception {
+                              @AuthenticationPrincipal User user) {
 
-        communityService.deleteComment(commentId, user);
+        communityService.deleteComment(commentId, user, OffsetDateTime.now());
     }
 
 

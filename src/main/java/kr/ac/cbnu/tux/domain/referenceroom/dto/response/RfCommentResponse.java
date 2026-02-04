@@ -20,7 +20,7 @@ public class RfCommentResponse {
     private Long authorId;
     private String author;
 
-    public static RfCommentResponse build(RfComment comment) {
+    public static RfCommentResponse of(RfComment comment) {
 
         return RfCommentResponse.builder()
                 .id(comment.getId())

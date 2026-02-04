@@ -46,7 +46,7 @@ public class ReferenceRoomResponse {
         List<RfCommentResponse> comments = data.getComments().stream()
                 .filter(c -> !c.getIsDeleted())
                 .sorted((c1, c2) -> c1.getCreatedDate().compareTo(c2.getCreatedDate()))
-                .map(c -> RfCommentResponse.build(c))
+                .map(c -> RfCommentResponse.of(c))
                 .toList();
 
         Long likes = data.getLikes().stream()
