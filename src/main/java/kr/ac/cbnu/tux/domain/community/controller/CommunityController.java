@@ -212,12 +212,12 @@ public class CommunityController implements CommunityControllerDocs {
                            @AuthenticationPrincipal User user) throws IOException {
         Community post = communityService.getPost(id);
 
-        if (user.equals(post.getUser()) || !CAN_EDIT_ROLES.contains(user.getRole())) {
-            Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
-            attachmentService.deleteAttachment(file, post);
-        } else {
+        if (!post.getUser().equals(user) && !CAN_EDIT_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
         }
+
+        Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
+        attachmentService.deleteAttachment(file, post);
     }
 
     /* 추천 비추천 추가 */

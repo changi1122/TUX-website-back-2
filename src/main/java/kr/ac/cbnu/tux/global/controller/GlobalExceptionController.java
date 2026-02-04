@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-@ControllerAdvice(basePackages = "kr.ac.cbnu.tux.controller")
+@ControllerAdvice(basePackages = "kr.ac.cbnu.tux")
 public class GlobalExceptionController {
 
     @ExceptionHandler(NoSuchElementException.class)

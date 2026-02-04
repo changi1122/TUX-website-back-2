@@ -27,12 +27,6 @@ public class UserController implements UserControllerDocs {
 
     private final UserService userService;
 
-    @GetMapping("/api/auth")
-    @ResponseBody
-    public UserResponse getCurrentUser(@AuthenticationPrincipal User user) {
-        return UserResponse.of(user);
-    }
-
     @PostMapping("/api/user")
     @ResponseStatus(code = HttpStatus.CREATED)
     public void createUser(@Validated @RequestBody SignupRequest request) {

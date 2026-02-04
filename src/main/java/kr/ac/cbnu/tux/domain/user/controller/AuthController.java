@@ -5,9 +5,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.cbnu.tux.domain.user.controller.docs.AuthControllerDocs;
 import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
+import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,4 +47,9 @@ public class AuthController implements AuthControllerDocs {
         response.addCookie(tokenCookie);
     }
 
+    @GetMapping("/api/auth")
+    @ResponseBody
+    public UserResponse getCurrentUser(@AuthenticationPrincipal User user) {
+        return UserResponse.of(user);
+    }
 }
