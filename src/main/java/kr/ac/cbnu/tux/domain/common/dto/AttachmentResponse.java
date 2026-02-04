@@ -19,7 +19,7 @@ public class AttachmentResponse {
     private Integer order;
     private Long downloadCount;
 
-    public static AttachmentResponse build(Attachment file) {
+    public static AttachmentResponse of(Attachment file) {
         return AttachmentResponse.builder()
                 .id(file.getId())
                 .filename(file.getFilename())

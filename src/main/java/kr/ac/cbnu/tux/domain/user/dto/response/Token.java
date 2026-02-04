@@ -14,7 +14,7 @@ public class Token {
     private String token;
     private Long expiresIn;
 
-    public static Token build(String token, long expiresIn) {
+    public static Token of(String token, long expiresIn) {
         return Token.builder()
                 .token(token)
                 .expiresIn(expiresIn)

@@ -23,14 +23,14 @@ public class AdminController implements AdminControllerDocs {
     @ResponseBody
     public List<UserResponse> listAllGuest() {
         List<User> found = userService.listAllWaitingUser();
-        return found.stream().map(UserResponse::build).toList();
+        return found.stream().map(UserResponse::of).toList();
     }
 
     @GetMapping("/api/admin/user/member")
     @ResponseBody
     public List<UserResponse> listAllMemberNotGuest() {
         List<User> found = userService.listAllUserNotGuest();
-        return found.stream().map(UserResponse::build).toList();
+        return found.stream().map(UserResponse::of).toList();
     }
 
     @PostMapping("/api/admin/user/{id}/role/{role}")

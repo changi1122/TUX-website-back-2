@@ -3,15 +3,19 @@ package kr.ac.cbnu.tux.domain.community.controller.docs;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
+import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityResponse;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Tag(name = "커뮤니티(community)", description = "커뮤니티 API")
 public interface CommunityControllerDocs {
@@ -41,4 +45,12 @@ public interface CommunityControllerDocs {
 
     @Operation(method = "GET", summary = "글 조회", description = "글을 조회한다.")
     CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user);
+
+    @Operation(method = "GET", summary = "글 목록 조회", description = "전체 글 목록을 조회한다.")
+    CommunityListResponse listPosts(@RequestParam(name = "query", defaultValue = "") String query, Pageable pageable);
+
+    @Operation(method = "GET", summary = "카테고리별 글 목록 조회", description = "카테고리별로 글 목록을 조회한다.")
+    CommunityListResponse listPostsByCategory(
+            @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam("type") List<CommunityPostType> types, Pageable pageable);
 }

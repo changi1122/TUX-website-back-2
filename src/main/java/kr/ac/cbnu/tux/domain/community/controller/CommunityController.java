@@ -6,8 +6,8 @@ import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.community.controller.docs.CommunityControllerDocs;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentResponse;
+import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityResponse;
-import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListDTO;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
@@ -17,7 +17,6 @@ import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -117,47 +116,39 @@ public class CommunityController implements CommunityControllerDocs {
     @ResponseBody
     public CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user) {
         Community post = communityService.readPost(id, user);
-        return CommunityResponse.build(post);
+        return CommunityResponse.of(post);
     }
 
     /* 게시판 리스트 조회 */
     @GetMapping("/api/community/list")
     @ResponseBody
-    public Page<CommunityListDTO> listPosts(@RequestParam(name = "query", defaultValue = "") String query,
-                                            Pageable pageable) {
-        Page<Community> found;
+    public CommunityListResponse listPosts(@RequestParam(name = "query", defaultValue = "") String query,
+                                           Pageable pageable) {
+        Page<Community> page;
             if (StringUtils.hasText(query)) {
-                found = communityService.searchList(query, pageable);
+                page = communityService.searchList(query, pageable);
             } else {
-                found = communityService.list(pageable);
+                page = communityService.list(pageable);
         }
 
-        return new PageImpl<>(
-            found.getContent().stream().map(CommunityListDTO::build).toList(),
-            pageable,
-            found.getTotalElements()
-        );
+        return CommunityListResponse.of(page, pageable);
     }
 
     @GetMapping("/api/community/list/category")
     @ResponseBody
-    public Page<CommunityListDTO> listPostsByCategory(
+    public CommunityListResponse listPostsByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam("type") List<CommunityPostType> types, Pageable pageable) {
 
-        Page<Community> found;
+        Page<Community> page;
         if (StringUtils.hasText(query)) {
-            found = communityService.searchListByCategories(query, pageable, types);
+            page = communityService.searchListByCategories(query, pageable, types);
         } else {
-            found = communityService.listByCategories(pageable, types);
+            page = communityService.listByCategories(pageable, types);
         }
-        return new PageImpl<>(
-                found.getContent().stream().map(CommunityListDTO::build).toList(),
-                pageable,
-                found.getTotalElements()
-        );
-    }
 
+        return CommunityListResponse.of(page, pageable);
+    }
 
     /* 댓글 */
     @PostMapping("/api/community/{id}/comment")
@@ -167,7 +158,7 @@ public class CommunityController implements CommunityControllerDocs {
                                         @AuthenticationPrincipal User user) {
 
         CmComment savedComment = communityService.addComment(id, comment, user);
-        return CmCommentResponse.build(savedComment);
+        return CmCommentResponse.of(savedComment);
     }
 
     @DeleteMapping("/api/community/{id}/comment/{commentId}")

@@ -13,7 +13,7 @@ import java.util.List;
 
 // 자료실
 @Entity
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

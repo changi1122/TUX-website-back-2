@@ -37,10 +37,10 @@ public class ReferenceRoomResponse {
     private String semester;
     private String professor;
 
-    public static ReferenceRoomResponse build(ReferenceRoom data) {
+    public static ReferenceRoomResponse of(ReferenceRoom data) {
         List<AttachmentResponse> files = data.getAttachments().stream()
                 .sorted((c1, c2) -> c1.getOrder().compareTo(c2.getOrder()))
-                .map(c -> AttachmentResponse.build(c))
+                .map(c -> AttachmentResponse.of(c))
                 .toList();
 
         List<RfCommentResponse> comments = data.getComments().stream()

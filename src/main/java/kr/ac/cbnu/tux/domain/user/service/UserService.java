@@ -82,7 +82,7 @@ public class UserService implements UserDetailsService {
             Authentication authentication = new UserAuthentication(
                     user, null, user.getAuthorities()
             );
-            return UserResponse.build(
+            return UserResponse.of(
                     user,
                     JwtTokenProvider.generateToken(authentication)
             );

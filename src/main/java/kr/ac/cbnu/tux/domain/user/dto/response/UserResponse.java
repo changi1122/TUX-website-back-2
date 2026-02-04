@@ -30,11 +30,11 @@ public class UserResponse {
 
     private Token token;
 
-    public static UserResponse build(User user) {
-        return build(user, null);
+    public static UserResponse of(User user) {
+        return of(user, null);
     }
 
-    public static UserResponse build(User user, Token token) {
+    public static UserResponse of(User user, Token token) {
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())

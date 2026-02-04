@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.util.NoSuchElementException;
 
 @ControllerAdvice(basePackages = "kr.ac.cbnu.tux.controller")
@@ -31,13 +30,6 @@ public class GlobalExceptionController {
     public ResponseEntity<String> handleException(IOException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleException(AccessDeniedException ex) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
                 .body(ex.getMessage());
     }
 

@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CommunityListDTO {
+public class CommunitySimpleResponse {
 
     private Long id;
     private String category;
@@ -24,8 +24,8 @@ public class CommunityListDTO {
     private String author;
     private Long likes;
 
-    public static CommunityListDTO build(Community post) {
-        return CommunityListDTO.builder()
+    public static CommunitySimpleResponse of(Community post) {
+        return CommunitySimpleResponse.builder()
                 .id(post.getId())
                 .category(post.getCategory().name())
                 .title(post.getTitle())

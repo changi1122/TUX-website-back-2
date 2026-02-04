@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
@@ -31,7 +30,7 @@ public class UserController implements UserControllerDocs {
     @GetMapping("/api/auth")
     @ResponseBody
     public UserResponse getCurrentUser(@AuthenticationPrincipal User user) {
-        return UserResponse.build(user);
+        return UserResponse.of(user);
     }
 
     @PostMapping("/api/user")
@@ -69,16 +68,17 @@ public class UserController implements UserControllerDocs {
 
     @GetMapping("/api/user/{id}")
     @ResponseBody
-    public UserResponse readUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException {
+    public UserResponse readUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null || "anonymousUser".equals(currentUser.getUsername()))
+            throw new RuntimeException("permission denied");
+
         String currentUsername = currentUser.getUsername();
         User foundUser = userService.readUser(id);
 
-        if ("anonymousUser".equals(currentUsername) || !currentUsername.equals(foundUser.getUsername()) ||
-                !canReadUserData(currentUser.getRole())) {
-            throw new AccessDeniedException("permission denied");
-        }
+        if (!currentUsername.equals(foundUser.getUsername()) || !canReadUserData(currentUser.getRole()))
+            throw new RuntimeException("permission denied");
 
-        return UserResponse.build(foundUser);
+        return UserResponse.of(foundUser);
     }
 
     @GetMapping("/api/user/check/username")

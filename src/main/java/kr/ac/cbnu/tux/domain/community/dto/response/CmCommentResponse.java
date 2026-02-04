@@ -21,7 +21,7 @@ public class CmCommentResponse {
     private Long authorId;
     private String author;
 
-    public static CmCommentResponse build(CmComment comment) {
+    public static CmCommentResponse of(CmComment comment) {
 
         return CmCommentResponse.builder()
                 .id(comment.getId())

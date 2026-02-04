@@ -32,16 +32,16 @@ public class CommunityResponse {
     List<String> likedPeople;
     private Long dislikes;
 
-    public static CommunityResponse build(Community post) {
+    public static CommunityResponse of(Community post) {
         List<AttachmentResponse> files = post.getAttachments().stream()
                 .sorted((c1, c2) -> c1.getOrder().compareTo(c2.getOrder()))
-                .map(c -> AttachmentResponse.build(c))
+                .map(c -> AttachmentResponse.of(c))
                 .toList();
 
         List<CmCommentResponse> comments = post.getComments().stream()
                 .filter(c -> !c.getIsDeleted())
                 .sorted((c1, c2) -> c1.getCreatedDate().compareTo(c2.getCreatedDate()))
-                .map(c -> CmCommentResponse.build(c))
+                .map(c -> CmCommentResponse.of(c))
                 .toList();
 
         Long likes = post.getLikes().stream()

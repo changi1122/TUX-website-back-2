@@ -5,8 +5,8 @@ import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.referenceroom.controller.docs.ReferenceRoomControllerDocs;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
+import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomResponse;
-import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListDTO;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
@@ -17,7 +17,6 @@ import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -117,35 +116,31 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @ResponseBody
     public ReferenceRoomResponse readData(@PathVariable Long id, @AuthenticationPrincipal User user) {
         ReferenceRoom data = referenceRoomService.readData(id, user);
-        return ReferenceRoomResponse.build(data);
+        return ReferenceRoomResponse.of(data);
     }
 
     /* 자료실 리스트 조회 */
     @GetMapping("/api/referenceroom/list")
     @ResponseBody
-    public Page<ReferenceRoomListDTO> listData(@RequestParam(name = "query", defaultValue = "") String query,
-                                               Pageable pageable, @AuthenticationPrincipal User user) {
+    public ReferenceRoomListResponse listData(@RequestParam(name = "query", defaultValue = "") String query,
+                                              Pageable pageable, @AuthenticationPrincipal User user) {
         if (ReferenceRoomPostType.cannotListBy(user)) {
             throw new RuntimeException("permission denied");
         }
 
-        Page<ReferenceRoom> found;
+        Page<ReferenceRoom> page;
         if (StringUtils.hasText(query)) {
-            found = referenceRoomService.searchList(query, pageable);
+            page = referenceRoomService.searchList(query, pageable);
         } else {
-            found = referenceRoomService.list(pageable);
+            page = referenceRoomService.list(pageable);
         }
 
-        return new PageImpl<>(
-                found.getContent().stream().map(ReferenceRoomListDTO::build).toList(),
-                pageable,
-                found.getTotalElements()
-        );
+        return ReferenceRoomListResponse.of(page, pageable);
     }
 
     @GetMapping("/api/referenceroom/list/category")
     @ResponseBody
-    public Page<ReferenceRoomListDTO> listDataByCategory(
+    public ReferenceRoomListResponse listDataByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
             @AuthenticationPrincipal User user) {
@@ -154,20 +149,16 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
             throw new RuntimeException("permission denied");
         }
 
-        Page<ReferenceRoom> found;
+        Page<ReferenceRoom> page;
         if (StringUtils.hasText(query)) {
-            found = referenceRoomService.searchListByCategories(query, pageable, types);
+            page = referenceRoomService.searchListByCategories(query, pageable, types);
         } else {
-            found = referenceRoomService.listByCategories(pageable, types);
+            page = referenceRoomService.listByCategories(pageable, types);
         }
-        return new PageImpl<>(
-                found.getContent().stream().map(ReferenceRoomListDTO::build).toList(),
-                pageable,
-                found.getTotalElements()
-        );
+
+        return ReferenceRoomListResponse.of(page, pageable);
     }
-    
-    
+
     /* 댓글 */
     @PostMapping("/api/referenceroom/{id}/comment")
     @ResponseStatus(code = HttpStatus.ACCEPTED)

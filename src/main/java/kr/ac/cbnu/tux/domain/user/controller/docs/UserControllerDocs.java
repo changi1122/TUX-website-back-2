@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.nio.file.AccessDeniedException;
-
 @Tag(name = "회원(user)", description = "회원 API")
 public interface UserControllerDocs {
 
@@ -25,7 +23,7 @@ public interface UserControllerDocs {
     void updateUser(@PathVariable Long id, @Validated @RequestBody UserDataRequest request, @AuthenticationPrincipal User currentUser);
 
     @Operation(method = "GET", summary = "회원 정보 조회", description = "회원 정보를 조회합니다. (MANAGER, ADMIN 권한 보유시 타인 정보 조회 가능)")
-    UserResponse readUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser) throws AccessDeniedException;
+    UserResponse readUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser);
 
     @Operation(method = "DELETE", summary = "회원 탈퇴", description = "회원을 탈퇴합니다.")
     void deleteUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser, final HttpServletResponse response);

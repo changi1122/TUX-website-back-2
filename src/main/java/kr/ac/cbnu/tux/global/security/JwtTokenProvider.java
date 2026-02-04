@@ -32,7 +32,7 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION_MS);
 
-        return Token.build(
+        return Token.of(
                 Jwts.builder()
                         // username을 "sub"라는 claim으로 토큰에 추가
                         .subject(((UserDetails)authentication.getPrincipal()).getUsername())
