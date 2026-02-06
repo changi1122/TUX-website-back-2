@@ -9,6 +9,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import kr.ac.cbnu.tux.global.controller.GlobalExceptionController;
+import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
 import kr.ac.cbnu.tux.global.utility.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,6 +38,9 @@ public abstract class ControllerTestSupport {
     protected ObjectMapper objectMapper;
 
     // Security 관련 - JwtAuthenticationFilter에서 사용
+    @MockitoBean
+    protected JwtTokenProvider jwtTokenProvider;
+
     @MockitoBean
     protected UserRepository userRepository;
 
