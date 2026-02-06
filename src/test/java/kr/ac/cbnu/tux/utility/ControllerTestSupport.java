@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.community.service.CommunityService;
 import kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService;
+import kr.ac.cbnu.tux.domain.user.repository.RefreshTokenRepository;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import kr.ac.cbnu.tux.global.controller.GlobalExceptionController;
@@ -43,6 +44,9 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean
     protected UserRepository userRepository;
+
+    @MockitoBean
+    protected RefreshTokenRepository refreshTokenRepository;
 
     // Domain Services
     @MockitoBean

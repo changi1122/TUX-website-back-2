@@ -9,6 +9,7 @@ import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
+import kr.ac.cbnu.tux.global.utility.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
-
-import static kr.ac.cbnu.tux.global.utility.CookieUtils.createTokenCookie;
 
 @RequiredArgsConstructor
 @Controller
@@ -54,10 +53,12 @@ public class UserController implements UserControllerDocs {
             throw new RuntimeException("user not matched");
         }
 
+        // 회원 삭제 플래그 설정
         userService.deleteUserSoftly(id, OffsetDateTime.now());
 
-        Cookie tokenCookie = createTokenCookie(null, 0);
-        response.addCookie(tokenCookie);
+        // 쿠키 삭제
+        response.addCookie(CookieUtils.deleteAccessTokenCookie());
+        response.addCookie(CookieUtils.deleteRefreshTokenCookie());
     }
 
     @GetMapping("/api/user/{id}")

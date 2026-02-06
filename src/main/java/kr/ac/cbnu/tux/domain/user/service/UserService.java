@@ -4,9 +4,13 @@ import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
+import kr.ac.cbnu.tux.domain.user.dto.response.LoginResponse;
+import kr.ac.cbnu.tux.domain.user.dto.response.Token;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
+import kr.ac.cbnu.tux.domain.user.entity.RefreshToken;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.repository.RefreshTokenRepository;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ public class UserService implements UserDetailsService {
     private static final String PASSWORD_RULE = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d@$!%*#?&]{8,}$";
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -62,6 +67,7 @@ public class UserService implements UserDetailsService {
             }
 
             user.updatePassword(passwordEncoder.encode(request.getPassword()));
+            refreshTokenRepository.deleteByUsername(user.getUsername());
         }
     }
 
@@ -69,9 +75,11 @@ public class UserService implements UserDetailsService {
     public void deleteUserSoftly(Long id, OffsetDateTime now) {
         User user = userRepository.findById(id).orElseThrow();
         user.deleteUserData(now);
+        refreshTokenRepository.deleteByUsername(user.getUsername());
     }
 
-    public UserResponse tryLogin(LoginRequest loginRequest) {
+    @Transactional
+    public LoginResponse tryLogin(LoginRequest loginRequest) {
         User user = userRepository.findUserByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("user not present"));
 
@@ -82,17 +90,37 @@ public class UserService implements UserDetailsService {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     user, null, user.getAuthorities()
             );
-            return UserResponse.of(
-                    user,
-                    jwtTokenProvider.generateToken(authentication)
-            );
+
+            // 액세스 토큰 생성
+            Token accessToken = jwtTokenProvider.generateAccessToken(authentication);
+
+            // 리프레시 토큰 생성
+            Token refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
+
+            // 기존 리프레시 토큰 삭제 후 새로 저장
+            refreshTokenRepository.deleteByUsername(user.getUsername());
+            refreshTokenRepository.save(RefreshToken.builder()
+                    .token(refreshToken.getToken())
+                    .username(user.getUsername())
+                    .expiryDate(OffsetDateTime.now().plusSeconds(
+                            jwtTokenProvider.getRefreshExpirationMs() / 1000
+                    ))
+                    .build());
+
+            return LoginResponse.of(user, accessToken, refreshToken);
         } else {
             throw new RuntimeException("user not present");
         }
     }
 
+    @Transactional
+    public void logout(String username) {
+        refreshTokenRepository.deleteByUsername(username);
+    }
+
     public void deleteUserHardly(Long id) {
         User user = userRepository.findById(id).orElseThrow();
+        refreshTokenRepository.deleteByUsername(user.getUsername());
         userRepository.delete(user);
     }
 
@@ -100,6 +128,7 @@ public class UserService implements UserDetailsService {
     public void ban(Long id, OffsetDateTime now) {
         User user = userRepository.findById(id).orElseThrow();
         user.ban(now);
+        refreshTokenRepository.deleteByUsername(user.getUsername());
     }
 
     @Transactional

@@ -36,4 +36,6 @@ file:
 # JWT
 jwt:
   secret: ${JWT_SECRET:V5gkpclbEgFKLel6LPLhJvm9Pd7H56QcizuSRRYoYgLLKumgeXjJQTdFuPThzX56}
-  expiration: ${JWT_EXPIRATION:604800000}  # 7일 (밀리초)
+  expiration:
+    access: ${JWT_EXPIRATION:1800000}  # 30분 (밀리초)
+    refresh: ${JWT_EXPIRATION:604800000}  # 7일 (밀리초)

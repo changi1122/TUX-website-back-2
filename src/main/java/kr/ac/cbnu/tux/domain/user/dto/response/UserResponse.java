@@ -34,6 +34,7 @@ public class UserResponse {
         return of(user, null);
     }
 
+    @Deprecated
     public static UserResponse of(User user, Token token) {
         return UserResponse.builder()
                 .id(user.getId())

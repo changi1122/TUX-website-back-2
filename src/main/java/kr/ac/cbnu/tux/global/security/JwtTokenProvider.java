@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import io.micrometer.common.util.StringUtils;
 import kr.ac.cbnu.tux.domain.user.dto.response.Token;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -20,34 +21,55 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
-    private final long expirationMs;
+    private final long accessExpirationMs;
+    @Getter
+    private final long refreshExpirationMs;
     private final JwtParser jwtParser;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            @Value("${jwt.expiration}") long expirationMs) {
+                            @Value("${jwt.expiration.access}") long accessExpirationMs,
+                            @Value("${jwt.expiration.refresh}") long refreshExpirationMs) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationMs;
+        this.accessExpirationMs = accessExpirationMs;
+        this.refreshExpirationMs = refreshExpirationMs;
         this.jwtParser = Jwts.parser()
                 .verifyWith(this.secretKey)
                 .build();
     }
 
-    public Token generateToken(Authentication authentication) {
+    // 액세스 토큰 생성
+    public Token generateAccessToken(Authentication authentication) {
+        return generateToken(
+                ((UserDetails) authentication.getPrincipal()).getUsername(),
+                authentication.getAuthorities(),
+                accessExpirationMs
+        );
+    }
+
+    // 리프레시 토큰 생성
+    public Token generateRefreshToken(Authentication authentication) {
+        return generateToken(
+                ((UserDetails) authentication.getPrincipal()).getUsername(),
+                null, // 리프레시 토큰에는 role 불필요
+                refreshExpirationMs
+        );
+    }
+
+    private Token generateToken(String username, Object authorities, long expirationMs) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
-        return Token.of(
-                Jwts.builder()
-                        // username을 "sub"라는 claim으로 토큰에 추가
-                        .subject(((UserDetails)authentication.getPrincipal()).getUsername())
-                        // 회원 권한을 "role"이라는 claim으로 토큰에 추가
-                        .claim("role", authentication.getAuthorities())
-                        .issuedAt(now)
-                        .expiration(expiryDate)
-                        .signWith(secretKey)
-                        .compact(),
-                expiryDate.getTime()
-        );
+        JwtBuilder builder = Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey);
+
+        if (authorities != null) {
+            builder.claim("role", authorities);
+        }
+
+        return Token.of(builder.compact(), expiryDate.getTime());
     }
 
     public String getUsernameFromJwt(String token) {
@@ -55,6 +77,22 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
+    // 토큰 만료 여부 확인
+    public boolean isTokenExpired(String token) {
+        if (token == null || StringUtils.isEmpty(token))
+            return true;
+
+        try {
+            jwtParser.parseSignedClaims(token);
+            return false;
+        } catch (ExpiredJwtException ex) {
+            return true;  // 만료됨
+        } catch (Exception ex) {
+            return false; // 만료가 아닌 다른 이유로 유효하지 않음
+        }
+    }
+
+    // 토큰 유효 여부 확인
     public boolean validateToken(String token) {
         if (token == null || StringUtils.isEmpty(token))
             return false;
@@ -63,15 +101,15 @@ public class JwtTokenProvider {
             jwtParser.parseSignedClaims(token);
             return true;
         } catch (SignatureException ex) {
-            log.info("Invalid JWT signature");
+            log.debug("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            log.info("Invalid JWT token");
+            log.debug("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            log.info("Expired JWT token");
+            log.debug("Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            log.info("Unsupported JWT token");
+            log.debug("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            log.info("JWT claims string is empty.");
+            log.debug("JWT claims string is empty.");
         }
         return false;
     }
