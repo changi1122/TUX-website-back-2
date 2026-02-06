@@ -32,3 +32,8 @@ spring:
 # File Upload Path
 file:
   dir: ${UPLOAD_DIR:./upload/}
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET:V5gkpclbEgFKLel6LPLhJvm9Pd7H56QcizuSRRYoYgLLKumgeXjJQTdFuPThzX56}
+  expiration: ${JWT_EXPIRATION:604800000}  # 7일 (밀리초)

@@ -88,7 +88,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true; // 비밀번호 만료 정책 미사용
     }
 
     @Override

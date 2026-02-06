@@ -9,8 +9,8 @@ import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
-import kr.ac.cbnu.tux.global.security.UserAuthentication;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,7 +30,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public void createUser(SignupRequest request, OffsetDateTime now) {
@@ -79,15 +79,15 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("user not present");
 
         if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            Authentication authentication = new UserAuthentication(
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
                     user, null, user.getAuthorities()
             );
             return UserResponse.of(
                     user,
-                    JwtTokenProvider.generateToken(authentication)
+                    jwtTokenProvider.generateToken(authentication)
             );
         } else {
-            throw new IllegalArgumentException("password not matched");
+            throw new RuntimeException("user not present");
         }
     }
 
