@@ -28,4 +28,10 @@ public class CleanupScheduler {
     public void cleanupUnusedFiles() {
         cleanupService.deleteUnusedFiles();
     }
+
+    // 매일 1일 새벽 4시에 실행
+    @Scheduled(cron = "0 0 5 * * *")
+    public void deleteExpiredRefreshTokens() {
+        cleanupService.deleteExpiredRefreshTokens();
+    }
 }

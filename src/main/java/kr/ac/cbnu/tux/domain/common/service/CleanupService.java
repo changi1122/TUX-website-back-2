@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.community.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.domain.community.repository.CommunityRepository;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.RfCommentRepository;
+import kr.ac.cbnu.tux.domain.user.repository.RefreshTokenRepository;
 import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +33,7 @@ public class CleanupService {
     private final CmCommentRepository cmCommentRepository;
     private final RfCommentRepository rfCommentRepository;
     private final AttachmentRepository attachmentRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final FileStore fileStore;
     private final TransactionTemplate transactionTemplate;
 
@@ -149,6 +152,17 @@ public class CleanupService {
         }
 
         log.info("[삭제되어 사용되지 않는 파일 정리 시작 종료] 총 {}개 파일 삭제됨", totalDeleted);
+    }
+
+    public void deleteExpiredRefreshTokens() {
+        log.info("[만료된 리프레시 토큰 정리 시작]");
+
+        try {
+            int deletedCount = refreshTokenRepository.deleteExpiredTokens(OffsetDateTime.now());
+            log.info("[만료된 리프레시 토큰 정리 종료] 총 {}개 삭제됨", deletedCount);
+        } catch (Exception e) {
+            log.error("[만료된 리프레시 토큰 정리 중 오류 발생]", e);
+        }
     }
 
     private static String[] parsePath(String path) {

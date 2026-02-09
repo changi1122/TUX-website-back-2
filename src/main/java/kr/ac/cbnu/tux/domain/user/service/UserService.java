@@ -97,8 +97,7 @@ public class UserService implements UserDetailsService {
             // 리프레시 토큰 생성
             Token refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
 
-            // 기존 리프레시 토큰 삭제 후 새로 저장
-            refreshTokenRepository.deleteByUsername(user.getUsername());
+            // 리프레시 토큰 저장
             refreshTokenRepository.save(RefreshToken.builder()
                     .token(refreshToken.getToken())
                     .username(user.getUsername())
