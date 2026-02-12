@@ -87,7 +87,7 @@ public class CommunityService {
 
     @Transactional
     public void updatePost(Long id, CommunityPostType type, CommunityRequest request, User user, OffsetDateTime now) {
-        Community post = communityRepository.findById(id).orElseThrow();
+        Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(post.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
@@ -103,7 +103,7 @@ public class CommunityService {
 
     @Transactional
     public void deletePost(Long id, User user, OffsetDateTime now) {
-        Community post = communityRepository.findById(id).orElseThrow();
+        Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(post.getUser()) && !CAN_DELETE_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
@@ -113,7 +113,7 @@ public class CommunityService {
     }
 
     public Community readPost(Long id, User user) {
-        Community post = communityRepository.findById(id).orElseThrow();
+        Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
         if (!post.getUser().equals(user))
             communityRepository.updateViewById(id);
 
@@ -160,7 +160,7 @@ public class CommunityService {
 
     @Transactional
     public CmComment addComment(Long id, CmCommentRequest request, User user, OffsetDateTime now) {
-        Community post = communityRepository.findById(id).orElseThrow();
+        Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
         CmComment comment = request.toEntity();
         comment.initializeComment(post, user, now);
         return cmCommentRepository.save(comment);

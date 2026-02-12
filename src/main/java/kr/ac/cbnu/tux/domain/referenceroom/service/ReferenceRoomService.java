@@ -99,7 +99,7 @@ public class ReferenceRoomService {
     /* 글 수정 */
     @Transactional
     public void updateData(Long id, ReferenceRoomPostType type, ReferenceRoomRequest request, User user, OffsetDateTime now) {
-        ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(data.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
@@ -125,7 +125,7 @@ public class ReferenceRoomService {
     /* 글 삭제 */
     @Transactional
     public void deleteData(Long id, User user, OffsetDateTime now) {
-        ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(data.getUser()) && !CAN_DELETE_ROLES.contains(user.getRole())) {
             throw new RuntimeException("user not matched");
@@ -136,7 +136,7 @@ public class ReferenceRoomService {
 
     /* 글 조회 */
     public ReferenceRoom readData(Long id, User user) {
-        ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
         if (data.getCategory().cannotReadBy(user))
             throw new RuntimeException("permission denied");
 
@@ -186,7 +186,7 @@ public class ReferenceRoomService {
 
     @Transactional
     public RfComment addComment(Long id, RfCommentRequest request, User user, OffsetDateTime now) {
-        ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
         RfComment comment = request.toEntity();
         comment.initializeComment(data, user, now);
         return rfCommentRepository.save(comment);

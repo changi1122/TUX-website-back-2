@@ -13,11 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
 public interface CommunityRepository extends JpaRepository<Community, Long>, CommunityRepositoryDsl {
     // 메서드 이름 길이가 긴데, 이게 맞는 건지는 -> QueryDSL로 개선하면 좋을 듯...
+
+    Optional<Community> findByIdAndIsDeletedFalse(Long id);
 
     @EntityGraph("Community.fetchUser")
     Page<Community> findByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);

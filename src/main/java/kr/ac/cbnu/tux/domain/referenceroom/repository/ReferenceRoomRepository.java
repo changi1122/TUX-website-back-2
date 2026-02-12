@@ -13,11 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
 public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Long> {
     // 메서드 이름 길이가 긴데, 이게 맞는 건지는 -> QueryDSL로 개선하면 좋을 듯...
+
+    Optional<ReferenceRoom> findByIdAndIsDeletedFalse(Long id);
 
     @EntityGraph("ReferenceRoom.fetchUser")
     Page<ReferenceRoom> findByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
