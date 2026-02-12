@@ -29,6 +29,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.NoSuchElementException;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
 import static kr.ac.cbnu.tux.domain.referenceroom.factory.ReferenceRoomFactory.createRequest;
@@ -196,6 +197,9 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         ReferenceRoom foundData = referenceRoomRepository.findById(data.getId()).orElseThrow();
         assertThat(foundData).extracting("isDeleted", "deletedDate")
                 .contains(true, now);
+
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), actor))
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @ParameterizedTest

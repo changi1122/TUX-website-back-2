@@ -26,6 +26,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 import static kr.ac.cbnu.tux.domain.community.factory.CommunityFactory.createRequest;
@@ -193,6 +195,9 @@ class CommunityServiceTest extends IntegrationTestSupport {
         Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
         assertThat(foundPost).extracting("isDeleted", "deletedDate")
                 .contains(true, now);
+
+        assertThatThrownBy(() -> communityService.readPost(post.getId(), user))
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @ParameterizedTest
