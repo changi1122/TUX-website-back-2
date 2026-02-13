@@ -39,3 +39,10 @@ jwt:
   expiration:
     access: ${JWT_EXPIRATION:1800000}  # 30분 (밀리초)
     refresh: ${JWT_EXPIRATION:604800000}  # 7일 (밀리초)
+
+# SpringDoc
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
