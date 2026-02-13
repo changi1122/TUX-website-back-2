@@ -184,6 +184,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
     void deleteData(UserRole role) {
         // given
         User user = userRepository.save(createTestUser("author", UserRole.USER));
+        User otherUser = userRepository.save(createTestUser("otherUser", UserRole.USER));
         ReferenceRoomRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
         ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, user, OffsetDateTime.now());
 
@@ -198,7 +199,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         assertThat(foundData).extracting("isDeleted", "deletedDate")
                 .contains(true, now);
 
-        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), actor))
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), otherUser))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
