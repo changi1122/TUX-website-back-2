@@ -182,6 +182,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
     void deletePost(UserRole role) {
         // given
         User user = userRepository.save(createTestUser("author", UserRole.USER));
+        User otherUser = userRepository.save(createTestUser("otherUser", UserRole.USER));
         CommunityRequest request = createRequest("제목", "<p>본문</p>", (short) 1);
         Community post = communityService.createPost(CommunityPostType.FREE, request, user, OffsetDateTime.now());
 
@@ -196,7 +197,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         assertThat(foundPost).extracting("isDeleted", "deletedDate")
                 .contains(true, now);
 
-        assertThatThrownBy(() -> communityService.readPost(post.getId(), user))
+        assertThatThrownBy(() -> communityService.readPost(post.getId(), otherUser))
                 .isInstanceOf(NoSuchElementException.class);
     }
 

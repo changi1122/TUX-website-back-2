@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Service
@@ -113,7 +114,10 @@ public class CommunityService {
     }
 
     public Community readPost(Long id, User user) {
-        Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
+        Community post = communityRepository.findById(id).orElseThrow();
+        if (post.getIsDeleted() && !user.equals(post.getUser())) // 임시 생성된 글 조회를 위해 본인은 조회 허용
+            throw new NoSuchElementException();
+
         if (!post.getUser().equals(user))
             communityRepository.updateViewById(id);
 

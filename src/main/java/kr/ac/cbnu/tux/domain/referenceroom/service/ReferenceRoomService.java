@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Service
@@ -136,7 +137,10 @@ public class ReferenceRoomService {
 
     /* 글 조회 */
     public ReferenceRoom readData(Long id, User user) {
-        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
+        ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
+        if (data.getIsDeleted() && !user.equals(data.getUser())) // 임시 생성된 글 조회를 위해 본인은 조회 허용
+            throw new NoSuchElementException();
+
         if (data.getCategory().cannotReadBy(user))
             throw new RuntimeException("permission denied");
 
