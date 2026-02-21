@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -62,7 +63,8 @@ public class Community {
     }
 
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<CmComment> comments = new ArrayList<>();
 
@@ -74,7 +76,8 @@ public class Community {
         }
     }
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<Attachment> attachments = new ArrayList<>();
 
@@ -96,6 +99,7 @@ public class Community {
 
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<Like> likes = new ArrayList<>();
 

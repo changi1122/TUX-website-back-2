@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -71,7 +72,8 @@ public class ReferenceRoom {
     }
 
 
-    @OneToMany(mappedBy = "data", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<RfComment> comments = new ArrayList<>();
 
@@ -83,7 +85,8 @@ public class ReferenceRoom {
         }
     }
 
-    @OneToMany(mappedBy = "data", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<Attachment> attachments = new ArrayList<>();
 
@@ -105,6 +108,7 @@ public class ReferenceRoom {
 
 
     @OneToMany(mappedBy = "data", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<Like> likes = new ArrayList<>();
 

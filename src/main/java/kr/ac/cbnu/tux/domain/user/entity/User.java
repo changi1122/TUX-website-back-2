@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -105,6 +106,7 @@ public class User implements UserDetails {
 
     /* 커뮤니티 글 */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<Community> posts = new ArrayList<>();
 
@@ -118,6 +120,7 @@ public class User implements UserDetails {
 
     /* 커뮤니티 댓글 */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<CmComment> cmComments = new ArrayList<>();
 
@@ -131,6 +134,7 @@ public class User implements UserDetails {
 
     /* 자료실 글 */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<ReferenceRoom> datas = new ArrayList<>();
 
@@ -144,6 +148,7 @@ public class User implements UserDetails {
 
     /* 자료실 댓글 */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<RfComment> rfComments = new ArrayList<>();
 

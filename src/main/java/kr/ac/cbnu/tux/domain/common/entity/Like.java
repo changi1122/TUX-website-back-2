@@ -20,7 +20,7 @@ public class Like {
     
     private Boolean dislike; // false: 추천, true: 비추천
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Community post;
 
     public void setPost(Community post) {
@@ -31,7 +31,7 @@ public class Like {
         }
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReferenceRoom data;
 
     public void setData(ReferenceRoom data) {
