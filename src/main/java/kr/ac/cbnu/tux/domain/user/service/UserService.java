@@ -113,8 +113,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void logout(String username) {
-        refreshTokenRepository.deleteByUsername(username);
+    public void logout(String refreshToken) {
+        refreshTokenRepository.deleteByToken(refreshToken);
     }
 
     public void deleteUserHardly(Long id) {

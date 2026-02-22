@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.user.controller;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.cbnu.tux.domain.user.controller.docs.AuthControllerDocs;
 import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
@@ -46,10 +47,11 @@ public class AuthController implements AuthControllerDocs {
 
     @DeleteMapping("/api/auth")
     @ResponseStatus(code = HttpStatus.OK)
-    public void logout(HttpServletResponse response, @AuthenticationPrincipal User user) {
+    public void logout(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal User user) {
         // DB에서 리프레시 토큰 삭제
-        if (user != null) {
-            userService.logout(user.getUsername());
+        String refreshToken = CookieUtils.getCookieValue(request, CookieUtils.REFRESH_TOKEN_KEY);
+        if (user != null && refreshToken != null) {
+            userService.logout(refreshToken);
         }
 
         // 쿠키 삭제
