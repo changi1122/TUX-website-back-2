@@ -28,6 +28,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -117,8 +119,10 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     /* 글 읽기 */
     @GetMapping("/api/referenceroom/{id}")
     @ResponseBody
-    public ReferenceRoomResponse readData(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        ReferenceRoom data = referenceRoomService.readData(id, user);
+    public ReferenceRoomResponse readData(@PathVariable Long id, @AuthenticationPrincipal User user,
+                                          HttpServletRequest request) {
+        String identifier = (user != null) ? user.getId().toString() : request.getRemoteAddr();
+        ReferenceRoom data = referenceRoomService.readData(id, user, identifier);
         return ReferenceRoomResponse.of(data);
     }
 

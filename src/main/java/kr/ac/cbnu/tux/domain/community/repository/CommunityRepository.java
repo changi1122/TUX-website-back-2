@@ -54,11 +54,6 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
 
     Long countByIsDeletedFalse();
 
-    @Modifying
-    @Transactional
-    @Query("update Community p set p.view = p.view + 1 where p.id = :id")
-    void updateViewById(Long id);
-
     @Query(value = """
         SELECT id
         FROM community

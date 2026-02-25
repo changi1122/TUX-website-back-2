@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
+import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.RfCommentRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
@@ -29,6 +30,7 @@ public class ReferenceRoomService {
     private final ReferenceRoomRepository referenceRoomRepository;
     private final RfCommentRepository rfCommentRepository;
     private final Sanitizer sanitizer;
+    private final ViewCountService viewCountService;
 
     public final static List<UserRole> CAN_EDIT_ROLES = List.of(UserRole.ADMIN);
     private final static List<UserRole> CAN_DELETE_ROLES = List.of(UserRole.ADMIN, UserRole.MANAGER);
@@ -136,7 +138,7 @@ public class ReferenceRoomService {
     }
 
     /* 글 조회 */
-    public ReferenceRoom readData(Long id, User user) {
+    public ReferenceRoom readData(Long id, User user, String viewerIdentifier) {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
         if (data.getIsDeleted() && !user.equals(data.getUser())) // 임시 생성된 글 조회를 위해 본인은 조회 허용
             throw new NoSuchElementException();
@@ -145,7 +147,7 @@ public class ReferenceRoomService {
             throw new RuntimeException("permission denied");
 
         if (!data.getUser().equals(user))
-            referenceRoomRepository.updateViewById(id);
+            viewCountService.addView("referenceroom", data.getId(), viewerIdentifier);
 
         return data;
     }

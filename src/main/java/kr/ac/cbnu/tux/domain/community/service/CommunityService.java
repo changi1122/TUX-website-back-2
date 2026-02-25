@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.community.repository.CmCommentRepository;
+import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
 import kr.ac.cbnu.tux.domain.community.repository.CommunityRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
@@ -28,6 +29,7 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CmCommentRepository cmCommentRepository;
     private final Sanitizer sanitizer;
+    private final ViewCountService viewCountService;
 
     public final static List<UserRole> CAN_EDIT_ROLES = List.of(UserRole.ADMIN);
     private final static List<UserRole> CAN_DELETE_ROLES = List.of(UserRole.ADMIN, UserRole.MANAGER);
@@ -113,13 +115,13 @@ public class CommunityService {
         post.deletePost(now);
     }
 
-    public Community readPost(Long id, User user) {
+    public Community readPost(Long id, User user, String viewerIdentifier) {
         Community post = communityRepository.findById(id).orElseThrow();
         if (post.getIsDeleted() && !user.equals(post.getUser())) // 임시 생성된 글 조회를 위해 본인은 조회 허용
             throw new NoSuchElementException();
 
         if (!post.getUser().equals(user))
-            communityRepository.updateViewById(id);
+            viewCountService.addView("community", post.getId(), viewerIdentifier);
 
         return post;
     }

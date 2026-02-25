@@ -3,6 +3,12 @@ spring:
   datasource:
     url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tuxweb2_test}
 
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 # File Upload Path
 file:
   dir: ${UPLOAD_DIR:./upload_test/}

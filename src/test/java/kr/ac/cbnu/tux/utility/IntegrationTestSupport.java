@@ -1,8 +1,9 @@
 package kr.ac.cbnu.tux.utility;
 
-import org.junit.jupiter.api.BeforeEach;
+import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -10,4 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public abstract class IntegrationTestSupport {
 
+    @MockitoBean
+    protected ViewCountService viewCountService;
 }

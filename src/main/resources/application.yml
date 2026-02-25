@@ -29,6 +29,12 @@ spring:
         show_sql: false
         format_sql: false
 
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
 # File Upload Path
 file:
   dir: ${UPLOAD_DIR:./upload/}

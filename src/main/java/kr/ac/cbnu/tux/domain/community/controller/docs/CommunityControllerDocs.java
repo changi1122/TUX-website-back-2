@@ -19,6 +19,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -50,7 +52,8 @@ public interface CommunityControllerDocs {
     void deletePost(@PathVariable Long id, @AuthenticationPrincipal User user);
 
     @Operation(method = "GET", summary = "글 조회", description = "글을 조회한다.")
-    CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user);
+    CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user,
+                               HttpServletRequest request);
 
     @Operation(method = "GET", summary = "글 목록 조회", description = "전체 글 목록을 조회한다.")
     CommunityListResponse listPosts(@RequestParam(name = "query", defaultValue = "") String query, Pageable pageable);

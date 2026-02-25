@@ -48,11 +48,6 @@ public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Lo
 
     Long countByIsDeletedFalse();
 
-    @Transactional
-    @Query("update ReferenceRoom d set d.view = d.view + 1 where d.id = :id")
-    @Modifying
-    void updateViewById(Long id);
-
     @Query(value = """
         SELECT id
         FROM reference_room

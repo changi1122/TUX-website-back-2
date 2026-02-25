@@ -28,6 +28,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -117,8 +119,10 @@ public class CommunityController implements CommunityControllerDocs {
     /* 글 읽기 */
     @GetMapping("/api/community/{id}")
     @ResponseBody
-    public CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user) {
-        Community post = communityService.readPost(id, user);
+    public CommunityResponse readPost(@PathVariable Long id, @AuthenticationPrincipal User user,
+                                      HttpServletRequest request) {
+        String identifier = (user != null) ? user.getId().toString() : request.getRemoteAddr();
+        Community post = communityService.readPost(id, user, identifier);
         return CommunityResponse.of(post);
     }
 

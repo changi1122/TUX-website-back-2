@@ -38,6 +38,7 @@ import static kr.ac.cbnu.tux.domain.user.factory.UserFactory.createTestUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class ReferenceRoomServiceTest extends IntegrationTestSupport {
 
@@ -199,7 +200,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         assertThat(foundData).extracting("isDeleted", "deletedDate")
                 .contains(true, now);
 
-        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), otherUser))
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), otherUser, "testId"))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -231,13 +232,14 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         User reader = userRepository.save(createTestUser("reader", UserRole.USER));
 
         // when
-        referenceRoomService.readData(data.getId(), reader);
+        referenceRoomService.readData(data.getId(), reader, "testId");
 
         // then
         entityManager.clear();
         ReferenceRoom foundData = referenceRoomRepository.findById(data.getId()).orElseThrow();
-        assertThat(foundData).extracting("title", "body", "editorVersion", "view", "user")
-                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), 1L, author);
+        assertThat(foundData).extracting("title", "body", "editorVersion", "user")
+                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), author);
+        verify(viewCountService).addView("referenceroom", data.getId(), "testId");
     }
 
     @Test
@@ -249,13 +251,14 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
 
         // when
-        referenceRoomService.readData(data.getId(), author);
+        referenceRoomService.readData(data.getId(), author, "testId");
 
         // then
         entityManager.clear();
         ReferenceRoom foundData = referenceRoomRepository.findById(data.getId()).orElseThrow();
         assertThat(foundData).extracting("title", "body", "editorVersion", "view", "user")
                 .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), 0L, author);
+        verify(viewCountService, never()).addView(any(), any(), any());
     }
 
     @Test
@@ -267,7 +270,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.GALLERY, request, author, OffsetDateTime.now());
 
         // when
-        ReferenceRoom result = referenceRoomService.readData(data.getId(), null);
+        ReferenceRoom result = referenceRoomService.readData(data.getId(), null, "testId");
 
         // then
         assertThat(result.getId()).isEqualTo(data.getId());
@@ -285,7 +288,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         User reader = userRepository.save(createTestUser("reader", role));
 
         // when
-        ReferenceRoom result = referenceRoomService.readData(data.getId(), reader);
+        ReferenceRoom result = referenceRoomService.readData(data.getId(), reader, "testId");
 
         // then
         assertThat(result.getId()).isEqualTo(data.getId());
@@ -303,10 +306,10 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         User guest = userRepository.save(createTestUser("guest", UserRole.GUEST));
 
         // when then
-        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), null))
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), null, "testId"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("permission denied");
-        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), guest))
+        assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), guest, "testId"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("permission denied");
     }
@@ -324,8 +327,8 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         User reader = userRepository.save(createTestUser("reader", role));
 
         // when then
-        assertThat(referenceRoomService.readData(studyData.getId(), reader).getId()).isEqualTo(studyData.getId());
-        assertThat(referenceRoomService.readData(examData.getId(), reader).getId()).isEqualTo(examData.getId());
+        assertThat(referenceRoomService.readData(studyData.getId(), reader, "testId").getId()).isEqualTo(studyData.getId());
+        assertThat(referenceRoomService.readData(examData.getId(), reader, "testId").getId()).isEqualTo(examData.getId());
     }
 
     @Test

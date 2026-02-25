@@ -34,6 +34,7 @@ import static kr.ac.cbnu.tux.domain.community.factory.CommunityFactory.createReq
 import static kr.ac.cbnu.tux.domain.user.factory.UserFactory.createTestUser;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class CommunityServiceTest extends IntegrationTestSupport {
 
@@ -197,7 +198,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         assertThat(foundPost).extracting("isDeleted", "deletedDate")
                 .contains(true, now);
 
-        assertThatThrownBy(() -> communityService.readPost(post.getId(), otherUser))
+        assertThatThrownBy(() -> communityService.readPost(post.getId(), otherUser, "testId"))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -229,13 +230,14 @@ class CommunityServiceTest extends IntegrationTestSupport {
         User reader = userRepository.save(createTestUser("reader", UserRole.USER));
 
         // when
-        communityService.readPost(post.getId(), reader);
+        communityService.readPost(post.getId(), reader, "testId");
 
         // then
         entityManager.clear();  // 1차 캐시 비우기
         Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
-        assertThat(foundPost).extracting("title", "body", "editorVersion", "view", "user")
-                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), 1L, author);
+        assertThat(foundPost).extracting("title", "body", "editorVersion", "user")
+                .contains(request.getTitle(), request.getBody(), request.getEditorVersion(), author);
+        verify(viewCountService).addView("community", post.getId(), "testId");
     }
 
     @Test
@@ -247,12 +249,13 @@ class CommunityServiceTest extends IntegrationTestSupport {
         Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
 
         // when
-        communityService.readPost(post.getId(), author);
+        communityService.readPost(post.getId(), author, "testId");
 
         // then
         entityManager.clear();  // 1차 캐시 비우기
         Community foundPost = communityRepository.findById(post.getId()).orElseThrow();
         assertThat(foundPost.getView()).isEqualTo(0L);
+        verify(viewCountService, never()).addView(any(), any(), any());
     }
 
     @Test
