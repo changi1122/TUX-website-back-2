@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
+import kr.ac.cbnu.tux.domain.common.enums.SearchType;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.community.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
@@ -133,28 +134,16 @@ public class CommunityService {
         return communityRepository.findByIsDeletedFalseOrderByCreatedDateDesc(pageable);
     }
 
-    public Page<Community> searchList(String query, Pageable pageable) {
-        return communityRepository.findByIsDeletedFalseAndTitleContainingIgnoreCaseOrderByCreatedDateDesc(query, pageable);
-    }
-
-    public Page<Community> listByCategory(Pageable pageable, CommunityPostType type) {
-        return communityRepository.findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(type, pageable);
+    public Page<Community> searchList(String query, SearchType searchType, Pageable pageable) {
+        return communityRepository.searchDsl(query, searchType, null, pageable);
     }
 
     public Page<Community> listByCategories(Pageable pageable, List<CommunityPostType> types) {
         return communityRepository.findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(types, pageable);
     }
 
-    public Page<Community> searchListByCategory(String query, Pageable pageable, CommunityPostType type) {
-        return communityRepository.findByIsDeletedFalseAndTitleContainingIgnoreCaseAndCategoryOrderByCreatedDateDesc(query, type, pageable);
-    }
-
-    public Page<Community> searchListByCategories(String query, Pageable pageable, List<CommunityPostType> types) {
-        return communityRepository.findByIsDeletedFalseAndTitleContainingIgnoreCaseAndCategoryInOrderByCreatedDateDesc(query, types, pageable);
-    }
-
-    public List<Community> listAll() {
-        return communityRepository.findAllByIsDeletedFalse();
+    public Page<Community> searchListByCategories(String query, SearchType searchType, Pageable pageable, List<CommunityPostType> types) {
+        return communityRepository.searchDsl(query, searchType, types, pageable);
     }
 
     public Long count() {

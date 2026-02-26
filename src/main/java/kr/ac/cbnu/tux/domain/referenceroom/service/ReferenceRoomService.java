@@ -7,6 +7,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
+import kr.ac.cbnu.tux.domain.common.enums.SearchType;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.ReferenceRoomRepository;
@@ -158,10 +159,8 @@ public class ReferenceRoomService {
         return referenceRoomRepository.findByIsDeletedFalseOrderByCreatedDateDesc(pageable);
     }
 
-    public Page<ReferenceRoom> searchList(String query, Pageable pageable) {
-        return referenceRoomRepository.findByIsDeletedFalseAndTitleContainingIgnoreCaseOrIsDeletedFalseAndLectureContainingIgnoreCaseOrIsDeletedFalseAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
-                query, query, query, pageable
-        );
+    public Page<ReferenceRoom> searchList(String query, SearchType searchType, Pageable pageable) {
+        return referenceRoomRepository.searchDsl(query, searchType, null, pageable);
     }
 
     public Page<ReferenceRoom> listByCategory(Pageable pageable, ReferenceRoomPostType type) {
@@ -172,16 +171,8 @@ public class ReferenceRoomService {
         return referenceRoomRepository.findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(types, pageable);
     }
 
-    public Page<ReferenceRoom> searchListByCategory(String query, Pageable pageable, ReferenceRoomPostType type) {
-        return referenceRoomRepository.findByIsDeletedFalseAndCategoryAndTitleContainingIgnoreCaseOrIsDeletedFalseAndCategoryAndLectureContainingIgnoreCaseOrIsDeletedFalseAndCategoryAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
-                type, query, type, query, type, query, pageable
-        );
-    }
-
-    public Page<ReferenceRoom> searchListByCategories(String query, Pageable pageable, List<ReferenceRoomPostType> types) {
-        return referenceRoomRepository.findByIsDeletedFalseAndCategoryInAndTitleContainingIgnoreCaseOrIsDeletedFalseAndCategoryInAndLectureContainingIgnoreCaseOrIsDeletedFalseAndCategoryInAndProfessorContainingIgnoreCaseOrderByCreatedDateDesc(
-                types, query, types, query, types, query, pageable
-        );
+    public Page<ReferenceRoom> searchListByCategories(String query, SearchType searchType, Pageable pageable, List<ReferenceRoomPostType> types) {
+        return referenceRoomRepository.searchDsl(query, searchType, types, pageable);
     }
 
     public Long count() {

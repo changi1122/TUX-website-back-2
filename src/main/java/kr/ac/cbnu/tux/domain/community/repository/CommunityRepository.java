@@ -26,11 +26,6 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
     Page<Community> findByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
 
     @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseAndTitleContainingIgnoreCaseOrderByCreatedDateDesc(
-            String title, Pageable pageable
-    );
-
-    @EntityGraph("Community.fetchUser")
     Page<Community> findByIsDeletedFalseOrderByViewDescCreatedDateDesc(Pageable pageable);
 
     @EntityGraph("Community.fetchUser")
@@ -38,16 +33,6 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
 
     @EntityGraph("Community.fetchUser")
     Page<Community> findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(List<CommunityPostType> types, Pageable pageable);
-
-    @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseAndTitleContainingIgnoreCaseAndCategoryOrderByCreatedDateDesc(
-            String title, CommunityPostType type, Pageable pageable
-    );
-
-    @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseAndTitleContainingIgnoreCaseAndCategoryInOrderByCreatedDateDesc(
-            String title, List<CommunityPostType> types, Pageable pageable
-    );
 
     @EntityGraph("Community.fetchUser")
     List<Community> findAllByIsDeletedFalse();

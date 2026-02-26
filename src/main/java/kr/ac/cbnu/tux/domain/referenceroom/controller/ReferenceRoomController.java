@@ -11,6 +11,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.RfCommentResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
+import kr.ac.cbnu.tux.domain.common.enums.SearchType;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
@@ -130,6 +131,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @GetMapping("/api/referenceroom/list")
     @ResponseBody
     public ReferenceRoomListResponse listData(@RequestParam(name = "query", defaultValue = "") String query,
+                                              @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
                                               Pageable pageable, @AuthenticationPrincipal User user) {
         if (ReferenceRoomPostType.cannotListBy(user)) {
             throw new RuntimeException("permission denied");
@@ -137,7 +139,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
 
         Page<ReferenceRoom> page;
         if (StringUtils.hasText(query)) {
-            page = referenceRoomService.searchList(query, pageable);
+            page = referenceRoomService.searchList(query, searchType, pageable);
         } else {
             page = referenceRoomService.list(pageable);
         }
@@ -149,6 +151,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @ResponseBody
     public ReferenceRoomListResponse listDataByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
             @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
             @AuthenticationPrincipal User user) {
 
@@ -158,7 +161,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
 
         Page<ReferenceRoom> page;
         if (StringUtils.hasText(query)) {
-            page = referenceRoomService.searchListByCategories(query, pageable, types);
+            page = referenceRoomService.searchListByCategories(query, searchType, pageable, types);
         } else {
             page = referenceRoomService.listByCategories(pageable, types);
         }

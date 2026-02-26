@@ -11,6 +11,7 @@ import kr.ac.cbnu.tux.domain.community.dto.response.CommunityListResponse;
 import kr.ac.cbnu.tux.domain.community.dto.response.CommunityResponse;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
+import kr.ac.cbnu.tux.domain.common.enums.SearchType;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.community.service.CommunityService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
@@ -130,12 +131,13 @@ public class CommunityController implements CommunityControllerDocs {
     @GetMapping("/api/community/list")
     @ResponseBody
     public CommunityListResponse listPosts(@RequestParam(name = "query", defaultValue = "") String query,
+                                           @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
                                            Pageable pageable) {
         Page<Community> page;
-            if (StringUtils.hasText(query)) {
-                page = communityService.searchList(query, pageable);
-            } else {
-                page = communityService.list(pageable);
+        if (StringUtils.hasText(query)) {
+            page = communityService.searchList(query, searchType, pageable);
+        } else {
+            page = communityService.list(pageable);
         }
 
         return CommunityListResponse.of(page, pageable);
@@ -145,11 +147,12 @@ public class CommunityController implements CommunityControllerDocs {
     @ResponseBody
     public CommunityListResponse listPostsByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
             @RequestParam("type") List<CommunityPostType> types, Pageable pageable) {
 
         Page<Community> page;
         if (StringUtils.hasText(query)) {
-            page = communityService.searchListByCategories(query, pageable, types);
+            page = communityService.searchListByCategories(query, searchType, pageable, types);
         } else {
             page = communityService.listByCategories(pageable, types);
         }
