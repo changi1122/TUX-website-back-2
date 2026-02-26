@@ -39,8 +39,7 @@ public class ViewCountSyncScheduler {
 
         List<Object[]> batchArgs = new ArrayList<>();
         for (String key : keys) {
-            // GETSET: 현재 값을 원자적으로 가져오고 0으로 초기화
-            String value = stringRedisTemplate.opsForValue().getAndSet(key, "0");
+            String value = stringRedisTemplate.opsForValue().getAndDelete(key);
             if (value == null || value.equals("0")) continue;
 
             // key 형식: viewCount:{domain}:{id}:{date}
