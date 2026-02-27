@@ -214,7 +214,8 @@ public class CommunityController implements CommunityControllerDocs {
         if (aid != -1)
             attachmentService.increaseDownloadCountById(aid);
 
-        String disposition = isImage ? "inline"
+        // aid가 있으면 명시적 다운로드 요청 → attachment, aid가 없는 이미지는 inline (페이지 내 임베드)
+        String disposition = (aid == -1 && isImage) ? "inline"
                 : "attachment; filename=\"" + new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"";
         String cacheControl = isImage
                 ? "public, max-age=86400, stale-while-revalidate=3600"
