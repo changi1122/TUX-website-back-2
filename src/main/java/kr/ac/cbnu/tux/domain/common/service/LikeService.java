@@ -5,6 +5,8 @@ import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.common.repository.LikeRepository;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.domain.common.exception.CommonErrorCode;
+import kr.ac.cbnu.tux.domain.common.exception.CommonException;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ public class LikeService {
                     .build();
             likeRepository.save(like);
         } else {
-            throw new RuntimeException("already like/dislike given");
+            throw new CommonException(CommonErrorCode.DUPLICATE_LIKE);
         }
     }
 
@@ -40,7 +42,7 @@ public class LikeService {
                     .build();
             likeRepository.save(like);
         } else {
-            throw new RuntimeException("already like/dislike given");
+            throw new CommonException(CommonErrorCode.DUPLICATE_LIKE);
         }
     }
 }

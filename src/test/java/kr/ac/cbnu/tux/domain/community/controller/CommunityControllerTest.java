@@ -151,7 +151,7 @@ class CommunityControllerTest extends ControllerTestSupport {
                         .with(csrf())
                         .with(user(currentUser)))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -210,7 +210,7 @@ class CommunityControllerTest extends ControllerTestSupport {
                         .with(csrf())
                         .with(user(currentUser)))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
     }
 
     @Test

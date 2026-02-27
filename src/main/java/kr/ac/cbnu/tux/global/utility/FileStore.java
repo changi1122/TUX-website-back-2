@@ -2,6 +2,8 @@ package kr.ac.cbnu.tux.global.utility;
 
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.enums.AttachmentType;
+import kr.ac.cbnu.tux.global.exception.FileErrorCode;
+import kr.ac.cbnu.tux.global.exception.FileException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +41,7 @@ public class FileStore {
             file.transferTo(destFile);
         }
         catch (Exception e) {
-            throw new RuntimeException("io exception while saveAttachment", e);
+            throw new FileException(FileErrorCode.SAVE_FAILED);
         }
     }
 
@@ -51,7 +53,7 @@ public class FileStore {
             Files.deleteIfExists(Paths.get(filePath));
         }
         catch (Exception e) {
-            throw new RuntimeException("io exception while deleteAttachment", e);
+            throw new FileException(FileErrorCode.DELETE_FAILED);
         }
     }
 
@@ -124,7 +126,7 @@ public class FileStore {
             }
             Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileException(FileErrorCode.COPY_FAILED);
         }
     }
 }

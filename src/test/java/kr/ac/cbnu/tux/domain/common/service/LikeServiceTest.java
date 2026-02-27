@@ -9,6 +9,7 @@ import kr.ac.cbnu.tux.domain.community.service.CommunityService;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
+import kr.ac.cbnu.tux.domain.common.exception.CommonException;
 import kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
@@ -89,7 +90,7 @@ class LikeServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> likeService.createLike(post, liker, false))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommonException.class)
                 .hasMessage("already like/dislike given");
     }
 
@@ -106,7 +107,7 @@ class LikeServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> likeService.createLike(post, liker, true))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommonException.class)
                 .hasMessage("already like/dislike given");
     }
 
@@ -164,7 +165,7 @@ class LikeServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> likeService.createLike(data, liker, false))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommonException.class)
                 .hasMessage("already like/dislike given");
     }
 
@@ -182,7 +183,7 @@ class LikeServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> likeService.createLike(data, liker, true))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommonException.class)
                 .hasMessage("already like/dislike given");
     }
 }

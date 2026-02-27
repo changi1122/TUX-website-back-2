@@ -11,6 +11,8 @@ import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.community.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
 import kr.ac.cbnu.tux.domain.community.repository.CommunityRepository;
+import kr.ac.cbnu.tux.domain.community.exception.CommunityErrorCode;
+import kr.ac.cbnu.tux.domain.community.exception.CommunityException;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.global.utility.Sanitizer;
@@ -74,7 +76,7 @@ public class CommunityService {
         Community post = communityRepository.findById(id).orElseThrow();
 
         if (!user.equals(post.getUser())) {
-            throw new RuntimeException("user not matched");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
 
         if (isSanitizationRequired(request))
@@ -94,7 +96,7 @@ public class CommunityService {
         Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(post.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
 
         if (isSanitizationRequired(request))
@@ -110,7 +112,7 @@ public class CommunityService {
         Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(post.getUser()) && !CAN_DELETE_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
 
         post.deletePost(now);
@@ -165,7 +167,7 @@ public class CommunityService {
     public void deleteComment(Long commentId, User user, OffsetDateTime now) {
         CmComment comment = cmCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().equals(user)) {
-            throw new RuntimeException("user not matched");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
         comment.deleteComment(now);
     }

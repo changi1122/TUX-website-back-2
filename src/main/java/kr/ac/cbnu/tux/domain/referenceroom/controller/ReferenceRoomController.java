@@ -13,6 +13,8 @@ import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.common.enums.SearchType;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
+import kr.ac.cbnu.tux.domain.referenceroom.exception.ReferenceRoomErrorCode;
+import kr.ac.cbnu.tux.domain.referenceroom.exception.ReferenceRoomException;
 import kr.ac.cbnu.tux.domain.referenceroom.service.ReferenceRoomService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.global.utility.FileStore;
@@ -32,10 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.io.File;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -85,7 +84,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
         ReferenceRoom data = referenceRoomService.getData(id);
 
         if (!user.equals(data.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
 
         Attachment attachment = attachmentService.createAttachment(file, data);
@@ -134,7 +133,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
                                               @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
                                               Pageable pageable, @AuthenticationPrincipal User user) {
         if (ReferenceRoomPostType.cannotListBy(user)) {
-            throw new RuntimeException("permission denied");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.PERMISSION_DENIED);
         }
 
         Page<ReferenceRoom> page;
@@ -156,7 +155,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
             @AuthenticationPrincipal User user) {
 
         if (types.stream().anyMatch(type -> type.cannotReadBy(user))) {
-            throw new RuntimeException("permission denied");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.PERMISSION_DENIED);
         }
 
         Page<ReferenceRoom> page;
@@ -197,13 +196,13 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
 
         ReferenceRoom data = referenceRoomService.getData(id);
         if (data.getCategory().cannotReadBy(user)) {
-            throw new RuntimeException("permission denied");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.PERMISSION_DENIED);
         }
 
         String path = fileStore.getReferenceRoomAttachmentFilePath(Long.toString(id), filename);
         File file = new File(path);
         if (!file.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.NOT_FOUND);
         }
 
         Attachment attachment = attachmentService.getFile(
@@ -249,14 +248,14 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @DeleteMapping(value = "/api/referenceroom/{id}/file/{filename}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id, @PathVariable String filename,
-                           @AuthenticationPrincipal User user) throws IOException {
+                           @AuthenticationPrincipal User user) {
         ReferenceRoom data = referenceRoomService.getData(id);
 
         if (user.equals(data.getUser()) || !CAN_EDIT_ROLES.contains(user.getRole())) {
             Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), data);
             attachmentService.deleteAttachment(file, data);
         } else {
-            throw new RuntimeException("user not matched");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
     }
 
@@ -266,7 +265,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     public void addLike(@PathVariable Long id, @RequestParam Boolean dislike,
                         @AuthenticationPrincipal User user) {
         if (user == null)
-            throw new RuntimeException("user not logged in");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_LOGGED_IN);
 
         ReferenceRoom data = referenceRoomService.getData(id);
         likeService.createLike(data, user, dislike);

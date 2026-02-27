@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
+import kr.ac.cbnu.tux.domain.community.exception.CommunityException;
 import kr.ac.cbnu.tux.domain.community.repository.CmCommentRepository;
 import kr.ac.cbnu.tux.domain.community.repository.CommunityRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
@@ -173,7 +174,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> communityService.updatePost(post.getId(), CommunityPostType.NOTICE, updateRequest, userWithoutPermission, OffsetDateTime.now()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommunityException.class)
                 .hasMessage("user not matched");
     }
 
@@ -215,7 +216,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> communityService.deletePost(post.getId(), userWithoutPermission, OffsetDateTime.now()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommunityException.class)
                 .hasMessage("user not matched");
     }
 
@@ -319,7 +320,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> communityService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CommunityException.class)
                 .hasMessage("user not matched");
     }
 }

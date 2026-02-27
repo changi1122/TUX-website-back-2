@@ -1,10 +1,11 @@
 package kr.ac.cbnu.tux.domain.user.exception;
 
+import kr.ac.cbnu.tux.global.exception.ErrorCode;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum UserErrorCode {
+public enum UserErrorCode implements ErrorCode {
 
     USERNAME_NOT_UNIQUE(HttpStatus.BAD_REQUEST, "username is not unique"),
     PASSWORD_RULE_NOT_MATCHED(HttpStatus.BAD_REQUEST, "password rule not matched"),

@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
+import kr.ac.cbnu.tux.domain.referenceroom.exception.ReferenceRoomException;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.RfCommentRepository;
 import kr.ac.cbnu.tux.domain.user.entity.User;
@@ -175,7 +176,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> referenceRoomService.updateData(data.getId(), ReferenceRoomPostType.GALLERY, updateRequest, userWithoutPermission, OffsetDateTime.now()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ReferenceRoomException.class)
                 .hasMessage("user not matched");
     }
 
@@ -217,7 +218,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> referenceRoomService.deleteData(data.getId(), userWithoutPermission, OffsetDateTime.now()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ReferenceRoomException.class)
                 .hasMessage("user not matched");
     }
 
@@ -307,10 +308,10 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), null, "testId"))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ReferenceRoomException.class)
                 .hasMessage("permission denied");
         assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), guest, "testId"))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ReferenceRoomException.class)
                 .hasMessage("permission denied");
     }
 
@@ -392,7 +393,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> referenceRoomService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ReferenceRoomException.class)
                 .hasMessage("user not matched");
     }
 

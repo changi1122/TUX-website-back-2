@@ -13,6 +13,8 @@ import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.common.enums.SearchType;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
+import kr.ac.cbnu.tux.domain.community.exception.CommunityErrorCode;
+import kr.ac.cbnu.tux.domain.community.exception.CommunityException;
 import kr.ac.cbnu.tux.domain.community.service.CommunityService;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.global.utility.FileStore;
@@ -32,10 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.io.File;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -86,7 +85,7 @@ public class CommunityController implements CommunityControllerDocs {
         Community post = communityService.getPost(id);
 
         if (!user.equals(post.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
 
         Attachment attachment = attachmentService.createAttachment(file, post);
@@ -190,7 +189,7 @@ public class CommunityController implements CommunityControllerDocs {
         String path = fileStore.getCommunityAttachmentFilePath(id, filename);
         File file = new File(path);
         if (!file.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+            throw new CommunityException(CommunityErrorCode.NOT_FOUND);
         }
 
         MediaType mediaType;
@@ -234,11 +233,11 @@ public class CommunityController implements CommunityControllerDocs {
     @DeleteMapping(value = "/api/community/{id}/file/{filename}")
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteFile(@PathVariable Long id, @PathVariable String filename,
-                           @AuthenticationPrincipal User user) throws IOException {
+                           @AuthenticationPrincipal User user) {
         Community post = communityService.getPost(id);
 
         if (!post.getUser().equals(user) && !CAN_EDIT_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
 
         Attachment file = attachmentService.getFile(URLDecoder.decode(filename, StandardCharsets.UTF_8), post);
@@ -251,7 +250,7 @@ public class CommunityController implements CommunityControllerDocs {
     public void addLike(@PathVariable Long id, @RequestParam Boolean dislike,
                         @AuthenticationPrincipal User user) {
         if (user == null)
-            throw new RuntimeException("user not logged in");
+            throw new CommunityException(CommunityErrorCode.USER_NOT_LOGGED_IN);
 
         Community post = communityService.getPost(id);
         likeService.createLike(post, user, dislike);

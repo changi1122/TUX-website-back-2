@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -67,14 +66,14 @@ public class AttachmentService {
     }
 
     @Transactional
-    public void deleteAttachment(Attachment file, Community post) throws IOException {
+    public void deleteAttachment(Attachment file, Community post) {
         fileStore.deleteAttachment(COMMUNITY, post.getId().toString(), file);
         post.removeAttachment(file);
         attachmentRepository.delete(file);
     }
 
     @Transactional
-    public void deleteAttachment(Attachment file, ReferenceRoom data) throws IOException {
+    public void deleteAttachment(Attachment file, ReferenceRoom data) {
         fileStore.deleteAttachment(REFERENCEROOM, data.getId().toString(), file);
         data.removeAttachment(file);
         attachmentRepository.delete(file);

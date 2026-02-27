@@ -12,6 +12,8 @@ import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.common.service.ViewCountService;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.ReferenceRoomRepository;
 import kr.ac.cbnu.tux.domain.referenceroom.repository.RfCommentRepository;
+import kr.ac.cbnu.tux.domain.referenceroom.exception.ReferenceRoomErrorCode;
+import kr.ac.cbnu.tux.domain.referenceroom.exception.ReferenceRoomException;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.global.utility.Sanitizer;
@@ -76,7 +78,7 @@ public class ReferenceRoomService {
         ReferenceRoom data = referenceRoomRepository.findById(id).orElseThrow();
 
         if (!user.equals(data.getUser())) {
-            throw new RuntimeException("user not matched");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
 
         if (isSanitizationRequired(request))
@@ -106,7 +108,7 @@ public class ReferenceRoomService {
         ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(data.getUser()) && !CAN_EDIT_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
 
         if (isSanitizationRequired(request))
@@ -132,7 +134,7 @@ public class ReferenceRoomService {
         ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
 
         if (!user.equals(data.getUser()) && !CAN_DELETE_ROLES.contains(user.getRole())) {
-            throw new RuntimeException("user not matched");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
 
         data.deleteData(now);
@@ -145,7 +147,7 @@ public class ReferenceRoomService {
             throw new NoSuchElementException();
 
         if (data.getCategory().cannotReadBy(user))
-            throw new RuntimeException("permission denied");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.PERMISSION_DENIED);
 
         if (!data.getUser().equals(user))
             viewCountService.addView("referenceroom", data.getId(), viewerIdentifier);
@@ -193,7 +195,7 @@ public class ReferenceRoomService {
     public void deleteComment(Long commentId, User user, OffsetDateTime now) {
         RfComment comment = rfCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().equals(user)) {
-            throw new RuntimeException("user not matched");
+            throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
         comment.deleteComment(now);
     }
