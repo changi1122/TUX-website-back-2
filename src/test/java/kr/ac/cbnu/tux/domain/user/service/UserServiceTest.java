@@ -64,7 +64,7 @@ class UserServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> userService.createUser(signupRequest, now))
                 .isInstanceOf(UserException.class)
-                .hasMessage("password rule not matched");
+                .hasMessage("비밀번호 영문자와 숫자를 포함하여 최소 8자 이상이어야 합니다.");
     }
 
     @ParameterizedTest
@@ -88,7 +88,7 @@ class UserServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> userService.createUser(signupRequest, now))
                 .isInstanceOf(UserException.class)
-                .hasMessage("username is not unique");
+                .hasMessage("이미 사용 중인 아이디입니다.");
     }
 
     @Test

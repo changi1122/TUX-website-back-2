@@ -91,7 +91,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> likeService.createLike(post, liker, false))
                 .isInstanceOf(CommonException.class)
-                .hasMessage("already like/dislike given");
+                .hasMessage("이미 추천/비추천하였습니다.");
     }
 
     @Test
@@ -108,7 +108,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> likeService.createLike(post, liker, true))
                 .isInstanceOf(CommonException.class)
-                .hasMessage("already like/dislike given");
+                .hasMessage("이미 추천/비추천하였습니다.");
     }
 
     @Test
@@ -166,7 +166,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> likeService.createLike(data, liker, false))
                 .isInstanceOf(CommonException.class)
-                .hasMessage("already like/dislike given");
+                .hasMessage("이미 추천/비추천하였습니다.");
     }
 
     @Test
@@ -184,6 +184,6 @@ class LikeServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> likeService.createLike(data, liker, true))
                 .isInstanceOf(CommonException.class)
-                .hasMessage("already like/dislike given");
+                .hasMessage("이미 추천/비추천하였습니다.");
     }
 }

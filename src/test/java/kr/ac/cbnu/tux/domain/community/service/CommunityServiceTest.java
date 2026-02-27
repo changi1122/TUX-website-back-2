@@ -175,7 +175,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> communityService.updatePost(post.getId(), CommunityPostType.NOTICE, updateRequest, userWithoutPermission, OffsetDateTime.now()))
                 .isInstanceOf(CommunityException.class)
-                .hasMessage("user not matched");
+                .hasMessage("글을 수정할 권한이 없습니다.");
     }
 
     @ParameterizedTest
@@ -217,7 +217,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> communityService.deletePost(post.getId(), userWithoutPermission, OffsetDateTime.now()))
                 .isInstanceOf(CommunityException.class)
-                .hasMessage("user not matched");
+                .hasMessage("글을 수정할 권한이 없습니다.");
     }
 
     @Test
@@ -321,6 +321,6 @@ class CommunityServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> communityService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
                 .isInstanceOf(CommunityException.class)
-                .hasMessage("user not matched");
+                .hasMessage("글을 수정할 권한이 없습니다.");
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum CommonErrorCode implements ErrorCode {
 
-    DUPLICATE_LIKE(HttpStatus.BAD_REQUEST, "already like/dislike given");
+    DUPLICATE_LIKE(HttpStatus.BAD_REQUEST, "이미 추천/비추천하였습니다.");
 
     private final HttpStatus status;
     private final String message;

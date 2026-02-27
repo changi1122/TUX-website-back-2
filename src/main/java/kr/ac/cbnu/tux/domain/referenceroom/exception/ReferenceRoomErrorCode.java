@@ -7,10 +7,10 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ReferenceRoomErrorCode implements ErrorCode {
 
-    USER_NOT_MATCHED(HttpStatus.FORBIDDEN, "user not matched"),
-    PERMISSION_DENIED(HttpStatus.FORBIDDEN, "permission denied"),
-    USER_NOT_LOGGED_IN(HttpStatus.UNAUTHORIZED, "user not logged in"),
-    NOT_FOUND(HttpStatus.NOT_FOUND, "Not found");
+    USER_NOT_MATCHED(HttpStatus.FORBIDDEN, "글을 수정할 권한이 없습니다."),
+    PERMISSION_DENIED(HttpStatus.FORBIDDEN, "자료실을 조회할 권한이 없습니다."),
+    USER_NOT_LOGGED_IN(HttpStatus.UNAUTHORIZED, "추천/비추천을 하기 위해 로그인하세요."),
+    NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

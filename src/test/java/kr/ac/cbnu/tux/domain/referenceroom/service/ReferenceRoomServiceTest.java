@@ -177,7 +177,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> referenceRoomService.updateData(data.getId(), ReferenceRoomPostType.GALLERY, updateRequest, userWithoutPermission, OffsetDateTime.now()))
                 .isInstanceOf(ReferenceRoomException.class)
-                .hasMessage("user not matched");
+                .hasMessage("글을 수정할 권한이 없습니다.");
     }
 
     @ParameterizedTest
@@ -219,7 +219,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> referenceRoomService.deleteData(data.getId(), userWithoutPermission, OffsetDateTime.now()))
                 .isInstanceOf(ReferenceRoomException.class)
-                .hasMessage("user not matched");
+                .hasMessage("글을 수정할 권한이 없습니다.");
     }
 
     @Test
@@ -309,10 +309,10 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), null, "testId"))
                 .isInstanceOf(ReferenceRoomException.class)
-                .hasMessage("permission denied");
+                .hasMessage("자료실을 조회할 권한이 없습니다.");
         assertThatThrownBy(() -> referenceRoomService.readData(data.getId(), guest, "testId"))
                 .isInstanceOf(ReferenceRoomException.class)
-                .hasMessage("permission denied");
+                .hasMessage("자료실을 조회할 권한이 없습니다.");
     }
 
     @ParameterizedTest
@@ -394,7 +394,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         // when then
         assertThatThrownBy(() -> referenceRoomService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
                 .isInstanceOf(ReferenceRoomException.class)
-                .hasMessage("user not matched");
+                .hasMessage("글을 수정할 권한이 없습니다.");
     }
 
 }
