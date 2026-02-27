@@ -36,11 +36,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -191,37 +191,57 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @GetMapping(value = "/api/referenceroom/{id}/file/{filename}")
     public ResponseEntity<FileSystemResource> getFile(
             @PathVariable Long id, @PathVariable String filename,
-            @RequestParam(name = "aid", defaultValue = "-1") Long aid, @AuthenticationPrincipal User user) throws UnsupportedEncodingException {
+            @RequestParam(name = "aid", defaultValue = "-1") Long aid,
+            @AuthenticationPrincipal User user,
+            HttpServletRequest request) {
 
         ReferenceRoom data = referenceRoomService.getData(id);
         if (data.getCategory().cannotReadBy(user)) {
             throw new RuntimeException("permission denied");
         }
 
-        // 다운로드 수 늘리기
+        String path = fileStore.getReferenceRoomAttachmentFilePath(Long.toString(id), filename);
+        File file = new File(path);
+        if (!file.exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        }
+
+        Attachment attachment = attachmentService.getFile(
+                URLDecoder.decode(filename, StandardCharsets.UTF_8), data);
+        boolean isImage = Boolean.TRUE.equals(attachment.getIsImage());
+
+        long lastModifiedMillis = file.lastModified();
+        String etag = "\"" + file.length() + "-" + lastModifiedMillis + "\"";
+
+        String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
+        if (etag.equals(ifNoneMatch)) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(etag).build();
+        }
+
+        // 다운로드 수 늘리기 (캐시 히트 시 제외)
         if (aid != -1)
             attachmentService.increaseDownloadCountById(aid);
 
-        String path = fileStore.getReferenceRoomAttachmentFilePath(Long.toString(id), filename);
-
-        if (new File(path).exists()) {
-            FileSystemResource resource = new FileSystemResource(path);
-
-            MediaType mediaType;
-            try {
-                mediaType = MediaType.parseMediaType(Files.probeContentType(Path.of(path)));
-            } catch (Exception e){
-                mediaType = MediaType.parseMediaType("application/octet-stream");
-            }
-
-            return ResponseEntity.ok()
-                    .contentType(mediaType)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
-                            new String(filename.getBytes("UTF-8"), "ISO-8859-1") + "\"")
-                    .body(resource);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        MediaType mediaType;
+        try {
+            mediaType = MediaType.parseMediaType(Files.probeContentType(Path.of(path)));
+        } catch (Exception e) {
+            mediaType = MediaType.parseMediaType("application/octet-stream");
         }
+
+        String disposition = isImage ? "inline"
+                : "attachment; filename=\"" + new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"";
+        String cacheControl = isImage
+                ? "public, max-age=86400, stale-while-revalidate=3600"
+                : "private, no-cache";
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .eTag(etag)
+                .lastModified(Instant.ofEpochMilli(lastModifiedMillis))
+                .header(HttpHeaders.CACHE_CONTROL, cacheControl)
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
+                .body(new FileSystemResource(file));
     }
 
     /* 첨부파일 삭제 */

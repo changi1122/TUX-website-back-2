@@ -76,7 +76,8 @@ public interface CommunityControllerDocs {
 
     @Operation(method = "GET", summary = "첨부파일 다운로드", description = "첨부파일을 다운로드한다.")
     ResponseEntity<FileSystemResource> getFile(@PathVariable String id, @PathVariable String filename,
-                                               @RequestParam(name = "aid", defaultValue = "-1") Long aid) throws UnsupportedEncodingException;
+                                               @RequestParam(name = "aid", defaultValue = "-1") Long aid,
+                                               HttpServletRequest request);
 
     @Operation(method = "DELETE", summary = "첨부파일 삭제", description = "첨부파일을 삭제한다.")
     void deleteFile(@PathVariable Long id, @PathVariable String filename,

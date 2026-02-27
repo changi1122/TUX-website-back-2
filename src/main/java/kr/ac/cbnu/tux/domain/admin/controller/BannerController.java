@@ -6,6 +6,7 @@ import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +59,7 @@ public class BannerController implements BannerControllerDocs {
 
         return ResponseEntity.ok()
                 .contentType(contentType)
+                .header(HttpHeaders.CACHE_CONTROL, "public, max-age=604800")
                 .body(resource);
     }
 }
