@@ -8,6 +8,7 @@ import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.LoginResponse;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.exception.UserException;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import kr.ac.cbnu.tux.global.utility.CookieUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @Controller
@@ -37,11 +37,11 @@ public class AuthController implements AuthControllerDocs {
 
             return result;
 
-        } catch (Exception e) {
+        } catch (UserException e) {
             // 실패 시 쿠키 삭제
             response.addCookie(CookieUtils.deleteAccessTokenCookie());
             response.addCookie(CookieUtils.deleteRefreshTokenCookie());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            throw e;
         }
     }
 

@@ -10,6 +10,8 @@ import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.entity.RefreshToken;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.exception.UserErrorCode;
+import kr.ac.cbnu.tux.domain.user.exception.UserException;
 import kr.ac.cbnu.tux.domain.user.repository.RefreshTokenRepository;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
@@ -42,11 +44,11 @@ public class UserService implements UserDetailsService {
 
         if (userRepository.existsByUsername(request.getUsername()) ||
             "anonymousUser".equals(request.getUsername())) {
-            throw new RuntimeException("username is not unique");
+            throw new UserException(UserErrorCode.USERNAME_NOT_UNIQUE);
         }
 
         if (!Pattern.matches(PASSWORD_RULE, request.getPassword())) {
-            throw new RuntimeException("password rule not matched");
+            throw new UserException(UserErrorCode.PASSWORD_RULE_NOT_MATCHED);
         }
 
         User createdUser = request.toEntity();
@@ -63,7 +65,7 @@ public class UserService implements UserDetailsService {
 
         if (request.getPassword() != null) {
             if (!Pattern.matches(PASSWORD_RULE, request.getPassword())) {
-                throw new RuntimeException("password rule not matched");
+                throw new UserException(UserErrorCode.PASSWORD_RULE_NOT_MATCHED);
             }
 
             user.updatePassword(passwordEncoder.encode(request.getPassword()));
@@ -84,7 +86,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("user not present"));
 
         if (user.isBanned() || user.isLocked() || user.isDeleted())
-            throw new RuntimeException("user not present");
+            throw new UserException(UserErrorCode.USER_NOT_PRESENT);
 
         if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -108,7 +110,7 @@ public class UserService implements UserDetailsService {
 
             return LoginResponse.of(user, accessToken, refreshToken);
         } else {
-            throw new RuntimeException("user not present");
+            throw new UserException(UserErrorCode.USER_NOT_PRESENT);
         }
     }
 

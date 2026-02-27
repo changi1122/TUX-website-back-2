@@ -8,6 +8,8 @@ import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.exception.UserErrorCode;
+import kr.ac.cbnu.tux.domain.user.exception.UserException;
 import kr.ac.cbnu.tux.domain.user.service.UserService;
 import kr.ac.cbnu.tux.global.utility.CookieUtils;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +40,7 @@ public class UserController implements UserControllerDocs {
                        @AuthenticationPrincipal User currentUser) {
 
         if (!Objects.deepEquals(currentUser.getId(), id)) {
-            throw new RuntimeException("user not matched");
+            throw new UserException(UserErrorCode.USER_NOT_MATCHED);
         }
 
         userService.updateUser(id, request);
@@ -50,7 +52,7 @@ public class UserController implements UserControllerDocs {
                        @AuthenticationPrincipal User currentUser, final HttpServletResponse response) {
 
         if (!Objects.deepEquals(currentUser.getId(), id)) {
-            throw new RuntimeException("user not matched");
+            throw new UserException(UserErrorCode.USER_NOT_MATCHED);
         }
 
         // 회원 삭제 플래그 설정
@@ -65,13 +67,13 @@ public class UserController implements UserControllerDocs {
     @ResponseBody
     public UserResponse readUser(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || "anonymousUser".equals(currentUser.getUsername()))
-            throw new RuntimeException("permission denied");
+            throw new UserException(UserErrorCode.PERMISSION_DENIED);
 
         String currentUsername = currentUser.getUsername();
         User foundUser = userService.readUser(id);
 
         if (!currentUsername.equals(foundUser.getUsername()) || !canReadUserData(currentUser.getRole()))
-            throw new RuntimeException("permission denied");
+            throw new UserException(UserErrorCode.PERMISSION_DENIED);
 
         return UserResponse.of(foundUser);
     }

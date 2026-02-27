@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.global.controller;
 
+import kr.ac.cbnu.tux.domain.user.exception.UserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,6 +12,13 @@ import java.util.NoSuchElementException;
 
 @ControllerAdvice(basePackages = "kr.ac.cbnu.tux")
 public class GlobalExceptionController {
+
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ErrorResponse> handleUserException(UserException ex) {
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(ErrorResponse.of(ex));
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<String> handleException(NoSuchElementException ex) {
@@ -35,11 +43,6 @@ public class GlobalExceptionController {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
-        if (ex.getMessage().equals("permission denied")) // 임시
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body(ex.getMessage());
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());

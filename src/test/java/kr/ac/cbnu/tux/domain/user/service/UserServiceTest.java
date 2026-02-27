@@ -4,6 +4,7 @@ import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
+import kr.ac.cbnu.tux.domain.user.exception.UserException;
 import kr.ac.cbnu.tux.domain.user.factory.UserFactory;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
 import kr.ac.cbnu.tux.utility.IntegrationTestSupport;
@@ -62,7 +63,7 @@ class UserServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> userService.createUser(signupRequest, now))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(UserException.class)
                 .hasMessage("password rule not matched");
     }
 
@@ -86,7 +87,7 @@ class UserServiceTest extends IntegrationTestSupport {
 
         // when then
         assertThatThrownBy(() -> userService.createUser(signupRequest, now))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(UserException.class)
                 .hasMessage("username is not unique");
     }
 
