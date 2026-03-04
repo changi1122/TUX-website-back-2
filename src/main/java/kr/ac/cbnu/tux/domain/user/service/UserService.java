@@ -83,10 +83,10 @@ public class UserService implements UserDetailsService {
     @Transactional
     public LoginResponse tryLogin(LoginRequest loginRequest) {
         User user = userRepository.findUserByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("user not present"));
+                .orElseThrow(() -> new UserException(UserErrorCode.LOGIN_FAILED));
 
         if (user.isBanned() || user.isLocked() || user.isDeleted())
-            throw new UserException(UserErrorCode.USER_NOT_PRESENT);
+            throw new UserException(UserErrorCode.LOGIN_FAILED);
 
         if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -110,7 +110,7 @@ public class UserService implements UserDetailsService {
 
             return LoginResponse.of(user, accessToken, refreshToken);
         } else {
-            throw new UserException(UserErrorCode.USER_NOT_PRESENT);
+            throw new UserException(UserErrorCode.LOGIN_FAILED);
         }
     }
 
