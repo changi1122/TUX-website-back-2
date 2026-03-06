@@ -1,6 +1,5 @@
 package kr.ac.cbnu.tux.domain.user.controller;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.cbnu.tux.domain.user.controller.docs.UserControllerDocs;
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;

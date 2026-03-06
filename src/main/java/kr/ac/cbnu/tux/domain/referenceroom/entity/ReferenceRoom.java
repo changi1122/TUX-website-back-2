@@ -19,6 +19,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamedEntityGraph(name = "ReferenceRoom.fetchUser", attributeNodes = @NamedAttributeNode("user"))
+@Table(
+        name = "reference_room",
+        indexes = {
+                @Index(name = "reference_room_list", columnList = "is_deleted, created_date"),
+                @Index(name = "reference_room_list_by_category", columnList = "is_deleted, category, created_date")
+        }
+)
 public class ReferenceRoom {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

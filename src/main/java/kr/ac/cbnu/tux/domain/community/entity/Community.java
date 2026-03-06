@@ -18,6 +18,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamedEntityGraph(name = "Community.fetchUser", attributeNodes = @NamedAttributeNode("user"))
+@Table(
+        name = "community",
+        indexes = {
+                @Index(name = "community_list", columnList = "is_deleted, created_date"),
+                @Index(name = "community_list_by_category", columnList = "is_deleted, category, created_date")
+        }
+)
 public class Community {
 
     @Id
