@@ -369,7 +369,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         OffsetDateTime now = OffsetDateTime.now();
 
         // when
-        referenceRoomService.deleteComment(comment.getId(), commenter, now);
+        referenceRoomService.deleteComment(data.getId(), comment.getId(), commenter, now);
 
         // then
         RfComment foundComment = rfCommentRepository.findById(comment.getId()).orElseThrow();
@@ -392,7 +392,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         User otherUser = userRepository.save(createTestUser("other", UserRole.USER));
 
         // when then
-        assertThatThrownBy(() -> referenceRoomService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
+        assertThatThrownBy(() -> referenceRoomService.deleteComment(data.getId(), comment.getId(), otherUser, OffsetDateTime.now()))
                 .isInstanceOf(ReferenceRoomException.class)
                 .hasMessage("글을 수정할 권한이 없습니다.");
     }

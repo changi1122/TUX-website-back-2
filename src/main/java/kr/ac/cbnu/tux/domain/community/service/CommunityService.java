@@ -63,6 +63,7 @@ public class CommunityService {
                 .view(0L)
                 .totalLikes(0L)
                 .totalDislikes(0L)
+                .totalComments(0L)
                 .score(ScoreUtils.calculateInitialScore(now))
                 .user(user)
                 .build();
@@ -160,20 +161,30 @@ public class CommunityService {
     /* 댓글 관련 코드 */
 
     @Transactional
-    public CmComment addComment(Long id, CmCommentRequest request, User user, OffsetDateTime now) {
-        Community post = communityRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
+    public CmComment addComment(Long postId, CmCommentRequest request, User user, OffsetDateTime now) {
+        Community post = communityRepository.findByIdAndIsDeletedFalseWithLock(postId)
+                .orElseThrow(() -> new CommunityException(CommunityErrorCode.NOT_FOUND));
+        post.createComment();
+        communityRepository.save(post);
+
         CmComment comment = request.toEntity();
         comment.initializeComment(post, user, now);
         return cmCommentRepository.save(comment);
     }
 
     @Transactional
-    public void deleteComment(Long commentId, User user, OffsetDateTime now) {
+    public void deleteComment(Long postId, Long commentId, User user, OffsetDateTime now) {
+        Community post = communityRepository.findByIdAndIsDeletedFalseWithLock(postId)
+                .orElseThrow(() -> new CommunityException(CommunityErrorCode.NOT_FOUND));
+
         CmComment comment = cmCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().equals(user)) {
             throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
         comment.deleteComment(now);
+
+        post.deleteComment();
+        communityRepository.save(post);
     }
 
     private boolean isSanitizationRequired(Community post) {

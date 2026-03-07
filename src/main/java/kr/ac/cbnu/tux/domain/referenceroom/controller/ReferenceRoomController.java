@@ -182,7 +182,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     @ResponseStatus(code = HttpStatus.ACCEPTED)
     public void deleteComment(@PathVariable Long id, @PathVariable Long commentId,
                               @AuthenticationPrincipal User user) {
-        referenceRoomService.deleteComment(commentId, user, OffsetDateTime.now());
+        referenceRoomService.deleteComment(id, commentId, user, OffsetDateTime.now());
     }
 
 

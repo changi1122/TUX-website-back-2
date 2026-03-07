@@ -296,7 +296,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         OffsetDateTime now = OffsetDateTime.now();
 
         // when
-        communityService.deleteComment(comment.getId(), commenter, now);
+        communityService.deleteComment(post.getId(), comment.getId(), commenter, now);
 
         // then
         CmComment foundComment = cmCommentRepository.findById(comment.getId()).orElseThrow();
@@ -319,7 +319,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         User otherUser = userRepository.save(createTestUser("other", UserRole.USER));
 
         // when then
-        assertThatThrownBy(() -> communityService.deleteComment(comment.getId(), otherUser, OffsetDateTime.now()))
+        assertThatThrownBy(() -> communityService.deleteComment(post.getId(), comment.getId(), otherUser, OffsetDateTime.now()))
                 .isInstanceOf(CommunityException.class)
                 .hasMessage("글을 수정할 권한이 없습니다.");
     }

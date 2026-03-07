@@ -69,6 +69,10 @@ public class Community {
     @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
     private Long totalDislikes;
 
+    @Setter
+    @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
+    private Long totalComments;
+
     @Column(columnDefinition = "DOUBLE NOT NULL DEFAULT 0")
     private Double score;
 
@@ -138,6 +142,7 @@ public class Community {
         this.view = 0L;
         this.totalLikes = 0L;
         this.totalDislikes = 0L;
+        this.totalComments = 0L;
         this.score = ScoreUtils.calculateInitialScore(now);
         this.user = user;
     }
@@ -170,4 +175,11 @@ public class Community {
         this.score = ScoreUtils.getUpdatedScoreOnLike(this.score, now, isDisliked);
     }
 
+    public void createComment() {
+        this.totalComments++;
+    }
+
+    public void deleteComment() {
+        this.totalComments--;
+    }
 }

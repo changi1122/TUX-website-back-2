@@ -64,6 +64,7 @@ public class ReferenceRoomService {
                 .view(0L)
                 .totalLikes(0L)
                 .totalDislikes(0L)
+                .totalComments(0L)
                 .score(ScoreUtils.calculateInitialScore(now))
                 .isAnonymized(true)
                 .user(user)
@@ -188,20 +189,30 @@ public class ReferenceRoomService {
     /* 댓글 관련 코드 */
 
     @Transactional
-    public RfComment addComment(Long id, RfCommentRequest request, User user, OffsetDateTime now) {
-        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(id).orElseThrow();
+    public RfComment addComment(Long dataId, RfCommentRequest request, User user, OffsetDateTime now) {
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalseWithLock(dataId)
+                .orElseThrow(() -> new ReferenceRoomException(ReferenceRoomErrorCode.NOT_FOUND));
+        data.createComment();
+        referenceRoomRepository.save(data);
+
         RfComment comment = request.toEntity();
         comment.initializeComment(data, user, now);
         return rfCommentRepository.save(comment);
     }
 
     @Transactional
-    public void deleteComment(Long commentId, User user, OffsetDateTime now) {
+    public void deleteComment(Long dataId, Long commentId, User user, OffsetDateTime now) {
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalseWithLock(dataId)
+                .orElseThrow(() -> new ReferenceRoomException(ReferenceRoomErrorCode.NOT_FOUND));
+
         RfComment comment = rfCommentRepository.findById(commentId).orElseThrow();
         if (!comment.getUser().equals(user)) {
             throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
         comment.deleteComment(now);
+
+        data.deleteComment();
+        referenceRoomRepository.save(data);
     }
 
     private boolean isSanitizationRequired(ReferenceRoom data) {

@@ -20,7 +20,7 @@ public class CommunitySimpleResponse {
     private OffsetDateTime createdDate;
     private OffsetDateTime editedDate;
     private Long view;
-    private Integer comment;
+    private Long comment;
     private String author;
     private Long likes;
 
@@ -32,7 +32,7 @@ public class CommunitySimpleResponse {
                 .createdDate(post.getCreatedDate())
                 .editedDate(post.getEditedDate())
                 .view(post.getView())
-                .comment(post.getComments().stream().filter(p -> !p.getIsDeleted()).toList().size())
+                .comment(post.getTotalComments())
                 .author(post.getUser().getNickname())
                 .likes(post.getTotalLikes())
                 .build();

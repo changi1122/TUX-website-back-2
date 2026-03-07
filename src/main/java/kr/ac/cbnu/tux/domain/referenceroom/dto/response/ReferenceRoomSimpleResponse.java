@@ -20,7 +20,7 @@ public class ReferenceRoomSimpleResponse {
     private OffsetDateTime createdDate;
     private OffsetDateTime editedDate;
     private Long view;
-    private Integer comment;
+    private Long comment;
     private String author;
     private Long likes;
 
@@ -36,7 +36,7 @@ public class ReferenceRoomSimpleResponse {
                 .createdDate(data.getCreatedDate())
                 .editedDate(data.getEditedDate())
                 .view(data.getView())
-                .comment(data.getComments().stream().filter(c -> !c.getIsDeleted()).toList().size())
+                .comment(data.getTotalComments())
                 .author((data.getIsAnonymized()) ? "익명" : data.getUser().getNickname())
                 .likes(data.getTotalLikes())
                 .lecture(data.getLecture())

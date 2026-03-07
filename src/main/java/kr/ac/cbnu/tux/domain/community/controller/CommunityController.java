@@ -175,7 +175,7 @@ public class CommunityController implements CommunityControllerDocs {
     public void deleteComment(@PathVariable Long id, @PathVariable Long commentId,
                               @AuthenticationPrincipal User user) {
 
-        communityService.deleteComment(commentId, user, OffsetDateTime.now());
+        communityService.deleteComment(id, commentId, user, OffsetDateTime.now());
     }
 
 
