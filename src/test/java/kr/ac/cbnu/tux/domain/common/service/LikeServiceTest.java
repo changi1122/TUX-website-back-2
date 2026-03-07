@@ -50,7 +50,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
 
         // when
-        likeService.createLike(post, liker, false);
+        likeService.createLikeOnCommunity(post.getId(), liker, false, OffsetDateTime.now());
 
         // then
         Like like = likeRepository.findAll().get(0);
@@ -69,7 +69,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
 
         // when
-        likeService.createLike(post, liker, true);
+        likeService.createLikeOnCommunity(post.getId(), liker, true,  OffsetDateTime.now());
 
         // then
         Like like = likeRepository.findAll().get(0);
@@ -86,10 +86,10 @@ class LikeServiceTest extends IntegrationTestSupport {
         Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
 
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
-        likeService.createLike(post, liker, false);
+        likeService.createLikeOnCommunity(post.getId(), liker, false, OffsetDateTime.now());
 
         // when then
-        assertThatThrownBy(() -> likeService.createLike(post, liker, false))
+        assertThatThrownBy(() -> likeService.createLikeOnCommunity(post.getId(), liker, false, OffsetDateTime.now()))
                 .isInstanceOf(CommonException.class)
                 .hasMessage("이미 추천/비추천하였습니다.");
     }
@@ -103,10 +103,10 @@ class LikeServiceTest extends IntegrationTestSupport {
         Community post = communityService.createPost(CommunityPostType.FREE, request, author, OffsetDateTime.now());
 
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
-        likeService.createLike(post, liker, true);
+        likeService.createLikeOnCommunity(post.getId(), liker, true, OffsetDateTime.now());
 
         // when then
-        assertThatThrownBy(() -> likeService.createLike(post, liker, true))
+        assertThatThrownBy(() -> likeService.createLikeOnCommunity(post.getId(), liker, true, OffsetDateTime.now()))
                 .isInstanceOf(CommonException.class)
                 .hasMessage("이미 추천/비추천하였습니다.");
     }
@@ -123,7 +123,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
 
         // when
-        likeService.createLike(data, liker, false);
+        likeService.createLikeOnReferenceRoom(data.getId(), liker, false, OffsetDateTime.now());
 
         // then
         Like like = likeRepository.findAll().get(0);
@@ -143,7 +143,7 @@ class LikeServiceTest extends IntegrationTestSupport {
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
 
         // when
-        likeService.createLike(data, liker, true);
+        likeService.createLikeOnReferenceRoom(data.getId(), liker, true, OffsetDateTime.now());
 
         // then
         Like like = likeRepository.findAll().get(0);
@@ -161,10 +161,10 @@ class LikeServiceTest extends IntegrationTestSupport {
         ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
 
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
-        likeService.createLike(data, liker, false);
+        likeService.createLikeOnReferenceRoom(data.getId(), liker, false, OffsetDateTime.now());
 
         // when then
-        assertThatThrownBy(() -> likeService.createLike(data, liker, false))
+        assertThatThrownBy(() -> likeService.createLikeOnReferenceRoom(data.getId(), liker, false, OffsetDateTime.now()))
                 .isInstanceOf(CommonException.class)
                 .hasMessage("이미 추천/비추천하였습니다.");
     }
@@ -179,10 +179,10 @@ class LikeServiceTest extends IntegrationTestSupport {
         ReferenceRoom data = referenceRoomService.createData(ReferenceRoomPostType.STUDY, request, author, OffsetDateTime.now());
 
         User liker = userRepository.save(createTestUser("liker", UserRole.USER));
-        likeService.createLike(data, liker, true);
+        likeService.createLikeOnReferenceRoom(data.getId(), liker, true, OffsetDateTime.now());
 
         // when then
-        assertThatThrownBy(() -> likeService.createLike(data, liker, true))
+        assertThatThrownBy(() -> likeService.createLikeOnReferenceRoom(data.getId(), liker, true, OffsetDateTime.now()))
                 .isInstanceOf(CommonException.class)
                 .hasMessage("이미 추천/비추천하였습니다.");
     }

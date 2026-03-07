@@ -252,7 +252,6 @@ public class CommunityController implements CommunityControllerDocs {
         if (user == null)
             throw new CommunityException(CommunityErrorCode.USER_NOT_LOGGED_IN);
 
-        Community post = communityService.getPost(id);
-        likeService.createLike(post, user, dislike);
+        likeService.createLikeOnCommunity(id, user, dislike, OffsetDateTime.now());
     }
 }

@@ -5,6 +5,7 @@ import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.global.utility.ScoreUtils;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
@@ -23,7 +24,10 @@ import java.util.List;
         name = "reference_room",
         indexes = {
                 @Index(name = "reference_room_list", columnList = "is_deleted, created_date"),
-                @Index(name = "reference_room_list_by_category", columnList = "is_deleted, category, created_date")
+                @Index(name = "reference_room_list_by_category", columnList = "is_deleted, category, created_date"),
+                @Index(name = "reference_room_list_by_score", columnList = "is_deleted, score"),
+                @Index(name = "reference_room_list_by_category_and_score", columnList = "is_deleted, category, score"),
+                @Index(name = "reference_room_list_by_category_and_likes", columnList = "is_deleted, category, total_likes")
         }
 )
 public class ReferenceRoom {
@@ -56,6 +60,15 @@ public class ReferenceRoom {
 
     @Column(nullable = false)
     private Long view;
+
+    @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
+    private Long totalLikes;
+
+    @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
+    private Long totalDislikes;
+
+    @Column(columnDefinition = "DOUBLE NOT NULL DEFAULT 0")
+    private Double score;
     
     /* 자료실 특수 정보 */
     @Column(nullable = false)
@@ -131,6 +144,9 @@ public class ReferenceRoom {
         this.isDeleted = false;
         this.createdDate = now;
         this.view = 0L;
+        this.totalLikes = 0L;
+        this.totalDislikes = 0L;
+        this.score = ScoreUtils.calculateInitialScore(now);
         this.user = user;
     }
 
@@ -163,4 +179,13 @@ public class ReferenceRoom {
         this.isDeleted = true;
         this.deletedDate = now;
     }
+
+    public void likePost(boolean isDisliked, OffsetDateTime now) {
+        if (isDisliked)
+            this.totalDislikes++;
+        else
+            this.totalLikes++;
+        this.score = ScoreUtils.getUpdatedScoreOnLike(this.score, now, isDisliked);
+    }
+
 }

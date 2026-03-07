@@ -5,6 +5,7 @@ import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.entity.Like;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.global.utility.ScoreUtils;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
@@ -22,7 +23,10 @@ import java.util.List;
         name = "community",
         indexes = {
                 @Index(name = "community_list", columnList = "is_deleted, created_date"),
-                @Index(name = "community_list_by_category", columnList = "is_deleted, category, created_date")
+                @Index(name = "community_list_by_category", columnList = "is_deleted, category, created_date"),
+                @Index(name = "community_list_by_score", columnList = "is_deleted, score"),
+                @Index(name = "community_list_by_category_and_score", columnList = "is_deleted, category, score"),
+                @Index(name = "community_list_by_category_and_likes", columnList = "is_deleted, category, total_likes")
         }
 )
 public class Community {
@@ -57,6 +61,17 @@ public class Community {
     @Column(nullable = false)
     private Long view;
 
+    @Setter
+    @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
+    private Long totalLikes;
+
+    @Setter
+    @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
+    private Long totalDislikes;
+
+    @Column(columnDefinition = "DOUBLE NOT NULL DEFAULT 0")
+    private Double score;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
@@ -68,7 +83,6 @@ public class Community {
             user.getPosts().add(this);
         }
     }
-
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @BatchSize(size = 50)
@@ -122,6 +136,9 @@ public class Community {
         this.createdDate = now;
         this.isDeleted = false;
         this.view = 0L;
+        this.totalLikes = 0L;
+        this.totalDislikes = 0L;
+        this.score = ScoreUtils.calculateInitialScore(now);
         this.user = user;
     }
 
@@ -144,4 +161,13 @@ public class Community {
         this.isDeleted = true;
         this.deletedDate = now;
     }
+
+    public void likePost(boolean isDisliked, OffsetDateTime now) {
+        if (isDisliked)
+            this.totalDislikes++;
+        else
+            this.totalLikes++;
+        this.score = ScoreUtils.getUpdatedScoreOnLike(this.score, now, isDisliked);
+    }
+
 }

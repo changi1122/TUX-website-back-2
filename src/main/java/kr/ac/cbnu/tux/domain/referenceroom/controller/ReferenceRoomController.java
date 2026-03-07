@@ -267,7 +267,6 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
         if (user == null)
             throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_LOGGED_IN);
 
-        ReferenceRoom data = referenceRoomService.getData(id);
-        likeService.createLike(data, user, dislike);
+        likeService.createLikeOnReferenceRoom(id, user, dislike, OffsetDateTime.now());
     }
 }

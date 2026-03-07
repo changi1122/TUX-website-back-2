@@ -38,7 +38,7 @@ public class ReferenceRoomSimpleResponse {
                 .view(data.getView())
                 .comment(data.getComments().stream().filter(c -> !c.getIsDeleted()).toList().size())
                 .author((data.getIsAnonymized()) ? "익명" : data.getUser().getNickname())
-                .likes(data.getLikes().stream().filter(l -> !l.getDislike()).count())
+                .likes(data.getTotalLikes())
                 .lecture(data.getLecture())
                 .semester(data.getSemester())
                 .professor(data.getProfessor())

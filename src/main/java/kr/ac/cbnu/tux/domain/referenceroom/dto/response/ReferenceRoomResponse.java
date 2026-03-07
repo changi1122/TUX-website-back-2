@@ -49,18 +49,10 @@ public class ReferenceRoomResponse {
                 .map(c -> RfCommentResponse.of(c))
                 .toList();
 
-        Long likes = data.getLikes().stream()
-                .filter(l -> !l.getDislike())
-                .count();
-
         List<String> likedPeople = data.getLikes().stream()
                 .filter(l -> !l.getDislike() && !l.getUser().isDeleted())
                 .map(l -> l.getUser().getNickname())
                 .toList();
-
-        Long dislikes = data.getLikes().stream()
-                .filter(l -> l.getDislike())
-                .count();
 
         return ReferenceRoomResponse.builder()
                 .id(data.getId())
@@ -74,9 +66,9 @@ public class ReferenceRoomResponse {
                 .authorId(data.getUser().getId())
                 .author((data.getIsAnonymized()) ? "익명" : data.getUser().getNickname())
                 .isAnonymized(data.getIsAnonymized())
-                .likes(likes)
+                .likes(data.getTotalLikes())
                 .likedPeople(likedPeople)
-                .dislikes(dislikes)
+                .dislikes(data.getTotalDislikes())
                 .lecture(data.getLecture())
                 .semester(data.getSemester())
                 .professor(data.getProfessor())

@@ -34,7 +34,7 @@ public class CommunitySimpleResponse {
                 .view(post.getView())
                 .comment(post.getComments().stream().filter(p -> !p.getIsDeleted()).toList().size())
                 .author(post.getUser().getNickname())
-                .likes(post.getLikes().stream().filter(l -> !l.getDislike()).count())
+                .likes(post.getTotalLikes())
                 .build();
     }
 }

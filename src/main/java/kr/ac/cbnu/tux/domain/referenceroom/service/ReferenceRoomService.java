@@ -17,6 +17,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.exception.ReferenceRoomException;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.global.utility.Sanitizer;
+import kr.ac.cbnu.tux.global.utility.ScoreUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +62,9 @@ public class ReferenceRoomService {
                 .isDeleted(true)
                 .createdDate(now)
                 .view(0L)
+                .totalLikes(0L)
+                .totalDislikes(0L)
+                .score(ScoreUtils.calculateInitialScore(now))
                 .isAnonymized(true)
                 .user(user)
                 .build();

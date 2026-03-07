@@ -44,18 +44,10 @@ public class CommunityResponse {
                 .map(c -> CmCommentResponse.of(c))
                 .toList();
 
-        Long likes = post.getLikes().stream()
-                .filter(l -> !l.getDislike())
-                .count();
-
         List<String> likedPeople = post.getLikes().stream()
                 .filter(l -> !l.getDislike() && !l.getUser().isDeleted())
                 .map(l -> l.getUser().getNickname())
                 .toList();
-
-        Long dislikes = post.getLikes().stream()
-                .filter(l -> l.getDislike())
-                .count();
 
         return CommunityResponse.builder()
                 .id(post.getId())
@@ -70,9 +62,9 @@ public class CommunityResponse {
                 .author(post.getUser().getNickname())
                 .files(files)
                 .comments(comments)
-                .likes(likes)
+                .likes(post.getTotalLikes())
                 .likedPeople(likedPeople)
-                .dislikes(dislikes)
+                .dislikes(post.getTotalDislikes())
                 .build();
     }
 
