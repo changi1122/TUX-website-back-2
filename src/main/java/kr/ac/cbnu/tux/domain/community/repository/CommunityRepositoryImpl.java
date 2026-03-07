@@ -1,8 +1,11 @@
 package kr.ac.cbnu.tux.domain.community.repository;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.ac.cbnu.tux.domain.common.enums.SearchType;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +36,14 @@ public class CommunityRepositoryImpl implements CommunityRepositoryDsl {
     }
 
     @Override
-    public Page<Community> searchDsl(String query, SearchType searchType, List<CommunityPostType> categories, Pageable pageable) {
+    public Page<Community> findAllDsl(
+            List<CommunityPostType> categories,
+            String query,
+            SearchType searchType,
+            SortType sortType,
+            Pageable pageable
+    ) {
+
         BooleanExpression where = community.isDeleted.isFalse()
                 .and(buildCategoryPredicate(categories))
                 .and(buildSearchPredicate(query, searchType));
@@ -42,7 +52,7 @@ public class CommunityRepositoryImpl implements CommunityRepositoryDsl {
                 .selectFrom(community)
                 .join(community.user)
                 .where(where)
-                .orderBy(community.createdDate.desc())
+                .orderBy(getOrderBy(sortType))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -58,6 +68,10 @@ public class CommunityRepositoryImpl implements CommunityRepositoryDsl {
     }
 
     private BooleanExpression buildSearchPredicate(String query, SearchType searchType) {
+        if (query == null || query.isBlank()) {
+            return null;
+        }
+
         return switch (searchType) {
             case TITLE -> community.title.containsIgnoreCase(query);
             case BODY -> community.body.containsIgnoreCase(query);
@@ -73,5 +87,30 @@ public class CommunityRepositoryImpl implements CommunityRepositoryDsl {
             return null;
         }
         return community.category.in(categories);
+    }
+
+    public static OrderSpecifier<?>[] getOrderBy(SortType sortType) {
+        if (sortType == SortType.SCORE) {
+            return new OrderSpecifier[] {
+                    new OrderSpecifier<>(Order.DESC, community.score),
+                    new OrderSpecifier<>(Order.DESC, community.createdDate)
+            };
+        }
+        else if (sortType == SortType.LIKES) {
+            return new OrderSpecifier[] {
+                    new OrderSpecifier<>(Order.DESC, community.totalLikes),
+                    new OrderSpecifier<>(Order.DESC, community.createdDate)
+            };
+        }
+        else if (sortType == SortType.VIEW) {
+            return new OrderSpecifier[] {
+                    new OrderSpecifier<>(Order.DESC, community.view),
+                    new OrderSpecifier<>(Order.DESC, community.createdDate)
+            };
+        }
+
+        return new OrderSpecifier[] {
+                new OrderSpecifier<>(Order.DESC, community.createdDate)
+        };
     }
 }

@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.community.repository;
 
 import kr.ac.cbnu.tux.domain.common.enums.SearchType;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import org.springframework.data.domain.Page;
@@ -12,5 +13,5 @@ public interface CommunityRepositoryDsl {
 
     Community findOneDsl(Long id);
 
-    Page<Community> searchDsl(String query, SearchType searchType, List<CommunityPostType> categories, Pageable pageable);
+    Page<Community> findAllDsl(List<CommunityPostType> categories, String query, SearchType searchType, SortType sortType, Pageable pageable);
 }

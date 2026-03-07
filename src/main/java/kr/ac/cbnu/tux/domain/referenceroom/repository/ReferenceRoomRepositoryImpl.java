@@ -1,8 +1,11 @@
 package kr.ac.cbnu.tux.domain.referenceroom.repository;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.ac.cbnu.tux.domain.common.enums.SearchType;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,13 @@ public class ReferenceRoomRepositoryImpl implements ReferenceRoomRepositoryDsl {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<ReferenceRoom> searchDsl(String query, SearchType searchType, List<ReferenceRoomPostType> categories, Pageable pageable) {
+    public Page<ReferenceRoom> findAllDsl(
+            List<ReferenceRoomPostType> categories,
+            String query,
+            SearchType searchType,
+            SortType sortType,
+            Pageable pageable
+    ) {
         BooleanExpression where = referenceRoom.isDeleted.isFalse()
                 .and(buildCategoryPredicate(categories))
                 .and(buildSearchPredicate(query, searchType));
@@ -31,7 +40,7 @@ public class ReferenceRoomRepositoryImpl implements ReferenceRoomRepositoryDsl {
                 .selectFrom(referenceRoom)
                 .join(referenceRoom.user)
                 .where(where)
-                .orderBy(referenceRoom.createdDate.desc())
+                .orderBy(getOrderBy(sortType))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -66,5 +75,30 @@ public class ReferenceRoomRepositoryImpl implements ReferenceRoomRepositoryDsl {
             return null;
         }
         return referenceRoom.category.in(categories);
+    }
+
+    public static OrderSpecifier<?>[] getOrderBy(SortType sortType) {
+        if (sortType == SortType.SCORE) {
+            return new OrderSpecifier[] {
+                    new OrderSpecifier<>(Order.DESC, referenceRoom.score),
+                    new OrderSpecifier<>(Order.DESC, referenceRoom.createdDate)
+            };
+        }
+        else if (sortType == SortType.LIKES) {
+            return new OrderSpecifier[] {
+                    new OrderSpecifier<>(Order.DESC, referenceRoom.totalLikes),
+                    new OrderSpecifier<>(Order.DESC, referenceRoom.createdDate)
+            };
+        }
+        else if (sortType == SortType.VIEW) {
+            return new OrderSpecifier[] {
+                    new OrderSpecifier<>(Order.DESC, referenceRoom.view),
+                    new OrderSpecifier<>(Order.DESC, referenceRoom.createdDate)
+            };
+        }
+
+        return new OrderSpecifier[] {
+                new OrderSpecifier<>(Order.DESC, referenceRoom.createdDate)
+        };
     }
 }

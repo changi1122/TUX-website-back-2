@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.community.controller;
 
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.community.controller.docs.CommunityControllerDocs;
@@ -28,7 +29,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -129,16 +129,13 @@ public class CommunityController implements CommunityControllerDocs {
     /* 게시판 리스트 조회 */
     @GetMapping("/api/community/list")
     @ResponseBody
-    public CommunityListResponse listPosts(@RequestParam(name = "query", defaultValue = "") String query,
-                                           @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
-                                           Pageable pageable) {
-        Page<Community> page;
-        if (StringUtils.hasText(query)) {
-            page = communityService.searchList(query, searchType, pageable);
-        } else {
-            page = communityService.list(pageable);
-        }
+    public CommunityListResponse listPosts(
+            @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
+            @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+            Pageable pageable) {
 
+        Page<Community> page = communityService.list(query, searchType, sortType, pageable);
         return CommunityListResponse.of(page, pageable);
     }
 
@@ -147,15 +144,10 @@ public class CommunityController implements CommunityControllerDocs {
     public CommunityListResponse listPostsByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
-            @RequestParam("type") List<CommunityPostType> types, Pageable pageable) {
+            @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+            @RequestParam("type") List<CommunityPostType> categories, Pageable pageable) {
 
-        Page<Community> page;
-        if (StringUtils.hasText(query)) {
-            page = communityService.searchListByCategories(query, searchType, pageable, types);
-        } else {
-            page = communityService.listByCategories(pageable, types);
-        }
-
+        Page<Community> page = communityService.listByCategories(categories, query, searchType, sortType, pageable);
         return CommunityListResponse.of(page, pageable);
     }
 

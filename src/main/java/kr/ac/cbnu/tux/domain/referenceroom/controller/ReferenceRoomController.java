@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.referenceroom.controller;
 
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
 import kr.ac.cbnu.tux.domain.referenceroom.controller.docs.ReferenceRoomControllerDocs;
@@ -129,20 +130,17 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     /* 자료실 리스트 조회 */
     @GetMapping("/api/referenceroom/list")
     @ResponseBody
-    public ReferenceRoomListResponse listData(@RequestParam(name = "query", defaultValue = "") String query,
-                                              @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
-                                              Pageable pageable, @AuthenticationPrincipal User user) {
+    public ReferenceRoomListResponse listData(
+            @RequestParam(name = "query", defaultValue = "") String query,
+            @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
+            @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+            Pageable pageable, @AuthenticationPrincipal User user) {
+
         if (ReferenceRoomPostType.cannotListBy(user)) {
             throw new ReferenceRoomException(ReferenceRoomErrorCode.PERMISSION_DENIED);
         }
 
-        Page<ReferenceRoom> page;
-        if (StringUtils.hasText(query)) {
-            page = referenceRoomService.searchList(query, searchType, pageable);
-        } else {
-            page = referenceRoomService.list(pageable);
-        }
-
+        Page<ReferenceRoom> page = referenceRoomService.list(query, searchType, sortType, pageable);
         return ReferenceRoomListResponse.of(page, pageable);
     }
 
@@ -151,20 +149,15 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     public ReferenceRoomListResponse listDataByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
-            @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
-            @AuthenticationPrincipal User user) {
+            @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+            @RequestParam("type") List<ReferenceRoomPostType> categories,
+            Pageable pageable, @AuthenticationPrincipal User user) {
 
-        if (types.stream().anyMatch(type -> type.cannotReadBy(user))) {
+        if (categories.stream().anyMatch(category -> category.cannotReadBy(user))) {
             throw new ReferenceRoomException(ReferenceRoomErrorCode.PERMISSION_DENIED);
         }
 
-        Page<ReferenceRoom> page;
-        if (StringUtils.hasText(query)) {
-            page = referenceRoomService.searchListByCategories(query, searchType, pageable, types);
-        } else {
-            page = referenceRoomService.listByCategories(pageable, types);
-        }
-
+        Page<ReferenceRoom> page = referenceRoomService.listByCategories(categories, query, searchType, sortType, pageable);
         return ReferenceRoomListResponse.of(page, pageable);
     }
 

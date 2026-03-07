@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.domain.referenceroom.controller;
 
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.referenceroom.controller.docs.GalleryControllerDocs;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.GalleryListResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
@@ -25,14 +26,17 @@ public class GalleryController implements GalleryControllerDocs {
 
     @GetMapping("/api/gallery/list")
     @ResponseBody
-    public GalleryListResponse list(@RequestParam(name = "query", defaultValue = "") String query, Pageable pageable) {
-        Page<ReferenceRoom> page;
-        if (StringUtils.hasText(query)) {
-            page = referenceRoomService.searchListByCategories(query, SearchType.TITLE, pageable, List.of(ReferenceRoomPostType.GALLERY));
-        } else {
-            page = referenceRoomService.listByCategory(pageable, ReferenceRoomPostType.GALLERY);
-        }
+    public GalleryListResponse list(@RequestParam(name = "query", defaultValue = "") String query,
+                                    @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+                                    Pageable pageable) {
 
+        Page<ReferenceRoom> page = referenceRoomService.listByCategories(
+                List.of(ReferenceRoomPostType.GALLERY),
+                query,
+                SearchType.TITLE,
+                sortType,
+                pageable
+        );
         return GalleryListResponse.of(page, pageable);
     }
 }

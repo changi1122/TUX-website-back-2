@@ -2,8 +2,6 @@ package kr.ac.cbnu.tux.domain.referenceroom.repository;
 
 import jakarta.persistence.LockModeType;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
-import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
@@ -29,18 +27,7 @@ public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Lo
     """)
     Optional<ReferenceRoom> findByIdAndIsDeletedFalseWithLock(Long id);
 
-    @EntityGraph("ReferenceRoom.fetchUser")
-    Page<ReferenceRoom> findByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
-
-    @EntityGraph("ReferenceRoom.fetchUser")
-    Page<ReferenceRoom> findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(ReferenceRoomPostType type, Pageable pageable);
-
-    @EntityGraph("ReferenceRoom.fetchUser")
-    Page<ReferenceRoom> findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(List<ReferenceRoomPostType> types, Pageable pageable);
-
     Slice<ReferenceRoom> findByScore(double score, Pageable pageable);
-
-    Long countByIsDeletedFalse();
 
     @Query(value = """
         SELECT id

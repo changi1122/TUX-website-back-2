@@ -3,6 +3,7 @@ package kr.ac.cbnu.tux.domain.referenceroom.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
@@ -162,28 +163,13 @@ public class ReferenceRoomService {
 
 
     /* 자료실 리스트 조회 */
-    public Page<ReferenceRoom> list(Pageable pageable) {
-        return referenceRoomRepository.findByIsDeletedFalseOrderByCreatedDateDesc(pageable);
+    public Page<ReferenceRoom> list(String query, SearchType searchType, SortType sortType, Pageable pageable) {
+        return referenceRoomRepository.findAllDsl(null, query, searchType, sortType, pageable);
     }
 
-    public Page<ReferenceRoom> searchList(String query, SearchType searchType, Pageable pageable) {
-        return referenceRoomRepository.searchDsl(query, searchType, null, pageable);
-    }
-
-    public Page<ReferenceRoom> listByCategory(Pageable pageable, ReferenceRoomPostType type) {
-        return referenceRoomRepository.findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(type, pageable);
-    }
-
-    public Page<ReferenceRoom> listByCategories(Pageable pageable, List<ReferenceRoomPostType> types) {
-        return referenceRoomRepository.findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(types, pageable);
-    }
-
-    public Page<ReferenceRoom> searchListByCategories(String query, SearchType searchType, Pageable pageable, List<ReferenceRoomPostType> types) {
-        return referenceRoomRepository.searchDsl(query, searchType, types, pageable);
-    }
-
-    public Long count() {
-        return referenceRoomRepository.countByIsDeletedFalse();
+    public Page<ReferenceRoom> listByCategories(List<ReferenceRoomPostType> categories, String query,
+                                                SearchType searchType, SortType sortType, Pageable pageable) {
+        return referenceRoomRepository.findAllDsl(categories, query, searchType, sortType, pageable);
     }
 
     /* 댓글 관련 코드 */

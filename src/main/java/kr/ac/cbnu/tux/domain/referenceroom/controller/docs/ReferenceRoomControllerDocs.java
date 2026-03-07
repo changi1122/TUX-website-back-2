@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.referenceroom.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.ReferenceRoomRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.request.RfCommentRequest;
 import kr.ac.cbnu.tux.domain.referenceroom.dto.response.ReferenceRoomListResponse;
@@ -59,14 +60,16 @@ public interface ReferenceRoomControllerDocs {
     @Operation(method = "GET", summary = "글 목록 조회", description = "전체 글 목록을 조회한다.")
     ReferenceRoomListResponse listData(@RequestParam(name = "query", defaultValue = "") String query,
                                        @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
+                                       @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
                                        Pageable pageable, @AuthenticationPrincipal User user);
 
     @Operation(method = "GET", summary = "카테고리별 글 목록 조회", description = "카테고리별로 글 목록을 조회한다.")
     ReferenceRoomListResponse listDataByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
-            @RequestParam("type") List<ReferenceRoomPostType> types, Pageable pageable,
-            @AuthenticationPrincipal User user);
+            @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+            @RequestParam("type") List<ReferenceRoomPostType> categories,
+            Pageable pageable, @AuthenticationPrincipal User user);
 
     @Operation(method = "POST", summary = "댓글 작성", description = "글에 댓글을 작성한다.")
     RfCommentResponse addComment(@PathVariable Long id, @Validated @RequestBody RfCommentRequest request,

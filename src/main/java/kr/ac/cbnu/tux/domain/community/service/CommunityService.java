@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.community.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
@@ -137,24 +138,13 @@ public class CommunityService {
 
     /* 게시판 리스트 조회 */
 
-    public Page<Community> list(Pageable pageable) {
-        return communityRepository.findByIsDeletedFalseOrderByCreatedDateDesc(pageable);
+    public Page<Community> list(String query, SearchType searchType, SortType sortType, Pageable pageable) {
+        return communityRepository.findAllDsl(null, query, searchType, sortType, pageable);
     }
 
-    public Page<Community> searchList(String query, SearchType searchType, Pageable pageable) {
-        return communityRepository.searchDsl(query, searchType, null, pageable);
-    }
-
-    public Page<Community> listByCategories(Pageable pageable, List<CommunityPostType> types) {
-        return communityRepository.findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(types, pageable);
-    }
-
-    public Page<Community> searchListByCategories(String query, SearchType searchType, Pageable pageable, List<CommunityPostType> types) {
-        return communityRepository.searchDsl(query, searchType, types, pageable);
-    }
-
-    public Long count() {
-        return communityRepository.countByIsDeletedFalse();
+    public Page<Community> listByCategories(List<CommunityPostType> categories, String query, SearchType searchType,
+                                            SortType sortType, Pageable pageable) {
+        return communityRepository.findAllDsl(categories, query, searchType, sortType, pageable);
     }
 
 

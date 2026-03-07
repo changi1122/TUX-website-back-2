@@ -2,8 +2,6 @@ package kr.ac.cbnu.tux.domain.community.repository;
 
 import jakarta.persistence.LockModeType;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
-import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
@@ -30,24 +28,7 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
     """)
     Optional<Community> findByIdAndIsDeletedFalseWithLock(Long id);
 
-    @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
-
-    @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseOrderByViewDescCreatedDateDesc(Pageable pageable);
-
-    @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseAndCategoryOrderByCreatedDateDesc(CommunityPostType type, Pageable pageable);
-
-    @EntityGraph("Community.fetchUser")
-    Page<Community> findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(List<CommunityPostType> types, Pageable pageable);
-
-    @EntityGraph("Community.fetchUser")
-    List<Community> findAllByIsDeletedFalse();
-
     Slice<Community> findByScore(double score, Pageable pageable);
-
-    Long countByIsDeletedFalse();
 
     @Query(value = """
         SELECT id

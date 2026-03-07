@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.community.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.dto.response.CmCommentResponse;
@@ -59,13 +60,15 @@ public interface CommunityControllerDocs {
     @Operation(method = "GET", summary = "글 목록 조회", description = "전체 글 목록을 조회한다.")
     CommunityListResponse listPosts(@RequestParam(name = "query", defaultValue = "") String query,
                                     @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
+                                    @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
                                     Pageable pageable);
 
     @Operation(method = "GET", summary = "카테고리별 글 목록 조회", description = "카테고리별로 글 목록을 조회한다.")
     CommunityListResponse listPostsByCategory(
             @RequestParam(name = "query", defaultValue = "") String query,
             @RequestParam(name = "searchType", defaultValue = "TITLE") SearchType searchType,
-            @RequestParam("type") List<CommunityPostType> types, Pageable pageable);
+            @RequestParam(name = "sortType", defaultValue = "CREATED_DATE") SortType sortType,
+            @RequestParam("type") List<CommunityPostType> categories, Pageable pageable);
 
     @Operation(method = "POST", summary = "댓글 작성", description = "글에 댓글을 작성한다.")
     CmCommentResponse addComment(@PathVariable Long id, @Validated @RequestBody CmCommentRequest request,
