@@ -61,9 +61,11 @@ public class ReferenceRoom {
     @Column(nullable = false)
     private Long view;
 
+    @Setter
     @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
     private Long totalLikes;
 
+    @Setter
     @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
     private Long totalDislikes;
 
@@ -71,6 +73,7 @@ public class ReferenceRoom {
     @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
     private Long totalComments;
 
+    @Setter
     @Column(columnDefinition = "DOUBLE NOT NULL DEFAULT 0")
     private Double score;
     

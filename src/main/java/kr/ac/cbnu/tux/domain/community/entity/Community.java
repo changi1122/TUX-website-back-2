@@ -73,6 +73,7 @@ public class Community {
     @Column(columnDefinition = "BIGINT NOT NULL DEFAULT 0")
     private Long totalComments;
 
+    @Setter
     @Column(columnDefinition = "DOUBLE NOT NULL DEFAULT 0")
     private Double score;
 

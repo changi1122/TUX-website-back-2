@@ -5,6 +5,7 @@ import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
 import kr.ac.cbnu.tux.domain.referenceroom.enums.ReferenceRoomPostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,8 @@ public interface ReferenceRoomRepository extends JpaRepository<ReferenceRoom, Lo
 
     @EntityGraph("ReferenceRoom.fetchUser")
     Page<ReferenceRoom> findByIsDeletedFalseAndCategoryInOrderByCreatedDateDesc(List<ReferenceRoomPostType> types, Pageable pageable);
+
+    Slice<ReferenceRoom> findByScore(double score, Pageable pageable);
 
     Long countByIsDeletedFalse();
 

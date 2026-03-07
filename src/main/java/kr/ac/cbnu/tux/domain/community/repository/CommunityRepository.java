@@ -5,6 +5,7 @@ import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,8 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
 
     @EntityGraph("Community.fetchUser")
     List<Community> findAllByIsDeletedFalse();
+
+    Slice<Community> findByScore(double score, Pageable pageable);
 
     Long countByIsDeletedFalse();
 
