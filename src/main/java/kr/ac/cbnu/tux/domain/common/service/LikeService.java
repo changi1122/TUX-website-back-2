@@ -29,7 +29,7 @@ public class LikeService {
 
     @Transactional
     public void createLikeOnCommunity(Long postId, User user, Boolean isDisliked, OffsetDateTime now) {
-        Community post = communityRepository.findByIdAndIsDeletedFalse(postId)
+        Community post = communityRepository.findByIdAndIsDeletedFalseWithLock(postId)
                 .orElseThrow(() -> new CommunityException(CommunityErrorCode.NOT_FOUND));
 
         if (likeRepository.existsByPostAndUserAndDislike(post, user, isDisliked)) {
@@ -49,7 +49,7 @@ public class LikeService {
 
     @Transactional
     public void createLikeOnReferenceRoom(Long dataId, User user, Boolean isDisliked, OffsetDateTime now) {
-        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalse(dataId)
+        ReferenceRoom data = referenceRoomRepository.findByIdAndIsDeletedFalseWithLock(dataId)
                 .orElseThrow(() -> new ReferenceRoomException(ReferenceRoomErrorCode.NOT_FOUND));
 
         if (likeRepository.existsByDataAndUserAndDislike(data, user, isDisliked)) {

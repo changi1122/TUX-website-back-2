@@ -1,13 +1,11 @@
 package kr.ac.cbnu.tux.domain.community.repository;
 
+import jakarta.persistence.LockModeType;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +19,15 @@ public interface CommunityRepository extends JpaRepository<Community, Long>, Com
     // 메서드 이름 길이가 긴데, 이게 맞는 건지는 -> QueryDSL로 개선하면 좋을 듯...
 
     Optional<Community> findByIdAndIsDeletedFalse(Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT c
+        FROM Community c
+        WHERE c.id = :id
+          AND c.isDeleted = false
+    """)
+    Optional<Community> findByIdAndIsDeletedFalseWithLock(Long id);
 
     @EntityGraph("Community.fetchUser")
     Page<Community> findByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
