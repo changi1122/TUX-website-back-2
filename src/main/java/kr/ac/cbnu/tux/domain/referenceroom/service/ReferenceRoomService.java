@@ -182,7 +182,19 @@ public class ReferenceRoomService {
         referenceRoomRepository.save(data);
 
         RfComment comment = request.toEntity();
-        comment.initializeComment(data, user, now);
+        if (request.getParentId() != null) {
+            RfComment parent = rfCommentRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new ReferenceRoomException(ReferenceRoomErrorCode.NOT_FOUND));
+            if (parent.getParent() != null) {
+                throw new ReferenceRoomException(ReferenceRoomErrorCode.INVALID_REQUEST);
+            }
+            if (!parent.getData().getId().equals(dataId)) {
+                throw new ReferenceRoomException(ReferenceRoomErrorCode.NOT_FOUND);
+            }
+            comment.initializeComment(data, user, now, parent);
+        } else {
+            comment.initializeComment(data, user, now);
+        }
         return rfCommentRepository.save(comment);
     }
 

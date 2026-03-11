@@ -55,11 +55,20 @@ public class RfComment {
         }
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private RfComment parent;
+
     public void initializeComment(ReferenceRoom data, User user, OffsetDateTime now) {
         this.user = user;
         this.data = data;
         this.createdDate = now;
         this.isDeleted = false;
+    }
+
+    public void initializeComment(ReferenceRoom data, User user, OffsetDateTime now, RfComment parent) {
+        initializeComment(data, user, now);
+        this.parent = parent;
     }
 
     public void deleteComment(OffsetDateTime now) {

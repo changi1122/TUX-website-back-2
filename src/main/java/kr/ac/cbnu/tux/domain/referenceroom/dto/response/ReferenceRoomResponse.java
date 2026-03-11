@@ -2,13 +2,17 @@ package kr.ac.cbnu.tux.domain.referenceroom.dto.response;
 
 import kr.ac.cbnu.tux.domain.common.dto.AttachmentResponse;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.domain.referenceroom.entity.RfComment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -43,10 +47,21 @@ public class ReferenceRoomResponse {
                 .map(c -> AttachmentResponse.of(c))
                 .toList();
 
-        List<RfCommentResponse> comments = data.getComments().stream()
+        List<RfComment> allComments = data.getComments().stream()
                 .filter(c -> !c.getIsDeleted())
-                .sorted((c1, c2) -> c1.getCreatedDate().compareTo(c2.getCreatedDate()))
-                .map(c -> RfCommentResponse.of(c))
+                .sorted(Comparator.comparing(c -> c.getCreatedDate()))
+                .toList();
+
+        Map<Long, List<RfCommentResponse>> repliesMap = allComments.stream()
+                .filter(c -> c.getParent() != null)
+                .collect(Collectors.groupingBy(
+                        c -> c.getParent().getId(),
+                        Collectors.mapping(RfCommentResponse::of, Collectors.toList())
+                ));
+
+        List<RfCommentResponse> comments = allComments.stream()
+                .filter(c -> c.getParent() == null)
+                .map(c -> RfCommentResponse.of(c, repliesMap.getOrDefault(c.getId(), List.of())))
                 .toList();
 
         List<String> likedPeople = data.getLikes().stream()

@@ -1,6 +1,7 @@
 package kr.ac.cbnu.tux.domain.community.dto.response;
 
 import kr.ac.cbnu.tux.domain.common.dto.AttachmentResponse;
+import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +9,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -38,10 +42,21 @@ public class CommunityResponse {
                 .map(c -> AttachmentResponse.of(c))
                 .toList();
 
-        List<CmCommentResponse> comments = post.getComments().stream()
+        List<CmComment> allComments = post.getComments().stream()
                 .filter(c -> !c.getIsDeleted())
-                .sorted((c1, c2) -> c1.getCreatedDate().compareTo(c2.getCreatedDate()))
-                .map(c -> CmCommentResponse.of(c))
+                .sorted(Comparator.comparing(c -> c.getCreatedDate()))
+                .toList();
+
+        Map<Long, List<CmCommentResponse>> repliesMap = allComments.stream()
+                .filter(c -> c.getParent() != null)
+                .collect(Collectors.groupingBy(
+                        c -> c.getParent().getId(),
+                        Collectors.mapping(CmCommentResponse::of, Collectors.toList())
+                ));
+
+        List<CmCommentResponse> comments = allComments.stream()
+                .filter(c -> c.getParent() == null)
+                .map(c -> CmCommentResponse.of(c, repliesMap.getOrDefault(c.getId(), List.of())))
                 .toList();
 
         List<String> likedPeople = post.getLikes().stream()

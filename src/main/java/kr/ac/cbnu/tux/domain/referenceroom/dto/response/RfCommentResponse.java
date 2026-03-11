@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +20,7 @@ public class RfCommentResponse {
     private OffsetDateTime createdDate;
     private Long authorId;
     private String author;
+    private List<RfCommentResponse> replies;
 
     public static RfCommentResponse of(RfComment comment) {
 
@@ -28,6 +30,19 @@ public class RfCommentResponse {
                 .createdDate(comment.getCreatedDate())
                 .authorId(comment.getUser().getId())
                 .author(comment.getUser().getNickname())
+                .replies(List.of())
+                .build();
+    }
+
+    public static RfCommentResponse of(RfComment comment, List<RfCommentResponse> replies) {
+
+        return RfCommentResponse.builder()
+                .id(comment.getId())
+                .body(comment.getBody())
+                .createdDate(comment.getCreatedDate())
+                .authorId(comment.getUser().getId())
+                .author(comment.getUser().getNickname())
+                .replies(replies)
                 .build();
     }
 

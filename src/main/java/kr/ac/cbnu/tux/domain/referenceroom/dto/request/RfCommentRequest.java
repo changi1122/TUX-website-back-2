@@ -12,6 +12,8 @@ public class RfCommentRequest {
     @NotEmpty
     private String body;
 
+    private Long parentId;
+
     public RfComment toEntity() {
         return RfComment.builder()
                 .body(body)

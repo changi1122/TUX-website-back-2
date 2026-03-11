@@ -52,11 +52,20 @@ public class CmComment {
         }
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private CmComment parent;
+
     public void initializeComment(Community post, User user, OffsetDateTime now) {
         this.user = user;
         this.post = post;
         this.isDeleted = false;
         this.createdDate = now;
+    }
+
+    public void initializeComment(Community post, User user, OffsetDateTime now, CmComment parent) {
+        initializeComment(post, user, now);
+        this.parent = parent;
     }
 
     public void deleteComment(OffsetDateTime now) {

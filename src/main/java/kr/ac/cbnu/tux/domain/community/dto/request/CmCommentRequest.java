@@ -12,6 +12,8 @@ public class CmCommentRequest {
     @NotEmpty
     private String body;
 
+    private Long parentId;
+
     public CmComment toEntity() {
         return CmComment.builder()
                 .body(body)

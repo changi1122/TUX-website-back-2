@@ -158,7 +158,19 @@ public class CommunityService {
         communityRepository.save(post);
 
         CmComment comment = request.toEntity();
-        comment.initializeComment(post, user, now);
+        if (request.getParentId() != null) {
+            CmComment parent = cmCommentRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new CommunityException(CommunityErrorCode.NOT_FOUND));
+            if (parent.getParent() != null) {
+                throw new CommunityException(CommunityErrorCode.INVALID_REQUEST);
+            }
+            if (!parent.getPost().getId().equals(postId)) {
+                throw new CommunityException(CommunityErrorCode.NOT_FOUND);
+            }
+            comment.initializeComment(post, user, now, parent);
+        } else {
+            comment.initializeComment(post, user, now);
+        }
         return cmCommentRepository.save(comment);
     }
 
