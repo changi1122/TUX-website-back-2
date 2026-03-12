@@ -41,6 +41,9 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.DELETE, "/api/community/**").authenticated()
 
                             /* ReferenceRoom */
+                            .requestMatchers(HttpMethod.GET, "/api/referenceroom/{id}").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/referenceroom/{id}/file/{filename}").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/referenceroom/**").authenticated()
                             .requestMatchers(HttpMethod.POST, "/api/referenceroom").authenticated()
                             .requestMatchers(HttpMethod.PUT, "/api/referenceroom/**").authenticated()
                             .requestMatchers(HttpMethod.DELETE, "/api/referenceroom/**").authenticated()
