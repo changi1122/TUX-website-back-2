@@ -6,6 +6,11 @@ spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
 
+  # Virtual Thread (Java 21+)
+  threads:
+    virtual:
+      enabled: true
+
   # Max Request/File Size
   servlet:
     multipart:
