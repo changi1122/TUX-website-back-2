@@ -1,6 +1,8 @@
 package kr.ac.cbnu.tux.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kr.ac.cbnu.tux.domain.admin.service.StaticPageService;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
 import kr.ac.cbnu.tux.domain.common.service.LikeService;
@@ -13,7 +15,8 @@ import kr.ac.cbnu.tux.global.controller.GlobalExceptionController;
 import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
 import kr.ac.cbnu.tux.global.utility.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,8 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *     // 테스트 코드
  * }
  */
-@WebMvcTest
-@Import(GlobalExceptionController.class)
+@Import({GlobalExceptionController.class, ControllerTestSupport.TestJacksonConfig.class})
 @ActiveProfiles("test")
 public abstract class ControllerTestSupport {
 
@@ -69,5 +71,15 @@ public abstract class ControllerTestSupport {
 
     @MockitoBean
     protected FileStore fileStore;
+
+    @TestConfiguration
+    static class TestJacksonConfig {
+        @Bean
+        public ObjectMapper objectMapper() {
+            return new ObjectMapper()
+                    .registerModule(new JavaTimeModule())
+                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        }
+    }
 
 }
