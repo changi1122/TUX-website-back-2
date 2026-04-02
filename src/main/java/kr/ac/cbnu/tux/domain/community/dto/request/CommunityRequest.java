@@ -3,13 +3,15 @@ package kr.ac.cbnu.tux.domain.community.dto.request;
 import jakarta.validation.constraints.NotEmpty;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.community.enums.CommunityPostType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.extern.jackson.Jacksonized;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@Jacksonized
+@NoArgsConstructor
+@AllArgsConstructor
 public class CommunityRequest {
 
     @NotEmpty
