@@ -4,9 +4,11 @@ import jakarta.validation.constraints.NotEmpty;
 import kr.ac.cbnu.tux.domain.community.entity.CmComment;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 @Getter
 @Builder
+@Jacksonized
 public class CmCommentRequest {
 
     @NotEmpty

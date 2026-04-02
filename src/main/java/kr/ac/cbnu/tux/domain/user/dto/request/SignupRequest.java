@@ -7,9 +7,11 @@ import jakarta.validation.constraints.Size;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 @Getter
 @Builder
+@Jacksonized
 public class SignupRequest {
 
     @Schema(description = "Username must be at least 4 characters long and contain only letters, numbers, or underscores.")
