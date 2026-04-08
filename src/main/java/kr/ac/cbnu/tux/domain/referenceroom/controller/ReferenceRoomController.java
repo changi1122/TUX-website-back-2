@@ -73,7 +73,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
         ReferenceRoom data = referenceRoomService.createTemporalDataForFile(type, user, OffsetDateTime.now());
         Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
-        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
+        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file, attachment.getFilename());
         return data.getId();
     }
 
@@ -90,7 +90,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
 
         Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
-        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
+        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file, attachment.getFilename());
     }
 
     /* 임시로 생성된 글 내용 업데이트 */

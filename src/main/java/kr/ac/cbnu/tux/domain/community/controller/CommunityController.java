@@ -73,7 +73,7 @@ public class CommunityController implements CommunityControllerDocs {
         Community post = communityService.createTemporalPostForFile(type, user, OffsetDateTime.now());
         Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
-        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
+        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file, attachment.getFilename());
         return post.getId();
     }
 
@@ -90,7 +90,7 @@ public class CommunityController implements CommunityControllerDocs {
 
         Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
-        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
+        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file, attachment.getFilename());
     }
 
     /* 임시로 생성된 글 내용 업데이트 */

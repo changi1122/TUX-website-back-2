@@ -14,12 +14,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.web.util.UriUtils;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
@@ -44,10 +47,11 @@ public class AttachmentService {
         String uniqueFilename = resolveUniqueFilename(
                 Objects.requireNonNull(file.getOriginalFilename()), post.getAttachments());
         
+        String sanitizedFilename = uniqueFilename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
         Attachment attachment = Attachment.builder()
                 .filename(uniqueFilename)
                 .path("/api/community/" + post.getId() + "/file/" +
-                        uniqueFilename.replaceAll("[\\\\/:*?\"<>| ]", "_"))
+                        UriUtils.encodePathSegment(sanitizedFilename, StandardCharsets.UTF_8))
                 .isImage(isImageFile(file))
                 .order(post.getAttachments().size() + 1)
                 .post(post)
@@ -63,10 +67,11 @@ public class AttachmentService {
         String uniqueFilename = resolveUniqueFilename(
                 Objects.requireNonNull(file.getOriginalFilename()), data.getAttachments());
         
+        String sanitizedFilename = uniqueFilename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
         Attachment attachment = Attachment.builder()
                 .filename(uniqueFilename)
                 .path("/api/referenceroom/" + data.getId() + "/file/" +
-                        uniqueFilename.replaceAll("[\\\\/:*?\"<>| ]", "_"))
+                        UriUtils.encodePathSegment(sanitizedFilename, StandardCharsets.UTF_8))
                 .isImage(isImageFile(file))
                 .order(data.getAttachments().size() + 1)
                 .data(data)

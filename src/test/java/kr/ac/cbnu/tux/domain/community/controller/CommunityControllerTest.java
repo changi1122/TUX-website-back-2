@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.domain.community.controller;
 
+import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
@@ -15,7 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -173,6 +176,14 @@ class CommunityControllerTest extends ControllerTestSupport {
                 .build();
 
         given(communityService.getPost(1L)).willReturn(post);
+
+        Attachment attachment = Attachment.builder()
+                .filename("test.txt")
+                .path("/api/community/1/file/test.txt")
+                .isImage(false)
+                .downloadCount(0L)
+                .build();
+        given(attachmentService.createAttachment(any(MultipartFile.class), any(Community.class), any(User.class))).willReturn(attachment);
 
         MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "content".getBytes());
 

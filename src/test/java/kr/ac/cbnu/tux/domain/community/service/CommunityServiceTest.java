@@ -113,7 +113,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         Community post = communityService.createTemporalPostForFile(CommunityPostType.FREE, user, now);
         Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
-        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
+        fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file, attachment.getFilename());
 
         // then
         Community foundPost = communityRepository.findById(post.getId()).orElseThrow();

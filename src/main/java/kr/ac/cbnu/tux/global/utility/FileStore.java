@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,15 +25,13 @@ public class FileStore {
 
     @Value("${file.dir}")
     private String fileDir;
-
-    public void saveAttachment(AttachmentType prefix, String id, MultipartFile file) {
+    public void saveAttachment(AttachmentType prefix, String id, MultipartFile file, String filename) {
         String directoryPath = fileDir + "file/" + prefix.getValue() + "/" + id;
         if (!new File(directoryPath).exists()) {
             new File(directoryPath).mkdirs();
         }
 
-        String filePath = directoryPath + "/" + Objects.requireNonNull(file.getOriginalFilename())
-                .replaceAll("[\\\\/:*?\"<>| ]", "_");
+        String filePath = directoryPath + "/" + sanitizeFilename(filename);
 
         File destFile = new File(filePath);
         try {
@@ -47,7 +44,7 @@ public class FileStore {
 
     public void deleteAttachment(AttachmentType prefix, String id, Attachment file) {
         String directoryPath = fileDir + "file/" + prefix.getValue() + "/" + id;
-        String filePath = directoryPath + "/" + file.getFilename().replaceAll("[\\\\/:*?\"<>| ]", "_");
+        String filePath = directoryPath + "/" + sanitizeFilename(file.getFilename());
 
         try {
             Files.deleteIfExists(Paths.get(filePath));
@@ -109,6 +106,10 @@ public class FileStore {
 
     public String getBannerPath(String filename) {
         return fileDir + "banner/" + filename;
+    }
+
+    private String sanitizeFilename(String filename) {
+        return filename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
     }
 
     // 배너 파일이 없을 시 기본 배너 복사

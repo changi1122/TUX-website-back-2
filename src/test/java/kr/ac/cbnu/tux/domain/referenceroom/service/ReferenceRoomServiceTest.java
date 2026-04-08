@@ -117,7 +117,7 @@ class ReferenceRoomServiceTest extends IntegrationTestSupport {
         ReferenceRoom data = referenceRoomService.createTemporalDataForFile(ReferenceRoomPostType.STUDY, user, now);
         Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
-        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
+        fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file, attachment.getFilename());
 
         // then
         ReferenceRoom foundData = referenceRoomRepository.findById(data.getId()).orElseThrow();
