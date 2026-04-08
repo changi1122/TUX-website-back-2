@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
@@ -25,10 +27,13 @@ public class AttachmentService {
 
     @Transactional
     public Attachment createAttachment(MultipartFile file, Community post) {
+        String uniqueFilename = resolveUniqueFilename(
+                Objects.requireNonNull(file.getOriginalFilename()), post.getAttachments());
+        
         Attachment attachment = Attachment.builder()
-                .filename(file.getOriginalFilename())
+                .filename(uniqueFilename)
                 .path("/api/community/" + post.getId() + "/file/" +
-                        Objects.requireNonNull(file.getOriginalFilename()).replaceAll("[\\\\/:*?\"<>| ]", "_"))
+                        uniqueFilename.replaceAll("[\\\\/:*?\"<>| ]", "_"))
                 .isImage(isImageFile(file))
                 .order(post.getAttachments().size() + 1)
                 .post(post)
@@ -40,10 +45,13 @@ public class AttachmentService {
 
     @Transactional
     public Attachment createAttachment(MultipartFile file, ReferenceRoom data) {
+        String uniqueFilename = resolveUniqueFilename(
+                Objects.requireNonNull(file.getOriginalFilename()), data.getAttachments());
+        
         Attachment attachment = Attachment.builder()
-                .filename(file.getOriginalFilename())
+                .filename(uniqueFilename)
                 .path("/api/referenceroom/" + data.getId() + "/file/" +
-                        Objects.requireNonNull(file.getOriginalFilename()).replaceAll("[\\\\/:*?\"<>| ]", "_"))
+                        uniqueFilename.replaceAll("[\\\\/:*?\"<>| ]", "_"))
                 .isImage(isImageFile(file))
                 .order(data.getAttachments().size() + 1)
                 .data(data)
@@ -77,6 +85,28 @@ public class AttachmentService {
         fileStore.deleteAttachment(REFERENCEROOM, data.getId().toString(), file);
         data.removeAttachment(file);
         attachmentRepository.delete(file);
+    }
+
+    private String resolveUniqueFilename(String originalFilename, List<Attachment> existingAttachments) {
+        Set<String> existingNames = existingAttachments.stream()
+                .map(Attachment::getFilename)
+                .collect(Collectors.toSet());
+
+        if (!existingNames.contains(originalFilename)) {
+            return originalFilename;
+        }
+
+        int dotIndex = originalFilename.lastIndexOf('.');
+        String baseName = dotIndex >= 0 ? originalFilename.substring(0, dotIndex) : originalFilename;
+        String extension = dotIndex >= 0 ? originalFilename.substring(dotIndex) : "";
+
+        int counter = 1;
+        String candidate;
+        do {
+            candidate = baseName + " (" + counter++ + ")" + extension;
+        } while (existingNames.contains(candidate));
+
+        return candidate;
     }
 
     private boolean isImageFile(MultipartFile multipartFile) {
