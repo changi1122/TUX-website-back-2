@@ -14,15 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.charset.StandardCharsets;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import org.springframework.web.util.UriUtils;
 
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.COMMUNITY;
 import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
@@ -44,14 +37,18 @@ public class AttachmentService {
     @Transactional
     public Attachment createAttachment(MultipartFile file, Community post, User user) {
         validateFileSize(file, user);
-        String uniqueFilename = resolveUniqueFilename(
-                Objects.requireNonNull(file.getOriginalFilename()), post.getAttachments());
-        
-        String sanitizedFilename = uniqueFilename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
+
+        String originalFilename = Objects.requireNonNull(file.getOriginalFilename());
+        String uniqueFilename = resolveUniqueFilename(originalFilename, post.getAttachments());
+        String displayName = uniqueFilename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
+        int dotIndex = originalFilename.lastIndexOf('.');
+        String extension = dotIndex >= 0 ? originalFilename.substring(dotIndex) : "";
+        String savedFilename = UUID.randomUUID() + extension;
+
         Attachment attachment = Attachment.builder()
-                .filename(uniqueFilename)
-                .path("/api/community/" + post.getId() + "/file/" +
-                        UriUtils.encodePathSegment(sanitizedFilename, StandardCharsets.UTF_8))
+                .filename(savedFilename)
+                .displayName(displayName)
+                .path("/api/community/" + post.getId() + "/file/" + savedFilename)
                 .isImage(isImageFile(file))
                 .order(post.getAttachments().size() + 1)
                 .post(post)
@@ -64,14 +61,18 @@ public class AttachmentService {
     @Transactional
     public Attachment createAttachment(MultipartFile file, ReferenceRoom data, User user) {
         validateFileSize(file, user);
-        String uniqueFilename = resolveUniqueFilename(
-                Objects.requireNonNull(file.getOriginalFilename()), data.getAttachments());
-        
-        String sanitizedFilename = uniqueFilename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
+
+        String originalFilename = Objects.requireNonNull(file.getOriginalFilename());
+        String uniqueFilename = resolveUniqueFilename(originalFilename, data.getAttachments());
+        String displayName = uniqueFilename.replaceAll("[\\\\/:*?\"<>|% ]", "_");
+        int dotIndex = originalFilename.lastIndexOf('.');
+        String extension = dotIndex >= 0 ? originalFilename.substring(dotIndex) : "";
+        String savedFilename = UUID.randomUUID() + extension;
+
         Attachment attachment = Attachment.builder()
-                .filename(uniqueFilename)
-                .path("/api/referenceroom/" + data.getId() + "/file/" +
-                        UriUtils.encodePathSegment(sanitizedFilename, StandardCharsets.UTF_8))
+                .filename(savedFilename)
+                .displayName(displayName)
+                .path("/api/community/" + data.getId() + "/file/" + savedFilename)
                 .isImage(isImageFile(file))
                 .order(data.getAttachments().size() + 1)
                 .data(data)
@@ -116,7 +117,7 @@ public class AttachmentService {
 
     private String resolveUniqueFilename(String originalFilename, List<Attachment> existingAttachments) {
         Set<String> existingNames = existingAttachments.stream()
-                .map(Attachment::getFilename)
+                .map(Attachment::getDisplayName)
                 .collect(Collectors.toSet());
 
         if (!existingNames.contains(originalFilename)) {

@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.domain.community.controller;
 
+import kr.ac.cbnu.tux.domain.common.dto.FileUploadResponse;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
@@ -66,7 +67,7 @@ public class CommunityController implements CommunityControllerDocs {
     /* 글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일 업로드 */
     @PostMapping(path = "/api/community/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public Long uploadFileBeforeCreatePost(@RequestParam CommunityPostType type,
+    public FileUploadResponse uploadFileBeforeCreatePost(@RequestParam CommunityPostType type,
                                            @RequestParam("file") MultipartFile file,
                                            @AuthenticationPrincipal User user) {
 
@@ -74,13 +75,14 @@ public class CommunityController implements CommunityControllerDocs {
         Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
         fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file, attachment.getFilename());
-        return post.getId();
+        return FileUploadResponse.of(post.getId(), attachment.getFilename());
     }
 
     /* 글이 생성된 이후 파일 업로드 */
     @PostMapping(path = "/api/community/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void uploadFileAfterCreatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+    @ResponseBody
+    public FileUploadResponse uploadFileAfterCreatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
                                           @AuthenticationPrincipal User user) {
         Community post = communityService.getPost(id);
 
@@ -91,6 +93,7 @@ public class CommunityController implements CommunityControllerDocs {
         Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
         fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file, attachment.getFilename());
+        return FileUploadResponse.of(post.getId(), attachment.getFilename());
     }
 
     /* 임시로 생성된 글 내용 업데이트 */

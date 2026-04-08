@@ -2,6 +2,7 @@ package kr.ac.cbnu.tux.domain.community.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.ac.cbnu.tux.domain.common.dto.FileUploadResponse;
 import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.community.dto.request.CmCommentRequest;
 import kr.ac.cbnu.tux.domain.community.dto.request.CommunityRequest;
@@ -35,11 +36,11 @@ public interface CommunityControllerDocs {
                     @AuthenticationPrincipal User user);
 
     @Operation(method = "POST", summary = "최초 파일 업로드", description = "글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일을 저장한다.")
-    Long uploadFileBeforeCreatePost(@RequestParam CommunityPostType type,
-                                    @RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user);
+    FileUploadResponse uploadFileBeforeCreatePost(@RequestParam CommunityPostType type,
+                                                  @RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user);
 
     @Operation(method = "POST", summary = "(글 생성 이후) 파일 업로드", description = "글쓰기 이후 파일 업로드시 파일을 저장한다.")
-    void uploadFileAfterCreatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+    FileUploadResponse uploadFileAfterCreatePost(@PathVariable Long id, @RequestParam("file") MultipartFile file,
                                    @AuthenticationPrincipal User user);
 
     @Operation(method = "POST", summary = "(글 생성 이후) 글 작성", description = "임시로 생성된 글의 내용을 작성한다.")

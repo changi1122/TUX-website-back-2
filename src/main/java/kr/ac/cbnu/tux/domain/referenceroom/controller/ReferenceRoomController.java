@@ -1,5 +1,6 @@
 package kr.ac.cbnu.tux.domain.referenceroom.controller;
 
+import kr.ac.cbnu.tux.domain.common.dto.FileUploadResponse;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
 import kr.ac.cbnu.tux.domain.common.enums.SortType;
 import kr.ac.cbnu.tux.domain.common.service.AttachmentService;
@@ -67,20 +68,21 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
     /* 글쓰기 도중 파일 업로드시 임시로 글 생성 후 파일 업로드 */
     @PostMapping(path = "/api/referenceroom/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public Long uploadFileBeforeCreateData(@RequestParam ReferenceRoomPostType type,
-                                           @RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
+    public FileUploadResponse uploadFileBeforeCreateData(@RequestParam ReferenceRoomPostType type,
+                                                         @RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
 
         ReferenceRoom data = referenceRoomService.createTemporalDataForFile(type, user, OffsetDateTime.now());
         Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
         fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file, attachment.getFilename());
-        return data.getId();
+        return FileUploadResponse.of(data.getId(), attachment.getFilename());
     }
 
     /* 글이 생성된 이후 파일 업로드 */
     @PostMapping(path = "/api/referenceroom/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(code = HttpStatus.ACCEPTED)
-    public void uploadFileAfterCreateData(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+    @ResponseBody
+    public FileUploadResponse uploadFileAfterCreateData(@PathVariable Long id, @RequestParam("file") MultipartFile file,
                                           @AuthenticationPrincipal User user) {
         ReferenceRoom data = referenceRoomService.getData(id);
 
@@ -91,6 +93,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
         Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
         fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file, attachment.getFilename());
+        return FileUploadResponse.of(data.getId(), attachment.getFilename());
     }
 
     /* 임시로 생성된 글 내용 업데이트 */

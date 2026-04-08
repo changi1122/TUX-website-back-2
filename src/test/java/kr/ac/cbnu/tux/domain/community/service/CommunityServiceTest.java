@@ -120,7 +120,7 @@ class CommunityServiceTest extends IntegrationTestSupport {
         assertThat(foundPost).extracting("category", "user", "createdDate", "isDeleted")
                 .contains(CommunityPostType.FREE, user, now, true);
         assertThat(foundPost.getAttachments()).hasSize(1)
-                .extracting("filename", "isImage")
+                .extracting("displayName", "isImage")
                 .contains(tuple("sky.jpg", true));
 
         // 임시 생성된 글의 내용을 작성한다

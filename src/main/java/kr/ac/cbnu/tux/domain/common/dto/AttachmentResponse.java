@@ -14,6 +14,7 @@ public class AttachmentResponse {
 
     private Long id;
     private String filename;
+    private String displayName;
     private String path;
     private Boolean isImage;
     private Integer order;
@@ -23,6 +24,7 @@ public class AttachmentResponse {
         return AttachmentResponse.builder()
                 .id(file.getId())
                 .filename(file.getFilename())
+                .displayName(file.getDisplayName())
                 .path(file.getPath())
                 .isImage(file.getIsImage())
                 .order(file.getOrder())
