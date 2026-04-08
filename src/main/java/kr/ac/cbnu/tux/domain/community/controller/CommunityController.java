@@ -71,7 +71,7 @@ public class CommunityController implements CommunityControllerDocs {
                                            @AuthenticationPrincipal User user) {
 
         Community post = communityService.createTemporalPostForFile(type, user, OffsetDateTime.now());
-        Attachment attachment = attachmentService.createAttachment(file, post);
+        Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
         fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
         return post.getId();
@@ -88,7 +88,7 @@ public class CommunityController implements CommunityControllerDocs {
             throw new CommunityException(CommunityErrorCode.USER_NOT_MATCHED);
         }
 
-        Attachment attachment = attachmentService.createAttachment(file, post);
+        Attachment attachment = attachmentService.createAttachment(file, post, user);
         communityService.addAttachment(attachment, post);
         fileStore.saveAttachment(COMMUNITY, post.getId().toString(), file);
     }

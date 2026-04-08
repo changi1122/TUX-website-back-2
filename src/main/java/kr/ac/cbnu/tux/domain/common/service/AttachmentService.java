@@ -2,15 +2,21 @@ package kr.ac.cbnu.tux.domain.common.service;
 
 import jakarta.transaction.Transactional;
 import kr.ac.cbnu.tux.domain.common.entity.Attachment;
+import kr.ac.cbnu.tux.domain.common.exception.CommonErrorCode;
+import kr.ac.cbnu.tux.domain.common.exception.CommonException;
 import kr.ac.cbnu.tux.domain.common.repository.AttachmentRepository;
 import kr.ac.cbnu.tux.domain.community.entity.Community;
 import kr.ac.cbnu.tux.domain.referenceroom.entity.ReferenceRoom;
+import kr.ac.cbnu.tux.domain.user.entity.User;
+import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.global.utility.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,11 +28,19 @@ import static kr.ac.cbnu.tux.domain.common.enums.AttachmentType.REFERENCEROOM;
 @Service
 public class AttachmentService {
 
+    private static final Map<UserRole, Long> MAX_FILE_SIZE = new EnumMap<>(Map.of(
+            UserRole.GUEST,   50L  * 1024 * 1024,   //  50 MB
+            UserRole.USER,    200L * 1024 * 1024,   // 200 MB
+            UserRole.MANAGER, 3000L * 1024 * 1024,  // 3 GB
+            UserRole.ADMIN,   3000L * 1024 * 1024   // 3 GB
+    ));
+
     private final AttachmentRepository attachmentRepository;
     private final FileStore fileStore;
 
     @Transactional
-    public Attachment createAttachment(MultipartFile file, Community post) {
+    public Attachment createAttachment(MultipartFile file, Community post, User user) {
+        validateFileSize(file, user);
         String uniqueFilename = resolveUniqueFilename(
                 Objects.requireNonNull(file.getOriginalFilename()), post.getAttachments());
         
@@ -44,7 +58,8 @@ public class AttachmentService {
     }
 
     @Transactional
-    public Attachment createAttachment(MultipartFile file, ReferenceRoom data) {
+    public Attachment createAttachment(MultipartFile file, ReferenceRoom data, User user) {
+        validateFileSize(file, user);
         String uniqueFilename = resolveUniqueFilename(
                 Objects.requireNonNull(file.getOriginalFilename()), data.getAttachments());
         
@@ -85,6 +100,13 @@ public class AttachmentService {
         fileStore.deleteAttachment(REFERENCEROOM, data.getId().toString(), file);
         data.removeAttachment(file);
         attachmentRepository.delete(file);
+    }
+
+    private void validateFileSize(MultipartFile file, User user) {
+        long limit = MAX_FILE_SIZE.getOrDefault(user.getRole(), 0L);
+        if (file.getSize() > limit) {
+            throw new CommonException(CommonErrorCode.FILE_SIZE_LIMIT_EXCEEDED);
+        }
     }
 
     private String resolveUniqueFilename(String originalFilename, List<Attachment> existingAttachments) {

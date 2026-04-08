@@ -71,7 +71,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
                                            @RequestParam("file") MultipartFile file, @AuthenticationPrincipal User user) {
 
         ReferenceRoom data = referenceRoomService.createTemporalDataForFile(type, user, OffsetDateTime.now());
-        Attachment attachment = attachmentService.createAttachment(file, data);
+        Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
         fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
         return data.getId();
@@ -88,7 +88,7 @@ public class ReferenceRoomController implements ReferenceRoomControllerDocs {
             throw new ReferenceRoomException(ReferenceRoomErrorCode.USER_NOT_MATCHED);
         }
 
-        Attachment attachment = attachmentService.createAttachment(file, data);
+        Attachment attachment = attachmentService.createAttachment(file, data, user);
         referenceRoomService.addAttachment(attachment, data);
         fileStore.saveAttachment(REFERENCEROOM, data.getId().toString(), file);
     }
