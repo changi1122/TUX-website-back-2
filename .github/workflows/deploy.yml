@@ -1,0 +1,32 @@
+name: Manual Deploy to Docker Hub
+
+on:
+  # GitHub UI에 실행 버튼 표시
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Docker Hub에 배포하시겠습니까? (yes 입력)'
+        required: true
+        default: 'no'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # 사용자가 'yes'라고 입력했을 때만 실행
+    if: github.event.inputs.confirm_deploy == 'yes'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build --build-arg CACHE_BUST=$(date +%s) -t ${{ secrets.DOCKER_USERNAME }}/tux-backend:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/tux-backend:latest
