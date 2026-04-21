@@ -20,6 +20,9 @@ public interface AuthControllerDocs {
     @Operation(method = "DELETE", summary = "로그아웃", description = "로그아웃하여 토큰이 저장된 쿠키를 삭제합니다.")
     void logout(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal User user);
 
+    @Operation(method = "POST", summary = "토큰 갱신", description = "리프레시 토큰으로 액세스 토큰을 재발급합니다.")
+    void refresh(HttpServletRequest request, HttpServletResponse response);
+
     @Operation(method = "GET", summary = "현재 로그인한 회원 정보 조회", description = "로그인된 회원의 정보를 조회합니다.")
     UserResponse getCurrentUser(@AuthenticationPrincipal User user);
 }

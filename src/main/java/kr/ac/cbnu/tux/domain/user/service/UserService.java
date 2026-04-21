@@ -5,19 +5,13 @@ import kr.ac.cbnu.tux.domain.user.dto.request.LoginRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.SignupRequest;
 import kr.ac.cbnu.tux.domain.user.dto.request.UserDataRequest;
 import kr.ac.cbnu.tux.domain.user.dto.response.LoginResponse;
-import kr.ac.cbnu.tux.domain.user.dto.response.Token;
-import kr.ac.cbnu.tux.domain.user.dto.response.UserResponse;
-import kr.ac.cbnu.tux.domain.user.entity.RefreshToken;
 import kr.ac.cbnu.tux.domain.user.entity.User;
 import kr.ac.cbnu.tux.domain.user.enums.UserRole;
 import kr.ac.cbnu.tux.domain.user.exception.UserErrorCode;
 import kr.ac.cbnu.tux.domain.user.exception.UserException;
 import kr.ac.cbnu.tux.domain.user.repository.RefreshTokenRepository;
 import kr.ac.cbnu.tux.domain.user.repository.UserRepository;
-import kr.ac.cbnu.tux.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,8 +30,8 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenService refreshTokenService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public void createUser(SignupRequest request, OffsetDateTime now) {
@@ -89,26 +83,8 @@ public class UserService implements UserDetailsService {
             throw new UserException(UserErrorCode.LOGIN_FAILED);
 
         if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    user, null, user.getAuthorities()
-            );
-
-            // 액세스 토큰 생성
-            Token accessToken = jwtTokenProvider.generateAccessToken(authentication);
-
-            // 리프레시 토큰 생성
-            Token refreshToken = jwtTokenProvider.generateRefreshToken(authentication);
-
-            // 리프레시 토큰 저장
-            refreshTokenRepository.save(RefreshToken.builder()
-                    .token(refreshToken.getToken())
-                    .username(user.getUsername())
-                    .expiryDate(OffsetDateTime.now().plusSeconds(
-                            jwtTokenProvider.getRefreshExpirationMs() / 1000
-                    ))
-                    .build());
-
-            return LoginResponse.of(user, accessToken, refreshToken);
+            RefreshTokenService.RotationResult result = refreshTokenService.issue(user);
+            return LoginResponse.of(user, result.accessToken(), result.refreshToken());
         } else {
             throw new UserException(UserErrorCode.LOGIN_FAILED);
         }
@@ -116,7 +92,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void logout(String refreshToken) {
-        refreshTokenRepository.deleteByToken(refreshToken);
+        refreshTokenService.deleteToken(refreshToken);
     }
 
     public void deleteUserHardly(Long id) {
